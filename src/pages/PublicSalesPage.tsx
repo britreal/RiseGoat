@@ -20,7 +20,7 @@ if(!robots){robots=document.createElement('meta');robots.name='robots';document.
 robots.content='index,follow';
 const setOg=(property:string,value:string)=>{let el=document.querySelector('meta[property="' + property + '"]') as HTMLMetaElement|null;if(!el){el=document.createElement('meta');el.setAttribute('property',property);document.head.appendChild(el)}el.content=value};
 setOg('og:title',title);setOg('og:description',description);
-const canonical=window.location.origin+window.location.pathname+'#/p/'+encodeURIComponent(p.slug);
+const canonical=window.location.origin+'/p/'+encodeURIComponent(p.slug);
 let canonicalTag=document.querySelector('link[data-risegoat-canonical]') as HTMLLinkElement|null;
 if(!canonicalTag){canonicalTag=document.createElement('link');canonicalTag.rel='canonical';canonicalTag.setAttribute('data-risegoat-canonical','true');document.head.appendChild(canonicalTag)}
 canonicalTag.href=canonical;
