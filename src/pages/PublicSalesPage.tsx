@@ -39,5 +39,5 @@ const {data:b}=await supabase.from('sales_blocks').select('*').eq('page_id',p.id
       case 'divider': return <hr key={block.id} className="border-t" style={{marginTop:s.paddingY??12,marginBottom:s.paddingY??12,borderColor:s.color||'#e2e8f0'}}/>;
       default:return null;
     }
-  })}</div>}</div><div className="text-center pb-8"><a href="/auth" className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-slate-400 transition"><Sparkles className="w-3 h-3"/>Powered by risegoat</a></div></div>;
+  })}</div>}</div><div className="text-center pb-8"><a href="#/auth" className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-slate-400 transition"><Sparkles className="w-3 h-3"/>Powered by risegoat</a></div></div>;
 }
