@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Sparkles, Loader2, Gift, Check } from 'lucide-react';
+import { Sparkles, Loader2, Gift, Check, Youtube, GraduationCap, ShoppingBag, ShieldAlert, X } from 'lucide-react';
 import type { Profile, Link, MicroblogPost } from '@/types';
 import { timeAgo } from '@/lib/utils';
 
@@ -40,6 +40,43 @@ function linkRadius(style: string): string {
   return '16px';
 }
 
+function youtubeId(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname.includes('youtu.be')) return parsed.pathname.slice(1).split('/')[0] || null;
+    if (parsed.hostname.includes('youtube.com')) {
+      const v = parsed.searchParams.get('v');
+      if (v) return v;
+      const parts = parsed.pathname.split('/').filter(Boolean);
+      const embedIndex = parts.indexOf('embed');
+      if (embedIndex >= 0 && parts[embedIndex + 1]) return parts[embedIndex + 1];
+      const shortsIndex = parts.indexOf('shorts');
+      if (shortsIndex >= 0 && parts[shortsIndex + 1]) return parts[shortsIndex + 1];
+    }
+  } catch {}
+  return null;
+}
+
+function setMeta(name: string, content: string) {
+  let tag = document.head.querySelector('meta[name="' + name + '"]') as HTMLMetaElement | null;
+  if (!tag) {
+    tag = document.createElement('meta');
+    tag.setAttribute('name', name);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute('content', content);
+}
+
+function setPropertyMeta(property: string, content: string) {
+  let tag = document.head.querySelector('meta[property="' + property + '"]') as HTMLMetaElement | null;
+  if (!tag) {
+    tag = document.createElement('meta');
+    tag.setAttribute('property', property);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute('content', content);
+}
+
 export function PublicPage({ username }: { username: string }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [links, setLinks] = useState<Link[]>([]);
@@ -51,6 +88,7 @@ export function PublicPage({ username }: { username: string }) {
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [ageGateLink, setAgeGateLink] = useState<Link | null>(null);
 
   useEffect(() => {
     supabase
@@ -66,6 +104,47 @@ export function PublicPage({ username }: { username: string }) {
         }
         const p = data as Profile;
         setProfile(p);
+
+        const seoTitle = p.seo_title || p.display_name || p.username;
+        const seoDescription = p.seo_description || p.bio || ('Página de ' + (p.display_name || p.username));
+        const seoImage = p.seo_image_url || p.cover_url || p.avatar_url;
+        document.title = seoTitle + ' — RiseGoat';
+        setMeta('description', seoDescription);
+        setMeta('robots', 'index,follow');
+        setPropertyMeta('og:title', seoTitle);
+        setPropertyMeta('og:description', seoDescription);
+        setPropertyMeta('og:type', 'profile');
+        if (seoImage) setPropertyMeta('og:image', seoImage);
+        const canonical = window.location.origin + window.location.pathname + '#/u/' + encodeURIComponent(p.username);
+        let canonicalTag = document.head.querySelector('link[data-risegoat-canonical]') as HTMLLinkElement | null;
+        if (!canonicalTag) {
+          canonicalTag = document.createElement('link');
+          canonicalTag.rel = 'canonical';
+          canonicalTag.setAttribute('data-risegoat-canonical', 'true');
+          document.head.appendChild(canonicalTag);
+        }
+        canonicalTag.href = canonical;
+
+        const schemaId = 'risegoat-profile-schema';
+        document.getElementById(schemaId)?.remove();
+        const schema = document.createElement('script');
+        schema.id = schemaId;
+        schema.type = 'application/ld+json';
+        schema.textContent = JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'ProfilePage',
+          name: seoTitle,
+          description: seoDescription,
+          url: canonical,
+          mainEntity: {
+            '@type': 'Person',
+            name: p.display_name || p.username,
+            identifier: p.username,
+            description: p.bio || undefined,
+            image: seoImage || undefined,
+          },
+        });
+        document.head.appendChild(schema);
 
         // Apply SEO meta if available
         // (set document title for SEO)
@@ -222,45 +301,19 @@ export function PublicPage({ username }: { username: string }) {
           <div className="space-y-3">
             {posts.map((post) => {
               const isLong = post.content.length > 280;
-
               return (
-                <div
-                  key={post.id}
-                  className="px-5 py-4 backdrop-blur-sm border rounded-2xl"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}
-                >
-                  {post.is_pinned && (
-                    <span className="text-[10px] font-semibold uppercase tracking-wider mb-2 block" style={{ color: accentColor }}>
-                      Fixado
-                    </span>
-                  )}
-                  {post.title && (
-                    <h3 className="text-base font-semibold text-white mb-2">{post.title}</h3>
-                  )}
-                  {post.image_url && (
-                    <img
-                      src={post.image_url}
-                      alt={post.title || ''}
-                      className="w-full rounded-xl mb-3 max-h-64 object-cover"
-                    />
-                  )}
-                  <p className="text-sm text-white/90 whitespace-pre-wrap leading-relaxed">
-                    {isLong ? post.content.slice(0, 280) + '...' : post.content}
-                  </p>
-                  {isLong && (
-                    <a
-                      href={`#/u/${profile?.username}/microblog/${post.id}`}
-                      className="inline-flex items-center text-xs font-medium mt-2 transition"
-                      style={{ color: accentColor }}
-                    >
-                      Ler artigo completo →
-                    </a>
-                  )}
+                <div key={post.id} className="px-5 py-4 backdrop-blur-sm border rounded-2xl" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                  {post.is_pinned && <span className="text-[10px] font-semibold uppercase tracking-wider mb-2 block" style={{ color: accentColor }}>Fixado</span>}
+                  {post.title && <h3 className="text-base font-semibold text-white mb-2">{post.title}</h3>}
+                  {post.image_url && <img src={post.image_url} alt={post.title || ''} className="w-full rounded-xl mb-3 max-h-64 object-cover" />}
+                  <p className="text-sm text-white/90 whitespace-pre-wrap leading-relaxed">{isLong ? post.content.slice(0, 280) + '...' : post.content}</p>
+                  {isLong && <a href={'#/u/' + profile?.username + '/microblog/' + post.id} className="inline-flex items-center text-xs font-medium mt-2 transition" style={{ color: accentColor }}>Ler artigo completo →</a>}
                   <p className="text-xs text-white/30 mt-2">{timeAgo(post.created_at)}</p>
                 </div>
               );
             })}
           </div>
+        )}
         )}
 
         {/* Divider */}
@@ -322,6 +375,22 @@ export function PublicPage({ username }: { username: string }) {
           </a>
         </div>
       </div>
+
+      {ageGateLink && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+              <ShieldAlert className="w-5 h-5 text-slate-700" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-900">Conteúdo sensível</h2>
+            <p className="text-sm text-slate-500 mt-2">Este link foi marcado como conteúdo para maiores de 18 anos. Confirme sua idade para continuar.</p>
+            <div className="flex gap-2 mt-5">
+              <button onClick={() => setAgeGateLink(null)} className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50"><X className="w-4 h-4 inline mr-1" />Voltar</button>
+              <a href={ageGateLink.url} target="_blank" rel="noopener noreferrer" onClick={() => { trackClick(ageGateLink); setAgeGateLink(null); }} className="flex-1 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium text-center">Tenho 18+</a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
