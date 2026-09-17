@@ -46,7 +46,6 @@ export function PublicPage({ username }: { username: string }) {
   const [posts, setPosts] = useState<MicroblogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -112,15 +111,6 @@ export function PublicPage({ username }: { username: string }) {
       user_id: link.user_id,
     });
     await supabase.from('links').update({ clicks: link.clicks + 1 }).eq('id', link.id);
-  }
-
-  function toggleExpand(id: string) {
-    setExpandedPosts((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
   }
 
   if (loading) {
@@ -231,11 +221,7 @@ export function PublicPage({ username }: { username: string }) {
         {posts.length > 0 && (
           <div className="space-y-3">
             {posts.map((post) => {
-              const isLong = post.content.length > 280;
-              const expanded = expandedPosts.has(post.id);
-              const showContent = !isLong || expanded;
-
-              return (
+              const isLong = post.content.length > 280;\n\n              return (
                 <div
                   key={post.id}
                   className="px-5 py-4 backdrop-blur-sm border rounded-2xl"
@@ -257,20 +243,16 @@ export function PublicPage({ username }: { username: string }) {
                     />
                   )}
                   <p className="text-sm text-white/90 whitespace-pre-wrap leading-relaxed">
-                    {showContent ? post.content : post.content.slice(0, 280) + '...'}
+                    {isLong ? post.content.slice(0, 280) + '...' : post.content}
                   </p>
                   {isLong && (
-                    <button
-                      onClick={() => toggleExpand(post.id)}
-                      className="flex items-center gap-1 text-xs font-medium mt-2 transition"
+                    <a
+                      href={`#/u/${profile?.username}/microblog/${post.id}`}
+                      className="inline-flex items-center text-xs font-medium mt-2 transition"
                       style={{ color: accentColor }}
                     >
-                      {expanded ? (
-                        <>Ver menos <ChevronUp className="w-3.5 h-3.5" /></>
-                      ) : (
-                        <>Ler mais <ChevronDown className="w-3.5 h-3.5" /></>
-                      )}
-                    </button>
+                      Ler artigo completo →
+                    </a>
                   )}
                   <p className="text-xs text-white/30 mt-2">{timeAgo(post.created_at)}</p>
                 </div>
