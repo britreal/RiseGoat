@@ -115,9 +115,9 @@ export function PublicPage({ username }: { username: string }) {
         setPropertyMeta('og:description', seoDescription);
         setPropertyMeta('og:type', 'profile');
         if (seoImage) setPropertyMeta('og:image', seoImage);
+        const canonical = window.location.origin + '/u/' + encodeURIComponent(p.username);
         setPropertyMeta('og:url', canonical);
         setMeta('twitter:card', 'summary_large_image');
-        const canonical = window.location.origin + '/u/' + encodeURIComponent(p.username);
         let canonicalTag = document.head.querySelector('link[data-risegoat-canonical]') as HTMLLinkElement | null;
         if (!canonicalTag) {
           canonicalTag = document.createElement('link');
@@ -147,12 +147,6 @@ export function PublicPage({ username }: { username: string }) {
           },
         });
         document.head.appendChild(schema);
-
-        // Apply SEO meta if available
-        // (set document title for SEO)
-        if (p.display_name) {
-          document.title = `${p.display_name} — risegoat`;
-        }
 
         supabase.from('page_visits').insert({
           user_id: p.id,
