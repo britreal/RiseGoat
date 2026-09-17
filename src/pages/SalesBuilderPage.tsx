@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Spinner } from '@/components/ui';
 import type { SalesBlock, SalesPage } from '@/types';
 import {
-  ArrowLeft, ChevronDown, ChevronUp, Copy, Eye, Image as ImageIcon, Loader2,
+  ArrowLeft, ChevronDown, ChevronUp, Copy, Eye, Image as ImageIcon, Loader2, Smartphone, Monitor,
   Minus, MousePointer, Palette, Plus, Save, Settings2, Trash2, Type, X,
 } from 'lucide-react';
 
@@ -64,13 +64,21 @@ export function SalesBuilderPage({ pageId, navigate }: { pageId:string; navigate
     </header>
     {showSettings&&<div className="bg-white border-b border-slate-200 p-4 grid md:grid-cols-2 gap-3"><input value={page?.seo_title||''} onChange={e=>setPage(p=>p?{...p,seo_title:e.target.value}:p)} placeholder="Título SEO" className="px-3 py-2 border rounded-lg text-sm"/><input value={page?.seo_description||''} onChange={e=>setPage(p=>p?{...p,seo_description:e.target.value}:p)} placeholder="Descrição SEO" className="px-3 py-2 border rounded-lg text-sm"/></div>}
     <div className="flex flex-1 min-h-0">
-      <aside className="hidden xl:block w-56 bg-white border-r border-slate-200 p-4 overflow-y-auto"><p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-3">Blocos</p><div className="grid grid-cols-2 gap-2">{blockTypes.map(b=><button key={b.type} onClick={()=>add(b.type)} className="p-3 rounded-xl border border-slate-200 hover:border-cyan-400 hover:bg-cyan-50 text-xs flex flex-col items-center gap-1.5"><b.icon className="w-4 h-4"/><span>{b.label}</span></button>)}</div></aside>
-      <main className="flex-1 overflow-y-auto p-3 lg:p-8"><div className="max-w-3xl mx-auto">
-        <div className="bg-white min-h-[700px] shadow-sm rounded-xl overflow-hidden" onClick={()=>setSelected(null)}>{blocks.length===0?<div className="min-h-[700px] flex items-center justify-center text-slate-400">Adicione seu primeiro bloco</div>:blocks.map((b,i)=><div key={b.id} onClick={e=>{e.stopPropagation();setSelected(b.id)}} className={`relative ${selected===b.id?'ring-2 ring-cyan-400 ring-inset':''}`}><BlockPreview block={b}/>{selected===b.id&&<div className="absolute right-2 top-2 flex gap-1 bg-white shadow rounded-lg p-1"><button onClick={()=>move(i,-1)} disabled={i===0} className="p-1 disabled:opacity-30"><ChevronUp className="w-3.5 h-3.5"/></button><button onClick={()=>move(i,1)} disabled={i===blocks.length-1} className="p-1 disabled:opacity-30"><ChevronDown className="w-3.5 h-3.5"/></button><button onClick={()=>duplicate(b)} className="p-1"><Copy className="w-3.5 h-3.5"/></button><button onClick={()=>remove(b.id)} className="p-1 text-red-500"><Trash2 className="w-3.5 h-3.5"/></button></div>}</div>)}</div>
+      <aside className="hidden xl:block w-56 bg-white border-r border-slate-200 p-4 sticky top-14 h-[calc(100vh-3.5rem)] self-start overflow-y-auto"><p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-3">Blocos</p><div className="grid grid-cols-2 gap-2">{blockTypes.map(b=><button key={b.type} onClick={()=>add(b.type)} className="p-3 rounded-xl border border-slate-200 hover:border-cyan-400 hover:bg-cyan-50 text-xs flex flex-col items-center gap-1.5"><b.icon className="w-4 h-4"/><span>{b.label}</span></button>)}</div></aside>
+      <main className="flex-1 overflow-y-auto p-3 lg:p-8"><div className="max-w-5xl mx-auto">
+        <div className="flex items-center justify-between mb-4 bg-white rounded-xl border border-slate-200 p-1.5 shadow-sm">
+          <p className="px-2 text-xs font-semibold text-slate-600">Visualização</p>
+          <div className="flex items-center gap-1">
+            <button onClick={()=>setPreviewMode('iphone')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${previewMode==='iphone'?'bg-slate-900 text-white':'text-slate-500 hover:bg-slate-100'}`}><Smartphone className="w-3.5 h-3.5"/> iPhone</button>
+            <button onClick={()=>setPreviewMode('desktop')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${previewMode==='desktop'?'bg-slate-900 text-white':'text-slate-500 hover:bg-slate-100'}`}><Monitor className="w-3.5 h-3.5"/> Desktop</button>
+          </div>
+        </div>
+        <div className={previewMode==='iphone' ? 'max-w-[390px] mx-auto border-[10px] border-slate-900 rounded-[2.25rem] shadow-xl overflow-hidden' : 'w-full'}>
+        <div className="bg-white min-h-[700px] shadow-sm overflow-hidden" onClick={()=>setSelected(null)}>{blocks.length===0?<div className="min-h-[700px] flex items-center justify-center text-slate-400">Adicione seu primeiro bloco</div>:blocks.map((b,i)=><div key={b.id} onClick={e=>{e.stopPropagation();setSelected(b.id)}} className={`relative ${selected===b.id?'ring-2 ring-cyan-400 ring-inset':''}`}><BlockPreview block={b}/>{selected===b.id&&<div className="absolute right-2 top-2 flex gap-1 bg-white shadow rounded-lg p-1"><button onClick={()=>move(i,-1)} disabled={i===0} className="p-1 disabled:opacity-30"><ChevronUp className="w-3.5 h-3.5"/></button><button onClick={()=>move(i,1)} disabled={i===blocks.length-1} className="p-1 disabled:opacity-30"><ChevronDown className="w-3.5 h-3.5"/></button><button onClick={()=>duplicate(b)} className="p-1"><Copy className="w-3.5 h-3.5"/></button><button onClick={()=>remove(b.id)} className="p-1 text-red-500"><Trash2 className="w-3.5 h-3.5"/></button></div>}</div>)}</div>
         <button onClick={()=>setShowAdd(v=>!v)} className="w-full mt-3 py-3 border-2 border-dashed border-slate-300 rounded-xl bg-white text-slate-500 hover:border-cyan-400 hover:text-cyan-600 text-sm flex justify-center gap-2"><Plus className="w-4 h-4"/>Adicionar bloco</button>
         {showAdd&&<div className="xl:hidden mt-2 p-3 bg-white rounded-xl border grid grid-cols-3 gap-2">{blockTypes.map(b=><button key={b.type} onClick={()=>add(b.type)} className="p-3 border rounded-lg text-xs"><b.icon className="w-4 h-4 mx-auto mb-1"/>{b.label}</button>)}</div>}
       </div></main>
-      <aside className="hidden lg:block w-72 bg-white border-l border-slate-200 p-4 overflow-y-auto">{selectedBlock?<Inspector block={selectedBlock} onUpdate={u=>persistBlock(selectedBlock,u)}/>:<div className="text-center text-slate-400 text-xs pt-16"><Palette className="w-7 h-7 mx-auto mb-2"/>Selecione um bloco para editar</div>}</aside>
+      <aside className="hidden lg:block w-72 bg-white border-l border-slate-200 p-4 sticky top-14 h-[calc(100vh-3.5rem)] self-start overflow-y-auto">{selectedBlock?<Inspector block={selectedBlock} onUpdate={u=>persistBlock(selectedBlock,u)}/>:<div className="text-center text-slate-400 text-xs pt-16"><Palette className="w-7 h-7 mx-auto mb-2"/>Selecione um bloco para editar</div>}</aside>
     </div>
   </div>;
 }
