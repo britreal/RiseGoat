@@ -69,7 +69,7 @@ export function PublicMicroblogPage({ username, postId }: { username: string; po
         }
         ogImage.content = seoImage;
       }
-      const canonical = window.location.origin + window.location.pathname + '#/u/' + encodeURIComponent(p.username) + '/microblog/' + encodeURIComponent(postData.id);
+      const canonical = window.location.origin + '/u/' + encodeURIComponent(p.username) + '/microblog/' + encodeURIComponent(postData.id);
       let canonicalTag = document.head.querySelector('link[data-risegoat-canonical]') as HTMLLinkElement | null;
       if (!canonicalTag) {
         canonicalTag = document.createElement('link');
