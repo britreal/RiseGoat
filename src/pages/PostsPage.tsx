@@ -1,0 +1,169 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/context/AuthContext';
+import { PageHeader, Card, Spinner, EmptyState } from '@/components/ui';
+import { Plus, Trash2, Pin, FileText, Loader2, Send, Search } from 'lucide-react';
+import type { MicroblogPost } from '@/types';
+import { timeAgo } from '@/lib/utils';
+
+export function PostsPage() {
+  const { user } = useAuth();
+  const [posts, setPosts] = useState<MicroblogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [content, setContent] = useState('');
+  const [title, setTitle] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [posting, setPosting] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('microblog_posts')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('is_pinned', { ascending: false })
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        setPosts((data as MicroblogPost[]) ?? []);
+        setLoading(false);
+      });
+  }, [user]);
+
+  async function post() {
+    if (!user || !content.trim()) return;
+    setPosting(true);
+    const { data, error } = await supabase
+      .from('microblog_posts')
+      .insert({
+        user_id: user.id,
+        content: content.trim(),
+        title: title.trim(),
+        image_url: imageUrl.trim(),
+      })
+      .select()
+      .single();
+    if (!error && data) {
+      setPosts([data as MicroblogPost, ...posts]);
+      setContent('');
+      setTitle('');
+      setImageUrl('');
+    }
+    setPosting(false);
+  }
+
+  async function deletePost(id: string) {
+    const { error } = await supabase.from('microblog_posts').delete().eq('id', id);
+    if (!error) setPosts(posts.filter((p) => p.id !== id));
+  }
+
+  async function togglePin(post: MicroblogPost) {
+    if (post.is_pinned) {
+      await supabase.from('microblog_posts').update({ is_pinned: false }).eq('id', post.id);
+      setPosts(posts.map((p) => (p.id === post.id ? { ...p, is_pinned: false } : p)));
+    } else {
+      await supabase.from('microblog_posts').update({ is_pinned: false }).eq('user_id', user!.id);
+      await supabase.from('microblog_posts').update({ is_pinned: true }).eq('id', post.id);
+      setPosts(
+        posts
+          .map((p) => ({ ...p, is_pinned: p.id === post.id }))
+          .sort((a, b) => (b.is_pinned ? 1 : 0) - (a.is_pinned ? 1 : 0) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      );
+    }
+  }
+
+  if (loading) return <Spinner />;
+
+  return (
+    <div className="p-6 lg:p-8 max-w-3xl mx-auto">
+      <PageHeader title="Posts" subtitle="Todas as suas publicações" />
+
+      <Card className="p-4 mb-6">
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Título (opcional)"
+          className="w-full px-3 py-2 text-sm font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 mb-3"
+        />
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Escreva uma nova postagem..."
+          rows={3}
+          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 resize-none mb-3"
+        />
+        <input
+          type="url"
+          value={imageUrl}
+          onChange={(e) => setImageUrl(e.target.value)}
+          placeholder="URL da imagem (opcional)"
+          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 mb-3"
+        />
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-slate-400">{content.length} caracteres</span>
+          <button
+            onClick={post}
+            disabled={!content.trim() || posting}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-lg transition disabled:opacity-50"
+          >
+            {posting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            Publicar
+          </button>
+        </div>
+      </Card>
+
+      {posts.length === 0 ? (
+        <Card>
+          <EmptyState icon={FileText} title="Nenhuma postagem" subtitle="Suas publicações aparecem aqui" />
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {posts.map((post) => (
+            <Card key={post.id} className="p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  {post.is_pinned && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full mb-2">
+                      <Pin className="w-3 h-3" /> Fixado
+                    </span>
+                  )}
+                  {post.title && (
+                    <p className="text-sm font-semibold text-slate-800 mb-1">{post.title}</p>
+                  )}
+                  <p className={`text-sm text-slate-700 whitespace-pre-wrap ${post.content.length > 280 ? 'line-clamp-4' : ''}`}>
+                    {post.content}
+                  </p>
+                  {post.image_url && (
+                    <img src={post.image_url} alt="" className="w-full max-h-32 object-cover rounded-lg mt-2" />
+                  )}
+                  {(post.seo_title || post.seo_description) && (
+                    <span className="inline-flex items-center gap-1 text-[10px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full mt-2">
+                      <Search className="w-2.5 h-2.5" /> SEO
+                    </span>
+                  )}
+                  <p className="text-xs text-slate-400 mt-2">{timeAgo(post.created_at)}</p>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    onClick={() => togglePin(post)}
+                    className={`p-1.5 rounded-lg transition ${
+                      post.is_pinned ? 'text-amber-500 hover:bg-amber-50' : 'text-slate-300 hover:bg-slate-100'
+                    }`}
+                  >
+                    <Pin className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => deletePost(post.id)}
+                    className="p-1.5 rounded-lg text-slate-300 hover:bg-red-50 hover:text-red-400 transition"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
