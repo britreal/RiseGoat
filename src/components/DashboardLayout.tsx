@@ -41,7 +41,7 @@ export function DashboardLayout({ children, currentPath, navigate }: DashboardLa
           {groups.map((group) => <div key={group}><p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{group}</p><div className="space-y-0.5">{navItems.filter((n) => n.group === group).map((item) => <button key={item.path} onClick={() => handleNav(item.path)} className={cn('w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition', currentPath === item.path ? 'bg-cyan-50 text-cyan-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')}><item.icon className="w-4 h-4 shrink-0" />{item.label}</button>)}</div></div>)}
         </nav>
         <div className="border-t border-slate-200 p-3 space-y-1">
-          {profile && <button onClick={() => window.open(`#/u/${profile.username}`, '_blank')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition"><ExternalLink className="w-4 h-4 shrink-0" />Ver minha página</button>}
+          {profile && <button onClick={() => window.open(`/u/${profile.username}`, '_blank')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition"><ExternalLink className="w-4 h-4 shrink-0" />Ver minha página</button>}
           <button onClick={() => signOut()} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition"><LogOut className="w-4 h-4 shrink-0" />Sair</button>
         </div>
       </aside>
