@@ -118,7 +118,7 @@ export function PublicMicroblogPage({ username, postId }: { username: string; po
 
         <article className="rounded-2xl border p-5 sm:p-8" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
           <div className="flex items-center justify-between gap-3 mb-5">
-            <a href={`#/u/${profile.username}`} className="inline-flex items-center gap-1.5 text-xs font-medium text-white/50 hover:text-white transition"><ArrowLeft className="w-3.5 h-3.5" /> Voltar ao perfil</a>
+            <a href={`/u/${profile.username}`} className="inline-flex items-center gap-1.5 text-xs font-medium text-white/50 hover:text-white transition"><ArrowLeft className="w-3.5 h-3.5" /> Voltar ao perfil</a>
             <span className="text-xs text-white/30">{timeAgo(post.created_at)}</span>
           </div>
           {post.title && <h2 className="text-2xl sm:text-3xl font-bold text-white leading-tight mb-5">{post.title}</h2>}
