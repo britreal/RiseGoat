@@ -60,6 +60,9 @@ export function PublicMicroblogPage({ username, postId }: { username: string; po
         document.head.appendChild(ogDescription);
       }
       ogDescription.content = seoDescription;
+      let ogType = document.head.querySelector('meta[property="og:type"]') as HTMLMetaElement | null;
+      if (!ogType) { ogType = document.createElement('meta'); ogType.setAttribute('property', 'og:type'); document.head.appendChild(ogType); }
+      ogType.content = 'article';
       if (seoImage) {
         let ogImage = document.head.querySelector('meta[property="og:image"]') as HTMLMetaElement | null;
         if (!ogImage) {
@@ -78,6 +81,9 @@ export function PublicMicroblogPage({ username, postId }: { username: string; po
         document.head.appendChild(canonicalTag);
       }
       canonicalTag.href = canonical;
+      let ogUrl = document.head.querySelector('meta[property="og:url"]') as HTMLMetaElement | null;
+      if (!ogUrl) { ogUrl = document.createElement('meta'); ogUrl.setAttribute('property', 'og:url'); document.head.appendChild(ogUrl); }
+      ogUrl.content = canonical;
       document.getElementById('risegoat-article-schema')?.remove();
       const schema = document.createElement('script');
       schema.id = 'risegoat-article-schema';
