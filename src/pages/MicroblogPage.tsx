@@ -13,6 +13,8 @@ export function MicroblogPage() {
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [buttonText, setButtonText] = useState('');
+  const [buttonUrl, setButtonUrl] = useState('');
   const [posting, setPosting] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [editingPost, setEditingPost] = useState<MicroblogPost | null>(null);
@@ -40,6 +42,8 @@ export function MicroblogPage() {
     setContent('');
     setTitle('');
     setImageUrl('');
+    setButtonText('');
+    setButtonUrl('');
     setSeoTitle('');
     setSeoDescription('');
     setSeoKeywords('');
@@ -55,6 +59,8 @@ export function MicroblogPage() {
       content: content.trim(),
       title: title.trim(),
       image_url: imageUrl.trim(),
+      button_text: buttonText.trim(),
+      button_url: buttonUrl.trim(),
       seo_title: seoTitle.trim(),
       seo_description: seoDescription.trim(),
       seo_keywords: seoKeywords.trim(),
@@ -108,6 +114,8 @@ export function MicroblogPage() {
     setContent(post.content);
     setTitle(post.title);
     setImageUrl(post.image_url);
+    setButtonText(post.button_text || '');
+    setButtonUrl(post.button_url || '');
     setSeoTitle(post.seo_title);
     setSeoDescription(post.seo_description);
     setSeoKeywords(post.seo_keywords);
@@ -161,6 +169,15 @@ export function MicroblogPage() {
                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
               />
             </div>
+            <div className="border-t border-slate-100 pt-3">
+              <p className="text-xs font-semibold text-slate-600 mb-2">Botão no final do artigo (opcional)</p>
+              <div className="grid sm:grid-cols-2 gap-2">
+                <input type="text" value={buttonText} onChange={(e) => setButtonText(e.target.value)} placeholder="Texto do botão" className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400" />
+                <input type="url" value={buttonUrl} onChange={(e) => setButtonUrl(e.target.value)} placeholder="https://..." className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400" />
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1">O botão só aparece quando os dois campos estiverem preenchidos.</p>
+            </div>
+
             <div className="border-t border-slate-100 pt-3">
               <p className="text-xs font-semibold text-slate-600 mb-2 flex items-center gap-1">
                 <Search className="w-3 h-3" /> SEO (opcional)
