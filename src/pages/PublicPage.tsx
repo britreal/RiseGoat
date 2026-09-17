@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Sparkles, Loader2, Gift, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, Loader2, Gift, Check } from 'lucide-react';
 import type { Profile, Link, MicroblogPost } from '@/types';
 import { timeAgo } from '@/lib/utils';
 
