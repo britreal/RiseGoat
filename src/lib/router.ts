@@ -23,8 +23,8 @@ function parseHash(): Route {
 
   if (parts.length === 0) return { name: 'dashboard' };
   if (parts[0] === 'auth') return { name: 'auth' };
-  if (parts[0] === 'u' && parts[1]) return { name: 'public', username: parts[1] };
-  if (parts[0] === 'p' && parts[1]) return { name: 'public-sales', slug: parts.slice(1).join('/') };
+  if (parts[0] === 'u' && parts[1]) return { name: 'public', username: decodeURIComponent(parts[1]) };
+  if (parts[0] === 'p' && parts[1]) return { name: 'public-sales', slug: parts.slice(1).map(decodeURIComponent).join('/') };
   if (parts[0] === 'dashboard') return { name: 'dashboard' };
   if (parts[0] === 'profile') return { name: 'profile' };
   if (parts[0] === 'links') return { name: 'links' };
@@ -36,6 +36,8 @@ function parseHash(): Route {
   if (parts[0] === 'analytics') return { name: 'analytics' };
   if (parts[0] === 'settings') return { name: 'settings' };
   if (parts[0] === 'sales' && parts[1] === 'editor' && parts[2]) return { name: 'sales-editor', pageId: parts[2] };
+  // Backward-compatible support for the previous editor URL.
+  if (parts[0] === 'sales-editor' && parts[1]) return { name: 'sales-editor', pageId: parts[1] };
   if (parts[0] === 'sales') return { name: 'sales' };
   return { name: 'dashboard' };
 }
