@@ -58,7 +58,37 @@ function AppContent() {
   return <DashboardLayout currentPath={currentPath} navigate={navigate}>{pageMap[route.name] ?? <DashboardPage navigate={navigate} />}</DashboardLayout>;
 }
 
+function hideBoltBadge() {
+  const hide = () => {
+    const elements = document.body.querySelectorAll<HTMLElement>('body *');
+    elements.forEach((el) => {
+      const text = (el.textContent || '').trim().toLowerCase();
+      const href = el instanceof HTMLAnchorElement ? (el.getAttribute('href') || '').toLowerCase() : '';
+      const aria = (el.getAttribute('aria-label') || '').toLowerCase();
+      const title = (el.getAttribute('title') || '').toLowerCase();
+      const isBoltBadge =
+        text.includes('made in bolt') ||
+        href.includes('bolt.new') ||
+        aria.includes('made in bolt') ||
+        title.includes('made in bolt');
+
+      if (isBoltBadge) {
+        el.style.setProperty('display', 'none', 'important');
+        el.style.setProperty('visibility', 'hidden', 'important');
+        el.style.setProperty('opacity', '0', 'important');
+        el.style.setProperty('pointer-events', 'none', 'important');
+      }
+    });
+  };
+
+  hide();
+  const observer = new MutationObserver(hide);
+  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+  return () => observer.disconnect();
+}
+
 function App() {
+  useEffect(() => hideBoltBadge(), []);
   return <AuthProvider><AppContent /></AuthProvider>;
 }
 
