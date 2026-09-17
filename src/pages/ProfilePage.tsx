@@ -44,6 +44,9 @@ export function ProfilePage() {
   const [accentColor, setAccentColor] = useState('#06b6d4');
   const [themeFont, setThemeFont] = useState('inter');
   const [linkStyle, setLinkStyle] = useState('rounded');
+  const [seoTitle, setSeoTitle] = useState('');
+  const [seoDescription, setSeoDescription] = useState('');
+  const [seoImageUrl, setSeoImageUrl] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -58,6 +61,9 @@ export function ProfilePage() {
       setAccentColor(profile.accent_color || '#06b6d4');
       setThemeFont(profile.theme_font || 'inter');
       setLinkStyle(profile.link_style || 'rounded');
+      setSeoTitle(profile.seo_title || '');
+      setSeoDescription(profile.seo_description || '');
+      setSeoImageUrl(profile.seo_image_url || '');
       setLoading(false);
     }
   }, [profile]);
@@ -76,6 +82,9 @@ export function ProfilePage() {
         accent_color: accentColor,
         theme_font: themeFont,
         link_style: linkStyle,
+        seo_title: seoTitle.trim(),
+        seo_description: seoDescription.trim(),
+        seo_image_url: seoImageUrl.trim(),
       })
       .eq('id', user!.id);
     if (!error) {
@@ -182,6 +191,28 @@ export function ProfilePage() {
         </Card>
 
         {/* Theme presets */}
+        <Card className="p-6 space-y-4">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-800">SEO da página</h2>
+            <p className="text-xs text-slate-400 mt-1">Defina como sua página pública aparece em mecanismos de busca e compartilhamentos.</p>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Título SEO</label>
+            <input value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} placeholder={displayName || 'Seu nome — RiseGoat'} maxLength={60} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400" />
+            <p className="text-[11px] text-slate-400 mt-1">{seoTitle.length}/60</p>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Descrição SEO</label>
+            <textarea value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} placeholder={bio || 'Uma descrição curta da sua página'} maxLength={160} rows={3} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400 resize-none" />
+            <p className="text-[11px] text-slate-400 mt-1">{seoDescription.length}/160</p>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Imagem para compartilhamento</label>
+            <input type="url" value={seoImageUrl} onChange={(e) => setSeoImageUrl(e.target.value)} placeholder={coverUrl || avatarUrl || 'https://...'} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400" />
+            <p className="text-[11px] text-slate-400 mt-1">Pode usar a capa ou a foto de perfil.</p>
+          </div>
+        </Card>
+
         <Card className="p-6 space-y-4">
           <h2 className="text-sm font-semibold text-slate-800">Temas predefinidos</h2>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
