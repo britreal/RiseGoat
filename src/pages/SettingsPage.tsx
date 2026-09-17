@@ -26,13 +26,12 @@ export function SettingsPage() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from('email_connections')
-      .select('smtp_host,smtp_port,smtp_user,from_name,from_email,created_at')
-      .eq('user_id', user.id).maybeSingle()
+    supabase.functions.invoke('get-email-connection', { body: { user_id: user.id } })
       .then(({ data }) => {
-        if (data) {
-          setSmtpHost(data.smtp_host); setSmtpPort(String(data.smtp_port)); setSmtpUser(data.smtp_user);
-          setFromName(data.from_name); setFromEmail(data.from_email);
+        const connection = data?.connection;
+        if (connection) {
+          setSmtpHost(connection.smtp_host); setSmtpPort(String(connection.smtp_port)); setSmtpUser(connection.smtp_user);
+          setFromName(connection.from_name); setFromEmail(connection.from_email);
         }
         setEmailLoading(false);
       });
