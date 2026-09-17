@@ -14,7 +14,8 @@ export type Route =
   | { name: 'settings' }
   | { name: 'sales' }
   | { name: 'sales-editor'; pageId: string }
-  | { name: 'public'; username: string }\n  | { name: 'public-microblog'; username: string; postId: string }
+  | { name: 'public'; username: string }
+  | { name: 'public-microblog'; username: string; postId: string }
   | { name: 'public-sales'; slug: string };
 
 function parseHash(): Route {
@@ -23,7 +24,8 @@ function parseHash(): Route {
 
   if (parts.length === 0) return { name: 'dashboard' };
   if (parts[0] === 'auth') return { name: 'auth' };
-  if (parts[0] === 'u' && parts[1] && parts[2] === 'microblog' && parts[3]) return { name: 'public-microblog', username: decodeURIComponent(parts[1]), postId: decodeURIComponent(parts[3]) };\n  if (parts[0] === 'u' && parts[1]) return { name: 'public', username: decodeURIComponent(parts[1]) };
+  if (parts[0] === 'u' && parts[1] && parts[2] === 'microblog' && parts[3]) return { name: 'public-microblog', username: decodeURIComponent(parts[1]), postId: decodeURIComponent(parts[3]) };
+  if (parts[0] === 'u' && parts[1]) return { name: 'public', username: decodeURIComponent(parts[1]) };
   if (parts[0] === 'p' && parts[1]) return { name: 'public-sales', slug: parts.slice(1).map(decodeURIComponent).join('/') };
   if (parts[0] === 'dashboard') return { name: 'dashboard' };
   if (parts[0] === 'profile') return { name: 'profile' };
