@@ -184,6 +184,15 @@ export function PublicPage({ username }: { username: string }) {
     setEmail('');
   }
 
+  function openLink(link: Link, event?: React.MouseEvent<HTMLAnchorElement>) {
+    if (link.sensitive) {
+      event?.preventDefault();
+      setAgeGateLink(link);
+      return;
+    }
+    trackClick(link);
+  }
+
   async function trackClick(link: Link) {
     await supabase.from('link_clicks').insert({
       link_id: link.id,
@@ -256,37 +265,83 @@ export function PublicPage({ username }: { username: string }) {
         {/* Links */}
         {links.length > 0 && (
           <div className="mt-8 space-y-3">
-            {links.map((link) => (
-              <a
-                key={link.id}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackClick(link)}
-                className="flex items-center gap-3 px-5 py-3.5 backdrop-blur-sm border text-white transition-all hover:scale-[1.02] active:scale-[0.98] group"
-                style={{
-                  backgroundColor: accentColor + '15',
-                  borderColor: accentColor + '30',
-                  borderRadius: radius,
-                }}
-              >
-                <div
-                  className="w-9 h-9 flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: accentColor + '20', borderRadius: radius === '9999px' ? '9999px' : '10px' }}
-                >
-                  <span className="text-xs font-bold text-white/80 uppercase">
-                    {(ICON_MAP[link.icon] || link.label).slice(0, 2)}
+            {links.map((link) => {
+              const videoId = link.link_type === 'youtube' ? youtubeId(link.url) : null;
+              const isAffiliate = link.link_type === 'affiliate';
+              const isCourse = link.link_type === 'course';
+
+              if (videoId) {
+                return (
+                  <div key={link.id} className="overflow-hidden rounded-2xl border" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: accentColor + '25' }}>
+                    <div className="px-5 py-3 flex items-center gap-2 text-white">
+                      <Youtube className="w-5 h-5" style={{ color: accentColor }} />
+                      <span className="text-sm font-semibold flex-1">{link.label}</span>
+                      {link.sensitive && <ShieldAlert className="w-4 h-4 text-white/40" />}
+                    </div>
+                    {link.sensitive ? (
+                      <button onClick={() => setAgeGateLink(link)} className="relative w-full aspect-video bg-black/60 flex items-center justify-center text-center px-6">
+                        <div>
+                          <ShieldAlert className="w-8 h-8 text-white/70 mx-auto mb-2" />
+                          <p className="text-sm font-semibold text-white">Conteúdo 18+</p>
+                          <p className="text-xs text-white/50 mt-1">Clique para confirmar a idade</p>
+                        </div>
+                      </button>
+                    ) : (
+                      <iframe
+                        title={link.label}
+                        src={'https://www.youtube.com/embed/' + videoId}
+                        className="w-full aspect-video"
+                        loading="lazy"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      />
+                    )}
+                    {link.description && <p className="px-5 py-3 text-xs text-white/60">{link.description}</p>}
+                  </div>
+                );
+              }
+
+              if (isAffiliate) {
+                return (
+                  <div key={link.id} className="overflow-hidden rounded-2xl border" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: accentColor + '25' }}>
+                    {link.thumbnail_url && <img src={link.thumbnail_url} alt={link.label} className="w-full aspect-[2/1] object-cover" loading="lazy" />}
+                    <div className="p-5">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base font-semibold text-white">{link.label}</h3>
+                          {link.description && <p className="text-sm text-white/60 mt-1 leading-relaxed">{link.description}</p>}
+                          {link.product_price && <p className="text-lg font-bold text-white mt-3">{link.product_price}</p>}
+                        </div>
+                        {link.sensitive && <ShieldAlert className="w-4 h-4 text-white/40 shrink-0" />}
+                      </div>
+                      <a href={link.url} target="_blank" rel="noopener noreferrer" onClick={(e) => openLink(link, e)} className="mt-4 flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white text-slate-900 text-sm font-semibold hover:opacity-90 transition">
+                        Ver produto →
+                      </a>
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" onClick={(e) => openLink(link, e)}
+                  className="flex items-center gap-3 px-5 py-3.5 backdrop-blur-sm border text-white transition-all hover:scale-[1.02] active:scale-[0.98] group"
+                  style={{ backgroundColor: accentColor + '15', borderColor: accentColor + '30', borderRadius: radius }}>
+                  <div className="w-9 h-9 flex items-center justify-center shrink-0" style={{ backgroundColor: accentColor + '20', borderRadius: radius === '9999px' ? '9999px' : '10px' }}>
+                    {isCourse ? <GraduationCap className="w-4 h-4 text-white/80" /> : <span className="text-xs font-bold text-white/80 uppercase">{(ICON_MAP[link.icon] || link.label).slice(0, 2)}</span>}
+                  </div>
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-sm font-medium truncate">{link.label}</span>
+                    {isCourse && link.description && <span className="block text-xs text-white/50 truncate mt-0.5">{link.description}</span>}
                   </span>
-                </div>
-                <span className="flex-1 text-sm font-medium">{link.label}</span>
-                <svg className="w-4 h-4 text-white/40 group-hover:text-white/70 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </a>
-            ))}
+                  {link.sensitive && <ShieldAlert className="w-4 h-4 text-white/40 shrink-0" />}
+                  <svg className="w-4 h-4 text-white/40 group-hover:text-white/70 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </a>
+              );
+            })}
           </div>
         )}
-
         {/* Divider */}
         {links.length > 0 && posts.length > 0 && (
           <div className="flex items-center gap-3 my-8">
