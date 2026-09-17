@@ -247,11 +247,6 @@ export function MicroblogPage() {
             <Card key={post.id} className="p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  {post.is_pinned && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full mb-2">
-                      <Pin className="w-3 h-3" /> Fixado
-                    </span>
-                  )}
                   {post.title && (
                     <p className="text-sm font-semibold text-slate-800 mb-1">{post.title}</p>
                   )}
@@ -263,11 +258,6 @@ export function MicroblogPage() {
                   )}
                   {post.image_url && (
                     <img src={post.image_url} alt="" className="w-full max-h-32 object-cover rounded-lg mt-2" />
-                  )}
-                  {(post.seo_title || post.seo_description) && (
-                    <span className="inline-flex items-center gap-1 text-[10px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full mt-2">
-                      <Search className="w-2.5 h-2.5" /> SEO configurado
-                    </span>
                   )}
                   <p className="text-xs text-slate-400 mt-2">{timeAgo(post.created_at)}</p>
                 </div>
