@@ -15,6 +15,7 @@ import { SettingsPage } from '@/pages/SettingsPage';
 import { SalesPagesPage } from '@/pages/SalesPagesPage';
 import { SalesBuilderPage } from '@/pages/SalesBuilderPage';
 import { PublicPage } from '@/pages/PublicPage';
+import { PublicMicroblogPage } from '@/pages/PublicMicroblogPage';
 import { PublicSalesPage } from '@/pages/PublicSalesPage';
 import { Spinner } from '@/components/ui';
 
@@ -23,6 +24,7 @@ function AppContent() {
   const { session, loading } = useAuth();
 
   if (route.name === 'public') return <PublicPage username={route.username} />;
+  if (route.name === 'public-microblog') return <PublicMicroblogPage username={route.username} postId={route.postId} />;
   if (route.name === 'public-sales') return <PublicSalesPage slug={route.slug} />;
 
   if (route.name === 'auth') {
