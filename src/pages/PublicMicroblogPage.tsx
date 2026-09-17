@@ -27,7 +27,72 @@ export function PublicMicroblogPage({ username, postId }: { username: string; po
       if (!postData) { setNotFound(true); setLoading(false); return; }
       setProfile(p);
       setPost(postData as MicroblogPost);
-      document.title = postData.title ? `${postData.title} — ${p.display_name || p.username}` : `${p.display_name || p.username} — Microblog`;
+
+      const seoTitle = postData.seo_title || postData.title || p.display_name || p.username;
+      const seoDescription = postData.seo_description || postData.content.slice(0, 155);
+      const seoImage = postData.image_url || p.seo_image_url || p.cover_url || p.avatar_url;
+      document.title = seoTitle + ' — ' + (p.display_name || p.username);
+      let description = document.head.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+      if (!description) {
+        description = document.createElement('meta');
+        description.name = 'description';
+        document.head.appendChild(description);
+      }
+      description.content = seoDescription;
+      let robots = document.head.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
+      if (!robots) {
+        robots = document.createElement('meta');
+        robots.name = 'robots';
+        document.head.appendChild(robots);
+      }
+      robots.content = 'index,follow';
+      let ogTitle = document.head.querySelector('meta[property="og:title"]') as HTMLMetaElement | null;
+      if (!ogTitle) {
+        ogTitle = document.createElement('meta');
+        ogTitle.setAttribute('property', 'og:title');
+        document.head.appendChild(ogTitle);
+      }
+      ogTitle.content = seoTitle;
+      let ogDescription = document.head.querySelector('meta[property="og:description"]') as HTMLMetaElement | null;
+      if (!ogDescription) {
+        ogDescription = document.createElement('meta');
+        ogDescription.setAttribute('property', 'og:description');
+        document.head.appendChild(ogDescription);
+      }
+      ogDescription.content = seoDescription;
+      if (seoImage) {
+        let ogImage = document.head.querySelector('meta[property="og:image"]') as HTMLMetaElement | null;
+        if (!ogImage) {
+          ogImage = document.createElement('meta');
+          ogImage.setAttribute('property', 'og:image');
+          document.head.appendChild(ogImage);
+        }
+        ogImage.content = seoImage;
+      }
+      const canonical = window.location.origin + window.location.pathname + '#/u/' + encodeURIComponent(p.username) + '/microblog/' + encodeURIComponent(postData.id);
+      let canonicalTag = document.head.querySelector('link[data-risegoat-canonical]') as HTMLLinkElement | null;
+      if (!canonicalTag) {
+        canonicalTag = document.createElement('link');
+        canonicalTag.rel = 'canonical';
+        canonicalTag.setAttribute('data-risegoat-canonical', 'true');
+        document.head.appendChild(canonicalTag);
+      }
+      canonicalTag.href = canonical;
+      document.getElementById('risegoat-article-schema')?.remove();
+      const schema = document.createElement('script');
+      schema.id = 'risegoat-article-schema';
+      schema.type = 'application/ld+json';
+      schema.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: postData.title || seoTitle,
+        description: seoDescription,
+        image: seoImage || undefined,
+        datePublished: postData.created_at,
+        author: { '@type': 'Person', name: p.display_name || p.username, identifier: p.username },
+        mainEntityOfPage: canonical,
+      });
+      document.head.appendChild(schema);
       setLoading(false);
     });
     return () => { alive = false; };
