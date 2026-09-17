@@ -62,7 +62,7 @@ function AppContent() {
 function hideBoltBadge() {
   const hide = () => {
     const candidates = document.querySelectorAll<HTMLElement>(
-      'a, button, [role="button"], [data-bolt], [class*="bolt" i], [id*="bolt" i]'
+      'a, button, [role="button"], [data-bolt], [data-badge], [class*="bolt" i], [id*="bolt" i], [class*="badge" i], [id*="badge" i]'
     );
 
     candidates.forEach((el) => {
@@ -75,7 +75,10 @@ function hideBoltBadge() {
         href.includes('bolt.new') ||
         aria.includes('made in bolt') ||
         title.includes('made in bolt') ||
-        el.hasAttribute('data-bolt');
+        el.hasAttribute('data-bolt') ||
+        el.hasAttribute('data-badge') ||
+        el.className.toString().toLowerCase().includes('badge') ||
+        el.id.toLowerCase().includes('badge');
 
       if (isBoltBadge) {
         el.style.setProperty('display', 'none', 'important');
