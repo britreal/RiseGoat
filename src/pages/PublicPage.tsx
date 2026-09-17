@@ -221,7 +221,9 @@ export function PublicPage({ username }: { username: string }) {
         {posts.length > 0 && (
           <div className="space-y-3">
             {posts.map((post) => {
-              const isLong = post.content.length > 280;\n\n              return (
+              const isLong = post.content.length > 280;
+
+              return (
                 <div
                   key={post.id}
                   className="px-5 py-4 backdrop-blur-sm border rounded-2xl"
