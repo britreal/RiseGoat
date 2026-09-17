@@ -19,6 +19,17 @@ export type Route =
   | { name: 'public-sales'; slug: string };
 
 function parseHash(): Route {
+  const pathParts = window.location.pathname.split('/').filter(Boolean);
+  if (pathParts[0] === 'u' && pathParts[1] && pathParts[2] === 'microblog' && pathParts[3]) {
+    return { name: 'public-microblog', username: decodeURIComponent(pathParts[1]), postId: decodeURIComponent(pathParts[3]) };
+  }
+  if (pathParts[0] === 'u' && pathParts[1]) {
+    return { name: 'public', username: decodeURIComponent(pathParts[1]) };
+  }
+  if (pathParts[0] === 'p' && pathParts[1]) {
+    return { name: 'public-sales', slug: pathParts.slice(1).map(decodeURIComponent).join('/') };
+  }
+
   const hash = window.location.hash.replace(/^#/, '') || '/';
   const parts = hash.split('/').filter(Boolean);
 
@@ -50,7 +61,11 @@ export function useRouter() {
   useEffect(() => {
     const handler = () => setRoute(parseHash());
     window.addEventListener('hashchange', handler);
-    return () => window.removeEventListener('hashchange', handler);
+    window.addEventListener('popstate', handler);
+    return () => {
+      window.removeEventListener('hashchange', handler);
+      window.removeEventListener('popstate', handler);
+    };
   }, []);
 
   const navigate = useCallback((path: string) => {
