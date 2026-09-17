@@ -115,6 +115,8 @@ export function PublicPage({ username }: { username: string }) {
         setPropertyMeta('og:description', seoDescription);
         setPropertyMeta('og:type', 'profile');
         if (seoImage) setPropertyMeta('og:image', seoImage);
+        setPropertyMeta('og:url', canonical);
+        setMeta('twitter:card', 'summary_large_image');
         const canonical = window.location.origin + '/u/' + encodeURIComponent(p.username);
         let canonicalTag = document.head.querySelector('link[data-risegoat-canonical]') as HTMLLinkElement | null;
         if (!canonicalTag) {
