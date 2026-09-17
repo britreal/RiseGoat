@@ -27,7 +27,7 @@ export function NewsletterPage() {
   async function sendBroadcast() {
     if (!user || !subject.trim() || !body.trim() || !leads.length) return;
     setSending(true); setSent(false); setSendError(null);
-    const { data: connection, error: connectionError } = await supabase.from('email_connections').select('user_id').eq('user.id' as never, user.id).maybeSingle();
+    const { data: connection, error: connectionError } = await supabase.from('email_connections').select('user_id').eq('user_id', user.id).maybeSingle();
     if (connectionError || !connection) { setSending(false); setSendError('Conecte seu e-mail em Configurações antes de enviar uma campanha.'); return; }
     const { data: campaign, error: campaignError } = await supabase.from('campaigns').insert({ user_id:user.id, subject:subject.trim(), body:body.trim(), status:'draft' }).select('id').single();
     if (campaignError || !campaign) { setSending(false); setSendError(campaignError?.message || 'Não foi possível criar a campanha.'); return; }
