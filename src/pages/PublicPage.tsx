@@ -368,7 +368,6 @@ export function PublicPage({ username }: { username: string }) {
             })}
           </div>
         )}
-        )}
 
         {/* Divider */}
         <div className="flex items-center gap-3 my-8">
