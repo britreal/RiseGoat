@@ -3,7 +3,7 @@ export interface Profile {
   theme_color: string; theme_font: string; accent_color: string; link_style: string; created_at: string;
 }
 export interface Link { id:string; user_id:string; label:string; url:string; icon:string; sort_order:number; is_active:boolean; clicks:number; created_at:string; }
-export interface MicroblogPost { id:string; user_id:string; content:string; title:string; image_url:string; seo_title:string; seo_description:string; seo_keywords:string; is_pinned:boolean; created_at:string; }
+export interface MicroblogPost { id:string; user_id:string; content:string; title:string; image_url:string; seo_title:string; seo_description:string; seo_keywords:string; button_text:string; button_url:string; is_pinned:boolean; created_at:string; }
 export interface NewsletterLead { id:string; user_id:string; name:string; email:string; source:string; created_at:string; }
 export interface PageVisit { id:string; user_id:string; visitor_referrer:string; created_at:string; }
 export interface LinkClick { id:string; link_id:string; user_id:string; created_at:string; }
