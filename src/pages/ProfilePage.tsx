@@ -97,7 +97,7 @@ export function ProfilePage() {
 
   if (loading) return <Spinner />;
 
-  const publicUrl = `${window.location.origin}${window.location.pathname}#/u/${profile?.username}`;
+  const publicUrl = `${window.location.origin}/u/${profile?.username}`;
 
   function applyPreset(preset: typeof THEME_PRESETS[0]) {
     setThemeColor(preset.bg);
