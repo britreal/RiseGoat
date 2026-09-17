@@ -13,12 +13,12 @@ const navItems: NavItem[] = [
   { label: 'Perfil', path: '/profile', icon: Users, group: 'Minha Página' },
   { label: 'Links', path: '/links', icon: Link2, group: 'Minha Página' },
   { label: 'Microblog', path: '/microblog', icon: MessageSquare, group: 'Minha Página' },
-  { label: 'Newsletter', path: '/newsletter', icon: Mail, group: 'Minha Página' },
+  { label: 'Newsletter', path: '/newsletter', icon: Mail, group: 'Crescimento' },
   { label: 'Posts', path: '/posts', icon: FileText, group: 'Conteúdo' },
   { label: 'Rascunhos', path: '/drafts', icon: FileText, group: 'Conteúdo' },
   { label: 'Páginas de venda', path: '/sales', icon: ShoppingBag, group: 'Monetização' },
-  { label: 'Leads', path: '/leads', icon: Users, group: 'Leads' },
-  { label: 'Analytics', path: '/analytics', icon: BarChart3, group: 'Leads' },
+  { label: 'Leads', path: '/leads', icon: Users, group: 'Crescimento' },
+  { label: 'Analytics', path: '/analytics', icon: BarChart3, group: 'Crescimento' },
   { label: 'Configurações', path: '/settings', icon: Settings, group: 'Conta' },
 ];
 
