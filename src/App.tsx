@@ -61,17 +61,21 @@ function AppContent() {
 
 function hideBoltBadge() {
   const hide = () => {
-    const elements = document.body.querySelectorAll<HTMLElement>('body *');
-    elements.forEach((el) => {
+    const candidates = document.querySelectorAll<HTMLElement>(
+      'a, button, [role="button"], [data-bolt], [class*="bolt" i], [id*="bolt" i]'
+    );
+
+    candidates.forEach((el) => {
       const text = (el.textContent || '').trim().toLowerCase();
-      const href = el instanceof HTMLAnchorElement ? (el.getAttribute('href') || '').toLowerCase() : '';
+      const href = (el.getAttribute('href') || '').toLowerCase();
       const aria = (el.getAttribute('aria-label') || '').toLowerCase();
       const title = (el.getAttribute('title') || '').toLowerCase();
       const isBoltBadge =
         text.includes('made in bolt') ||
         href.includes('bolt.new') ||
         aria.includes('made in bolt') ||
-        title.includes('made in bolt');
+        title.includes('made in bolt') ||
+        el.hasAttribute('data-bolt');
 
       if (isBoltBadge) {
         el.style.setProperty('display', 'none', 'important');
