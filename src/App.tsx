@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { useRouter } from '@/lib/router';
 import { DashboardLayout } from '@/components/DashboardLayout';
