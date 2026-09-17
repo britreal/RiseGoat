@@ -12,19 +12,25 @@ import { DraftsPage } from '@/pages/DraftsPage';
 import { LeadsPage } from '@/pages/LeadsPage';
 import { AnalyticsPage } from '@/pages/AnalyticsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
+import { SalesPagesPage } from '@/pages/SalesPagesPage';
+import { SalesEditorPage } from '@/pages/SalesEditorPage';
 import { PublicPage } from '@/pages/PublicPage';
+import { PublicSalesPage } from '@/pages/PublicSalesPage';
 import { Spinner } from '@/components/ui';
 
 function AppContent() {
   const { route, navigate } = useRouter();
   const { session, loading } = useAuth();
 
-  // Public page — no auth required
+  // Public creator profile and sales pages do not require authentication.
   if (route.name === 'public') {
     return <PublicPage username={route.username} />;
   }
 
-  // Auth page
+  if (route.name === 'public-sales') {
+    return <PublicSalesPage slug={route.slug} />;
+  }
+
   if (route.name === 'auth') {
     if (loading) return <Spinner />;
     if (session) {
@@ -34,14 +40,10 @@ function AppContent() {
     return <AuthPage />;
   }
 
-  // All other routes require auth
   if (loading) return <Spinner />;
+  if (!session) return <AuthPage />;
 
-  if (!session) {
-    return <AuthPage />;
-  }
-
-  const currentPath = `/${route.name}`;
+  const currentPath = route.name === 'sales-editor' ? '/sales' : `/${route.name}`;
   const pageMap: Record<string, React.ReactNode> = {
     dashboard: <DashboardPage navigate={navigate} />,
     profile: <ProfilePage />,
@@ -53,7 +55,12 @@ function AppContent() {
     leads: <LeadsPage />,
     analytics: <AnalyticsPage />,
     settings: <SettingsPage />,
+    sales: <SalesPagesPage navigate={navigate} />,
   };
+
+  if (route.name === 'sales-editor') {
+    return <SalesEditorPage pageId={route.pageId} navigate={navigate} />;
+  }
 
   return (
     <DashboardLayout currentPath={currentPath} navigate={navigate}>
