@@ -358,7 +358,6 @@ export function PublicPage({ username }: { username: string }) {
               const isLong = post.content.length > 280;
               return (
                 <div key={post.id} className="px-5 py-4 backdrop-blur-sm border rounded-2xl" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
-                  {post.is_pinned && <span className="text-[10px] font-semibold uppercase tracking-wider mb-2 block" style={{ color: accentColor }}>Fixado</span>}
                   {post.title && <h3 className="text-base font-semibold text-white mb-2">{post.title}</h3>}
                   {post.image_url && <img src={post.image_url} alt={post.title || ''} className="w-full rounded-xl mb-3 max-h-64 object-cover" />}
                   <p className="text-sm text-white/90 whitespace-pre-wrap leading-relaxed">{isLong ? post.content.slice(0, 280) + '...' : post.content}</p>
