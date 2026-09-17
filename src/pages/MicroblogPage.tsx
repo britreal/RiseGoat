@@ -22,7 +22,6 @@ export function MicroblogPage() {
   // SEO fields
   const [seoTitle, setSeoTitle] = useState('');
   const [seoDescription, setSeoDescription] = useState('');
-  const [seoKeywords, setSeoKeywords] = useState('');
 
   useEffect(() => {
     if (!user) return;
@@ -46,7 +45,6 @@ export function MicroblogPage() {
     setButtonUrl('');
     setSeoTitle('');
     setSeoDescription('');
-    setSeoKeywords('');
     setShowOptions(false);
     setEditingPost(null);
   }
@@ -63,7 +61,6 @@ export function MicroblogPage() {
       button_url: buttonUrl.trim(),
       seo_title: seoTitle.trim(),
       seo_description: seoDescription.trim(),
-      seo_keywords: seoKeywords.trim(),
     };
     if (editingPost) {
       const { data, error } = await supabase
@@ -118,7 +115,6 @@ export function MicroblogPage() {
     setButtonUrl(post.button_url || '');
     setSeoTitle(post.seo_title);
     setSeoDescription(post.seo_description);
-    setSeoKeywords(post.seo_keywords);
     setShowOptions(true);
   }
 
@@ -196,13 +192,6 @@ export function MicroblogPage() {
                   placeholder="Descrição SEO (meta description)"
                   rows={2}
                   className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 resize-none"
-                />
-                <input
-                  type="text"
-                  value={seoKeywords}
-                  onChange={(e) => setSeoKeywords(e.target.value)}
-                  placeholder="Palavras-chave (separadas por vírgula)"
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
                 />
               </div>
             </div>
