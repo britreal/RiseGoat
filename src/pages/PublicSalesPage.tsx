@@ -9,7 +9,24 @@ interface BlockSettings { fontSize?:string; fontFamily?:string; align?:string; c
 
 export function PublicSalesPage({ slug }: { slug:string }) {
   const [page,setPage]=useState<SalesPage|null>(null); const [blocks,setBlocks]=useState<SalesBlock[]>([]); const [loading,setLoading]=useState(true); const [notFound,setNotFound]=useState(false);
-  useEffect(()=>{let alive=true; supabase.from('sales_pages').select('*').eq('slug',slug.toLowerCase()).maybeSingle().then(async({data})=>{if(!alive)return;if(!data||!(data as SalesPage).is_published){setNotFound(true);setLoading(false);return;}const p=data as SalesPage;setPage(p);document.title=p.seo_title||p.title;if(p.seo_description){let meta=document.querySelector('meta[name="description"]');if(!meta){meta=document.createElement('meta');meta.setAttribute('name','description');document.head.appendChild(meta)}meta.setAttribute('content',p.seo_description)}const {data:b}=await supabase.from('sales_blocks').select('*').eq('page_id',p.id).order('sort_order');if(alive){setBlocks((b as SalesBlock[])||[]);setLoading(false)}});return()=>{alive=false}},[slug]);
+  useEffect(()=>{let alive=true; supabase.from('sales_pages').select('*').eq('slug',slug.toLowerCase()).maybeSingle().then(async({data})=>{if(!alive)return;if(!data||!(data as SalesPage).is_published){setNotFound(true);setLoading(false);return;}const p=data as SalesPage;setPage(p);document.title=p.seo_title||p.title;
+const title=p.seo_title||p.title;
+const description=p.seo_description||p.title;
+let meta=document.querySelector('meta[name="description"]') as HTMLMetaElement|null;
+if(!meta){meta=document.createElement('meta');meta.name='description';document.head.appendChild(meta)}
+meta.content=description;
+let robots=document.querySelector('meta[name="robots"]') as HTMLMetaElement|null;
+if(!robots){robots=document.createElement('meta');robots.name='robots';document.head.appendChild(robots)}
+robots.content='index,follow';
+const setOg=(property:string,value:string)=>{let el=document.querySelector('meta[property="' + property + '"]') as HTMLMetaElement|null;if(!el){el=document.createElement('meta');el.setAttribute('property',property);document.head.appendChild(el)}el.content=value};
+setOg('og:title',title);setOg('og:description',description);
+const canonical=window.location.origin+window.location.pathname+'#/p/'+encodeURIComponent(p.slug);
+let canonicalTag=document.querySelector('link[data-risegoat-canonical]') as HTMLLinkElement|null;
+if(!canonicalTag){canonicalTag=document.createElement('link');canonicalTag.rel='canonical';canonicalTag.setAttribute('data-risegoat-canonical','true');document.head.appendChild(canonicalTag)}
+canonicalTag.href=canonical;
+document.getElementById('risegoat-sales-schema')?.remove();
+const schema=document.createElement('script');schema.id='risegoat-sales-schema';schema.type='application/ld+json';schema.textContent=JSON.stringify({'@context':'https://schema.org','@type':'WebPage',name:title,description,url:canonical});document.head.appendChild(schema);
+const {data:b}=await supabase.from('sales_blocks').select('*').eq('page_id',p.id).order('sort_order');if(alive){setBlocks((b as SalesBlock[])||[]);setLoading(false)}});return()=>{alive=false}},[slug]);
   if(loading)return <div className="min-h-screen flex items-center justify-center bg-white"><Loader2 className="w-8 h-8 text-slate-300 animate-spin"/></div>;
   if(notFound)return <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-center px-4"><div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center mb-4"><Sparkles className="w-6 h-6 text-white"/></div><h1 className="text-xl font-bold text-white mb-2">Página não encontrada</h1><p className="text-sm text-slate-400">Esta página de venda não existe ou não está publicada.</p></div>;
   return <div className="min-h-screen bg-white"><div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">{blocks.length===0?<p className="text-center text-slate-400 py-20">Esta página está vazia.</p>:<div>{blocks.map(block=>{const s=block.settings as unknown as BlockSettings;const font=FONT_SIZES[s.fontSize||'base']||'text-base';const align=ALIGN[s.align||'left']||'text-left';const base={fontFamily:s.fontFamily||'Inter',backgroundColor:s.bgColor||'transparent',paddingTop:s.paddingY??8,paddingBottom:s.paddingY??8};
