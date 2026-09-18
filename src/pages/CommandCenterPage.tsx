@@ -5,15 +5,16 @@ import { Card, Spinner } from '@/components/ui';
 import type {
   AuthorityProperty, AuthorityContact, AuthorityConnection, AuthorityTask,
   AuthorityContent, AuthorityOpportunity, ReciprocityEntry, LeverageNode,
-  ProductPipelineItem, Commission,
+  ProductPipelineItem, Commission, ContactDossier, AuthorityThreat, DefenseAction,
+  AuthoritySuggestion, AuthoritySource,
 } from '@/types';
 import {
   Network, Search, Plus, Trash2, ExternalLink, Target, CheckSquare, Users,
   Briefcase, FileText, Wallet, Handshake, AlertTriangle, ArrowRight,
-  Download, Upload, RefreshCw, Link2, X, ChevronDown,
+  Download, Upload, RefreshCw, Link2, X, ChevronDown, Shield,
 } from 'lucide-react';
 
-type Tab = 'overview' | 'map' | 'crm' | 'action' | 'opportunities' | 'strategy' | 'finance';
+type Tab = 'overview' | 'map' | 'crm' | 'action' | 'opportunities' | 'intelligence' | 'strategy' | 'defense' | 'finance';
 type EntityType = 'property' | 'contact';
 
 const tabs: Array<{ id: Tab; label: string; icon: typeof Network }> = [
@@ -22,7 +23,9 @@ const tabs: Array<{ id: Tab; label: string; icon: typeof Network }> = [
   { id: 'crm', label: 'CRM', icon: Users },
   { id: 'action', label: 'Ação', icon: CheckSquare },
   { id: 'opportunities', label: 'Oportunidades', icon: Target },
+  { id: 'intelligence', label: 'Inteligência', icon: Users },
   { id: 'strategy', label: 'Estratégia', icon: Handshake },
+  { id: 'defense', label: 'Defesa', icon: Shield },
   { id: 'finance', label: 'Finanças', icon: Wallet },
 ];
 
@@ -65,6 +68,11 @@ export function CommandCenterPage() {
   const [leverage, setLeverage] = useState<LeverageNode[]>([]);
   const [products, setProducts] = useState<ProductPipelineItem[]>([]);
   const [commissions, setCommissions] = useState<Commission[]>([]);
+  const [dossiers, setDossiers] = useState<ContactDossier[]>([]);
+  const [threats, setThreats] = useState<AuthorityThreat[]>([]);
+  const [defenseActions, setDefenseActions] = useState<DefenseAction[]>([]);
+  const [suggestions, setSuggestions] = useState<AuthoritySuggestion[]>([]);
+  const [sources, setSources] = useState<AuthoritySource[]>([]);
   const [notice, setNotice] = useState('');
 
   const load = async () => {
@@ -81,6 +89,11 @@ export function CommandCenterPage() {
       supabase.from('authority_leverage').select('*').eq('user_id', user.id).order('score', { ascending: false }),
       supabase.from('product_pipeline').select('*').eq('user_id', user.id).order('updated_at', { ascending: false }),
       supabase.from('commissions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+      supabase.from('contact_dossiers').select('*').eq('user_id', user.id),
+      supabase.from('authority_threats').select('*').eq('user_id', user.id).order('updated_at', { ascending: false }),
+      supabase.from('authority_defense_actions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+      supabase.from('authority_suggestions').select('*').eq('user_id', user.id).order('score', { ascending: false }),
+      supabase.from('authority_sources').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
     ]);
     setProperties((results[0].data as AuthorityProperty[]) ?? []);
     setContacts((results[1].data as AuthorityContact[]) ?? []);
@@ -92,6 +105,11 @@ export function CommandCenterPage() {
     setLeverage((results[7].data as LeverageNode[]) ?? []);
     setProducts((results[8].data as ProductPipelineItem[]) ?? []);
     setCommissions((results[9].data as Commission[]) ?? []);
+    setDossiers((results[10].data as ContactDossier[]) ?? []);
+    setThreats((results[11].data as AuthorityThreat[]) ?? []);
+    setDefenseActions((results[12].data as DefenseAction[]) ?? []);
+    setSuggestions((results[13].data as AuthoritySuggestion[]) ?? []);
+    setSources((results[14].data as AuthoritySource[]) ?? []);
     const failed = results.find((x) => x.error);
     if (failed?.error) setNotice(failed.error.message);
     setLoading(false);
@@ -99,6 +117,154 @@ export function CommandCenterPage() {
   };
 
   useEffect(() => { load(); }, [user]);
+
+  async function runRadar() {
+    if (!user) return;
+    const { error } = await supabase.rpc('authority_run_radar', { p_user_id: user.id });
+    if (error) {
+      setNotice(error.message);
+      return;
+    }
+    const [t, a] = await Promise.all([
+      supabase.from('authority_threats').select('*').eq('user_id', user.id).order('updated_at', { ascending: false }),
+      supabase.from('authority_defense_actions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+    ]);
+    setThreats((t.data as AuthorityThreat[]) ?? []);
+    setDefenseActions((a.data as DefenseAction[]) ?? []);
+  }
+
+  async function syncRiseGoatData() {
+    if (!user) return;
+    setNotice('');
+    try {
+      const [profileRes, linksRes, salesRes, microblogRes, draftsRes, leadsRes, campaignsRes] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
+        supabase.from('links').select('*').eq('user_id', user.id).order('sort_order'),
+        supabase.from('sales_pages').select('*').eq('user_id', user.id),
+        supabase.from('microblog_posts').select('*').eq('user_id', user.id),
+        supabase.from('drafts').select('*').eq('user_id', user.id),
+        supabase.from('newsletter_leads').select('*').eq('user_id', user.id),
+        supabase.from('campaigns').select('*').eq('user_id', user.id),
+      ]);
+
+      const profile = profileRes.data;
+      if (profile) {
+        await supabase.from('authority_properties').upsert({
+          user_id: user.id,
+          name: profile.display_name || '@' + profile.username,
+          property_type: 'Página',
+          platform: 'RiseGoat',
+          url: window.location.origin + '/u/' + profile.username,
+          description: profile.bio || '',
+          status: 'Ativo',
+          objective: 'Atrair',
+          source_kind: 'profiles',
+          source_id: profile.id,
+        }, { onConflict: 'user_id,source_kind,source_id' });
+      }
+
+      const profileProperty = (await supabase.from('authority_properties').select('id').eq('user_id', user.id).eq('source_kind', 'profiles').eq('source_id', user.id).maybeSingle()).data;
+      const propertyId = profileProperty?.id || null;
+
+      for (const item of (linksRes.data ?? []) as Array<Record<string, unknown>>) {
+        const linkType = String(item.link_type || 'link');
+        const propertyType = linkType === 'affiliate' ? 'Produto' : linkType === 'youtube' ? 'Canal' : linkType === 'course' ? 'Página' : 'Perfil Social';
+        await supabase.from('authority_properties').upsert({
+          user_id: user.id,
+          name: String(item.label || 'Link'),
+          property_type: propertyType,
+          platform: String(item.icon || ''),
+          url: String(item.url || ''),
+          description: String(item.description || ''),
+          status: item.is_active === false ? 'Pausado' : 'Ativo',
+          objective: 'Redirecionar',
+          tags: linkType,
+          source_kind: 'links',
+          source_id: String(item.id),
+        }, { onConflict: 'user_id,source_kind,source_id' });
+      }
+
+      for (const item of (salesRes.data ?? []) as Array<Record<string, unknown>>) {
+        await supabase.from('authority_properties').upsert({
+          user_id: user.id,
+          name: String(item.title || 'Página de venda'),
+          property_type: 'Página',
+          platform: 'RiseGoat',
+          url: window.location.origin + '/p/' + String(item.slug || ''),
+          description: '',
+          status: item.is_published ? 'Ativo' : 'Em construção',
+          objective: 'Vender',
+          source_kind: 'sales_pages',
+          source_id: String(item.id),
+        }, { onConflict: 'user_id,source_kind,source_id' });
+      }
+
+      for (const item of (microblogRes.data ?? []) as Array<Record<string, unknown>>) {
+        await supabase.from('authority_contents').upsert({
+          user_id: user.id,
+          title: String(item.title || item.content || 'Microblog'),
+          property_id: propertyId,
+          content_type: 'Post',
+          status: 'Publicado',
+          link: propertyId ? window.location.origin + '/u/' + (profile?.username || '') + '/microblog/' + String(item.id) : '',
+          tags: 'microblog',
+          source_kind: 'microblog_posts',
+          source_id: String(item.id),
+        }, { onConflict: 'user_id,source_kind,source_id' });
+      }
+
+      for (const item of (draftsRes.data ?? []) as Array<Record<string, unknown>>) {
+        await supabase.from('authority_contents').upsert({
+          user_id: user.id,
+          title: String(item.title || 'Rascunho'),
+          property_id: propertyId,
+          content_type: 'Post',
+          status: 'Rascunho',
+          link: '',
+          tags: 'rascunho',
+          source_kind: 'drafts',
+          source_id: String(item.id),
+        }, { onConflict: 'user_id,source_kind,source_id' });
+      }
+
+      for (const item of (leadsRes.data ?? []) as Array<Record<string, unknown>>) {
+        await supabase.from('authority_contacts').upsert({
+          user_id: user.id,
+          name: String(item.name || item.email || 'Lead'),
+          email: String(item.email || ''),
+          status: 'Frio',
+          source_kind: 'newsletter_leads',
+          source_id: String(item.id),
+        }, { onConflict: 'user_id,source_kind,source_id' });
+      }
+
+      for (const item of (campaignsRes.data ?? []) as Array<Record<string, unknown>>) {
+        await supabase.from('authority_contents').upsert({
+          user_id: user.id,
+          title: String(item.subject || 'Campanha'),
+          property_id: propertyId,
+          content_type: 'E-mail',
+          status: String(item.status || 'Rascunho') === 'sent' ? 'Publicado' : 'Rascunho',
+          tags: 'newsletter,email',
+          source_kind: 'campaigns',
+          source_id: String(item.id),
+        }, { onConflict: 'user_id,source_kind,source_id' });
+      }
+
+      await Promise.all([
+        supabase.from('authority_sources').upsert({ user_id: user.id, source_type: 'RiseGoat', name: 'Perfil e página pública', url: profile ? window.location.origin + '/u/' + profile.username : '' }, { onConflict: 'user_id,source_type,name' }),
+        supabase.from('authority_sources').upsert({ user_id: user.id, source_type: 'RiseGoat', name: 'Links', url: '/links' }, { onConflict: 'user_id,source_type,name' }),
+        supabase.from('authority_sources').upsert({ user_id: user.id, source_type: 'RiseGoat', name: 'Newsletter e campanhas', url: '/newsletter' }, { onConflict: 'user_id,source_type,name' }),
+        supabase.from('authority_sources').upsert({ user_id: user.id, source_type: 'RiseGoat', name: 'Páginas de venda', url: '/sales' }, { onConflict: 'user_id,source_type,name' }),
+      ]);
+
+      setNotice('Dados do RiseGoat sincronizados com o Centro de Comando.');
+      await load();
+      await runRadar();
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Falha ao sincronizar os dados.');
+    }
+  }
 
   useEffect(() => {
     if (loading) return;
