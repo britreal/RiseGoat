@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { PageHeader, Card } from '@/components/ui';
-import { Check, AlertTriangle, Mail, Loader2, ShieldCheck, Database, BookOpen, ArrowRight, Target, Sparkles, Network, BarChart3, Settings2, Layers3, CircleDollarSign, Handshake, CalendarDays, Radar as RadarIcon } from 'lucide-react';
+import { Check, AlertTriangle, Mail, Loader2, ShieldCheck, Database, BookOpen, ArrowRight, Target, Sparkles, Network, BarChart3, Settings2, Layers3, CircleDollarSign, Handshake, CalendarDays, Radar as RadarIcon, UserRound, LockKeyhole, Server, Info, LogOut, ChevronRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export function SettingsPage() {
@@ -89,10 +89,54 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-2xl mx-auto">
-      <PageHeader title="Configurações" subtitle="Gerencie sua conta" />
-      <div className="space-y-6">
-        <Card className="overflow-hidden border-slate-200">
+    <div className="min-h-full bg-slate-50/70">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 lg:py-8">
+        <PageHeader
+          title="Configurações"
+          subtitle="Controle sua conta, integrações, segurança e informações do RiseGoat."
+          action={
+            <button
+              onClick={() => signOut()}
+              className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition"
+            >
+              <LogOut className="w-4 h-4" /> Sair
+            </button>
+          }
+        />
+
+        <div className="grid lg:grid-cols-[220px_1fr] gap-6 items-start">
+          <aside className="lg:sticky lg:top-6">
+            <Card className="p-3">
+              <p className="px-3 pt-2 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Configuração</p>
+              <div className="space-y-1">
+                {[
+                  { label: 'Sobre o sistema', icon: Info, tone: 'bg-slate-950 text-white' },
+                  { label: 'Conta', icon: UserRound, tone: 'bg-slate-100 text-slate-700' },
+                  { label: 'E-mail', icon: Mail, tone: 'bg-cyan-50 text-cyan-700' },
+                  { label: 'Segurança', icon: LockKeyhole, tone: 'bg-slate-100 text-slate-700' },
+                ].map(item => {
+                  const Icon = item.icon;
+                  return (
+                    <div key={item.label} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600">
+                      <span className={`w-8 h-8 rounded-lg flex items-center justify-center ${item.tone}`}><Icon className="w-4 h-4" /></span>
+                      <span className="flex-1">{item.label}</span>
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+            <div className="hidden lg:block rounded-2xl border border-slate-200 bg-white p-4 mt-3">
+              <div className="flex items-center gap-2 mb-2">
+                <Server className="w-4 h-4 text-cyan-600" />
+                <p className="text-xs font-bold text-slate-700">Infraestrutura</p>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-5">RiseGoat conectado ao projeto Fluently para autenticação, dados e armazenamento.</p>
+            </div>
+          </aside>
+
+          <div className="space-y-6">
+        <Card className="overflow-hidden border-slate-200 shadow-sm">
           <div className="p-6 bg-slate-950 text-white">
             <div className="flex items-start gap-4">
               <div className="w-11 h-11 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center shrink-0">
@@ -161,7 +205,7 @@ export function SettingsPage() {
                   { n: '11', name: 'Ofertas', group: 'Monetização', icon: CircleDollarSign, function: 'Organiza tudo que pode ser vendido.', how: 'Cadastre tipo, status, preço, margem, comissão, canal, receita e vincule uma página de venda.', pain: 'Resolve a falta de uma visão central do catálogo e da rentabilidade das ofertas.' },
                   { n: '12', name: 'Receita', group: 'Monetização', icon: CircleDollarSign, function: 'Controla dinheiro recebido e pendente.', how: 'Registre fonte, valor e data e conecte cada receita a oferta, parceria, lead e lançamento.', pain: 'Evita perder o histórico financeiro e mostra distância até a meta mensal.' },
                   { n: '13', name: 'Centro de Comando', group: 'Estratégia', icon: Network, function: 'Integra propriedades, contatos, conexões, oportunidades, estratégia, defesa e finanças.', how: 'Use a Teia de Autoridade e seus painéis para organizar a estrutura estratégica.', pain: 'Resolve a falta de visão integrada sobre ativos, pessoas e oportunidades.' },
-                  { n: '14', name: 'GOAT', group: 'Estratégia', icon: Sparkles, function: 'Acompanha desenvolvimento pessoal e consistência.', how: 'Gerencie hábitos, heatmap, Body Analytics, livros e audiobooks.', pain: 'Ajuda a transformar intenção pessoal em rotina acompanhável.' },
+                  { n: '14', name: 'GOAT', group: 'Personal', icon: Sparkles, function: 'Acompanha desenvolvimento pessoal e consistência.', how: 'Gerencie hábitos, heatmap, Body Analytics, livros e audiobooks.', pain: 'Ajuda a transformar intenção pessoal em rotina acompanhável.' },
                   { n: '15', name: 'Parcerias', group: 'Estratégia', icon: Handshake, function: 'Organiza afiliados, parceiros e colaboradores.', how: 'Cadastre comissão, vendas, valor a pagar e conecte parceiros a leads e receitas.', pain: 'Evita controlar relacionamentos comerciais de forma espalhada.' },
                   { n: '16', name: 'Lançamentos', group: 'Estratégia', icon: CalendarDays, function: 'Planeja campanhas por período e fase.', how: 'Monte kanban, calendário, metas e resultados e vincule posts e newsletters.', pain: 'Evita executar campanhas sem cronograma ou conexão entre conteúdo e resultado.' },
                   { n: '17', name: 'Radar', group: 'Estratégia', icon: RadarIcon, function: 'Cruza dados automaticamente para encontrar oportunidades.', how: 'Compara interesses, ofertas e sinais de audiência, atualiza o score de alavancagem e permite criar tarefas.', pain: 'Reduz oportunidades escondidas em dados que estão isolados.' },
@@ -244,15 +288,26 @@ export function SettingsPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <div className="pt-1">
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <UserRound className="w-4 h-4 text-slate-500" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Conta e identidade</p>
+          </div>
+          <Card className="p-6"> 
           <h2 className="text-sm font-semibold text-slate-800 mb-4">Conta</h2>
           <div className="space-y-3">
             <div><label className="block text-xs font-medium text-slate-500 mb-1">Email</label><input type="email" value={user?.email ?? ''} disabled className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg text-slate-500" /></div>
             <div><label className="block text-xs font-medium text-slate-500 mb-1">Usuário</label><input type="text" value={`@${profile?.username ?? ''}`} disabled className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg text-slate-500" /></div>
           </div>
-        </Card>
+          </Card>
+        </div>
 
-        <Card className="p-6">
+        <div className="pt-1">
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <Mail className="w-4 h-4 text-cyan-600" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Integrações</p>
+          </div>
+          <Card className="p-6">
           <div className="flex items-center gap-2 mb-1"><Mail className="w-4 h-4 text-cyan-500" /><h2 className="text-sm font-semibold text-slate-800">Conectar meu e-mail</h2></div>
           <p className="text-xs text-slate-500 mb-4">Use seu próprio SMTP para enviar newsletters. Sua senha nunca é retornada ao frontend e é armazenada criptografada no servidor.</p>
           {emailLoading ? <div className="flex items-center gap-2 text-sm text-slate-500"><Loader2 className="w-4 h-4 animate-spin" /> Carregando...</div> : <div className="space-y-3">
@@ -273,9 +328,15 @@ export function SettingsPage() {
             {emailMessage && <p className="text-sm text-green-600">{emailMessage}</p>}
             <p className="text-[11px] text-slate-400">A senha SMTP é criptografada com AES-256-GCM usando uma chave que fica apenas nas variáveis secretas da Edge Function.</p>
           </div>}
-        </Card>
+          </Card>
+        </div>
 
-        <Card className="p-6">
+        <div className="pt-1">
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <LockKeyhole className="w-4 h-4 text-slate-500" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Segurança</p>
+          </div>
+          <Card className="p-6">
           <h2 className="text-sm font-semibold text-slate-800 mb-4">Alterar senha</h2>
           <div className="space-y-3">
             <div><label className="block text-xs font-medium text-slate-500 mb-1">Senha atual</label><input type="password" value={currentPassword} onChange={e=>setCurrentPassword(e.target.value)} placeholder="••••••••" className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg" /></div>
@@ -284,12 +345,14 @@ export function SettingsPage() {
             {pwSuccess && <p className="flex items-center gap-1 text-sm text-green-600"><Check className="w-4 h-4"/> Senha alterada</p>}
             <button onClick={updatePassword} className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-lg">Alterar senha</button>
           </div>
-        </Card>
+          </Card>
+        </div>
 
-        <Card className="p-6 border-red-200">
+        <Card className="p-6 border-red-200 shadow-sm">
           <div className="flex items-start gap-3"><div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center shrink-0"><AlertTriangle className="w-5 h-5 text-red-500" /></div><div className="flex-1"><h2 className="text-sm font-semibold text-slate-800 mb-1">Excluir conta</h2><p className="text-xs text-slate-500 mb-3">Esta ação é permanente. Todos os seus dados, links, posts, páginas de venda e leads serão removidos.</p><button onClick={()=>{if(confirm('Tem certeza? Esta ação não pode ser desfeita.')) deleteAccount()}} className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg">Excluir conta</button></div></div>
         </Card>
-        <button onClick={()=>signOut()} className="text-sm text-slate-500 hover:text-slate-700 font-medium">Sair da conta</button>
+      </div>
+        </div>
       </div>
     </div>
   );
