@@ -17,6 +17,7 @@ import { SalesPagesPage } from '@/pages/SalesPagesPage';
 import { CommandCenterPage } from '@/pages/CommandCenterPage';
 import { GoatPage } from '@/pages/GoatPage';
 import { OffersPage, RevenuePage, PartnershipsPage, LaunchesPage, GoalsPage, RadarPage } from '@/pages/BusinessModulesPage';
+import { ActionFlowsPage } from '@/pages/ActionFlowsPage';
 import { SalesBuilderPage } from '@/pages/SalesBuilderPage';
 import { PublicPage } from '@/pages/PublicPage';
 import { PublicMicroblogPage } from '@/pages/PublicMicroblogPage';
@@ -49,6 +50,7 @@ function AppContent() {
   const currentPath = `/${route.name}`;
   const pageMap: Record<string, React.ReactNode> = {
     dashboard: <DashboardPage navigate={navigate} />,
+    'action-flows': <ActionFlowsPage navigate={navigate} />,
     profile: <ProfilePage />,
     links: <LinksPage />,
     microblog: <MicroblogPage />,
