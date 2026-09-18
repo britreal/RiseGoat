@@ -47,6 +47,7 @@ type Flow = {
   objective: string;
   goal: string;
   status: FlowStatus;
+  workspace_mode: 'pessoal' | 'negocios';
   created_at: string;
   updated_at: string;
 };
@@ -494,6 +495,137 @@ const TEMPLATES: Template[] = [
   },
 ];
 
+
+type TemplateResearch = {
+  sources: Array<{ label: string; url: string }>;
+  realPlan: string[];
+  idealPlan: string[];
+};
+
+const TEMPLATE_RESEARCH: Record<string, TemplateResearch> = {
+  'shopify-store': {
+    sources: [
+      { label: 'Shopify — checklist para abrir uma nova loja', url: 'https://help.shopify.com/pt-BR/manual/intro-to-shopify/initial-setup/new-to-shopify-checklists/general-checklist' },
+      { label: 'Google Analytics — medição de e-commerce', url: 'https://support.google.com/analytics/answer/14430645?hl=pt-BR' },
+    ],
+    realPlan: ['Definir objetivos', 'Configurar informações básicas', 'Adicionar produtos', 'Escolher e ajustar a aparência', 'Configurar domínio, pagamentos e operação', 'Testar a experiência de compra', 'Lançar e promover', 'Medir eventos de e-commerce'],
+    idealPlan: ['Validar oferta e margem antes de escalar', 'Usar critérios de entrada e saída por etapa', 'Conectar oferta, página e receita no RiseGoat', 'Medir conversão após o lançamento', 'Fazer revisão e iteração'],
+  },
+  'digital-product': {
+    sources: [{ label: 'SBA — pesquisa e planejamento de negócio', url: 'https://www.sba.gov/counseling/plan-your-business/' }, { label: 'Atlassian — ciclo de vida de projetos', url: 'https://www.atlassian.com/work-management/project-management/phases/' }],
+    realPlan: ['Pesquisar mercado e clientes', 'Definir problema e proposta', 'Planejar produto', 'Executar e testar', 'Preparar entrega', 'Lançar', 'Monitorar e revisar'],
+    idealPlan: ['Validar demanda em pequena escala', 'Transformar etapas em tarefas verificáveis', 'Conectar oferta e página', 'Registrar feedback', 'Revisar pós-lançamento'],
+  },
+  'clothing-brand': {
+    sources: [{ label: 'SBA — planejamento', url: 'https://www.sba.gov/counseling/plan-your-business/' }, { label: 'Shopify — primeiros passos', url: 'https://help.shopify.com/pt-BR/manual/intro-to-shopify/initial-setup/setup-getting-started' }],
+    realPlan: ['Pesquisar mercado e público', 'Definir posicionamento e produto', 'Planejar coleção', 'Organizar produção', 'Preparar loja', 'Lançar', 'Vender e acompanhar'],
+    idealPlan: ['Validar coleção antes de produzir volume alto', 'Registrar custos e margem', 'Definir critérios de aprovação por peça', 'Conectar lançamento, conteúdo e receita', 'Revisar demanda e margem'],
+  },
+  'saas': {
+    sources: [{ label: 'Atlassian — ciclo de vida de projetos', url: 'https://www.atlassian.com/work-management/project-management/phases/' }, { label: 'Stripe — modelos de assinatura', url: 'https://docs.stripe.com/billing/subscriptions/metered-billing/thresholds' }, { label: 'Google Analytics — e-commerce e conversões', url: 'https://support.google.com/analytics/answer/14430645?hl=pt-BR' }],
+    realPlan: ['Definir problema e objetivo', 'Planejar solução', 'Construir e testar', 'Monitorar uso', 'Definir cobrança', 'Lançar', 'Acompanhar resultados'],
+    idealPlan: ['Validar o problema antes de ampliar', 'Manter MVP pequeno', 'Definir eventos e métricas', 'Testar preço e recorrência', 'Criar ciclo contínuo de feedback'],
+  },
+  'service-business': {
+    sources: [{ label: 'HubSpot — qualificação de leads', url: 'https://blog.hubspot.com/sales/ultimate-guide-to-sales-qualification' }, { label: 'SBA — planejamento', url: 'https://www.sba.gov/counseling/plan-your-business/' }],
+    realPlan: ['Definir cliente ideal', 'Definir problema e serviço', 'Criar oferta/proposta', 'Gerar e qualificar leads', 'Fazer contato', 'Apresentar proposta', 'Fechar e entregar'],
+    idealPlan: ['Definir critérios antes da prospecção', 'Criar processo de proposta e follow-up', 'Registrar leads e receita', 'Documentar entrega', 'Revisar preço, escopo e aquisição'],
+  },
+  'agency': {
+    sources: [{ label: 'HubSpot — pipeline de vendas', url: 'https://blog.hubspot.com/sales/sales-pipeline' }, { label: 'Atlassian — ciclo de vida de projetos', url: 'https://www.atlassian.com/work-management/project-management/phases/' }],
+    realPlan: ['Definir nicho e oferta', 'Gerar e qualificar leads', 'Propor', 'Fechar', 'Executar entrega', 'Monitorar resultado', 'Melhorar processo'],
+    idealPlan: ['Padronizar proposta e onboarding', 'Separar aquisição, vendas e entrega', 'Definir capacidade', 'Criar indicadores por cliente', 'Documentar processos repetíveis'],
+  },
+  'paid-newsletter': {
+    sources: [{ label: 'Mailchimp — primeiros passos', url: 'https://mailchimp.com/pt-br/help/getting-started-with-mailchimp/' }, { label: 'Mailchimp — campanhas', url: 'https://mailchimp.com/pt-br/help/getting-started-with-campaigns/' }],
+    realPlan: ['Definir público e proposta editorial', 'Configurar audiência', 'Criar formulário', 'Produzir conteúdo', 'Criar campanha', 'Enviar/automatizar', 'Medir'],
+    idealPlan: ['Separar gratuito e pago', 'Criar calendário editorial', 'Definir métricas de aquisição e conversão', 'Conectar leads/ofertas/receita', 'Revisar retenção'],
+  },
+  'affiliate-business': {
+    sources: [{ label: 'SBA — pesquisa e planejamento', url: 'https://www.sba.gov/counseling/plan-your-business/' }, { label: 'Google Analytics — e-commerce', url: 'https://support.google.com/analytics/answer/14430645?hl=pt-BR' }],
+    realPlan: ['Escolher mercado e público', 'Pesquisar ofertas', 'Escolher canais', 'Criar aquisição', 'Gerar tráfego', 'Acompanhar conversões', 'Otimizar'],
+    idealPlan: ['Avaliar comissão versus custo', 'Registrar ofertas como unidades de monetização', 'Mensurar jornada', 'Cortar canais sem retorno', 'Revisar economia da oferta'],
+  },
+  'launch-product': {
+    sources: [{ label: 'Atlassian — execução de projetos', url: 'https://www.atlassian.com/work-management/project-management/phases/' }, { label: 'Mailchimp — campanhas', url: 'https://mailchimp.com/pt-br/help/getting-started-with-campaigns/' }],
+    realPlan: ['Definir objetivo', 'Planejar', 'Preparar ativos', 'Executar', 'Monitorar', 'Encerrar e revisar'],
+    idealPlan: ['Definir critérios por fase', 'Conectar conteúdo à oferta', 'Registrar meta e resultado', 'Fazer revisão imediata', 'Transformar aprendizados em próximo ciclo'],
+  },
+  'campaign': {
+    sources: [{ label: 'Mailchimp — campanhas', url: 'https://mailchimp.com/pt-br/help/getting-started-with-campaigns/' }, { label: 'Atlassian — execução', url: 'https://www.atlassian.com/work-management/project-management/phases/' }],
+    realPlan: ['Definir objetivo', 'Definir público', 'Criar mensagem e ativos', 'Distribuir', 'Publicar', 'Medir', 'Revisar'],
+    idealPlan: ['Definir métrica principal', 'Testar antes de escalar', 'Registrar resultado por canal', 'Documentar aprendizado', 'Iterar'],
+  },
+  'funnel': {
+    sources: [{ label: 'Mailchimp — jornada do cliente', url: 'https://mailchimp.com/resources/define-your-customer-journey-for-better-email-marketing/' }, { label: 'HubSpot — pipeline', url: 'https://blog.hubspot.com/sales/sales-pipeline' }],
+    realPlan: ['Definir oferta e público', 'Criar entrada', 'Capturar contato', 'Nutrir/qualificar', 'Apresentar oferta', 'Converter', 'Medir'],
+    idealPlan: ['Definir critérios de passagem', 'Separar qualificados', 'Criar mensagens por estágio', 'Medir conversão por etapa', 'Corrigir gargalo'],
+  },
+  'lead-capture': {
+    sources: [{ label: 'Mailchimp — formulário de inscrição', url: 'https://mailchimp.com/pt-br/help/create-a-hosted-signup-form/' }, { label: 'HubSpot — qualificação', url: 'https://blog.hubspot.com/sales/ultimate-guide-to-sales-qualification' }],
+    realPlan: ['Definir público e oferta de entrada', 'Criar captura', 'Coletar contatos', 'Qualificar', 'Nutrir/encaminhar', 'Medir'],
+    idealPlan: ['Definir critérios antes de escalar', 'Conectar origem do lead', 'Criar nutrição', 'Registrar próxima ação', 'Medir oportunidade e venda'],
+  },
+  'influencer-campaign': {
+    sources: [{ label: 'HubSpot — pipeline de vendas', url: 'https://blog.hubspot.com/sales/sales-pipeline' }, { label: 'Mailchimp — campanhas', url: 'https://mailchimp.com/pt-br/help/getting-started-with-campaigns/' }],
+    realPlan: ['Definir objetivo e público', 'Encontrar parceiros', 'Avaliar fit', 'Negociar', 'Executar', 'Medir leads/vendas', 'Revisar'],
+    idealPlan: ['Definir critérios de parceiro', 'Registrar comissão e entregas', 'Usar identificação por parceiro', 'Conectar leads e receita', 'Renovar com base em resultado'],
+  },
+  'new-company': {
+    sources: [{ label: 'SBA — planejar um negócio', url: 'https://www.sba.gov/counseling/plan-your-business/' }, { label: 'SBA — guia de lançamento', url: 'https://www.sba.gov/counseling/' }],
+    realPlan: ['Pesquisar mercado', 'Escrever plano', 'Calcular custos iniciais', 'Definir estrutura/registro', 'Lançar', 'Operar', 'Revisar'],
+    idealPlan: ['Definir premissas e critérios de validação', 'Registrar custos', 'Definir metas', 'Criar processos essenciais', 'Revisar mensalmente'],
+  },
+  'product-structure': {
+    sources: [{ label: 'Atlassian — ciclo de projetos', url: 'https://www.atlassian.com/work-management/project-management/phases/' }, { label: 'HubSpot — necessidades do prospect', url: 'https://blog.hubspot.com/sales/ultimate-guide-to-sales-qualification' }],
+    realPlan: ['Definir problema', 'Definir resultado', 'Planejar solução', 'Construir', 'Testar', 'Ajustar', 'Preparar entrega'],
+    idealPlan: ['Definir critérios de aceitação', 'Testar cedo', 'Registrar feedback', 'Conectar produto à oferta', 'Revisar pós-entrega'],
+  },
+  'validate-idea': {
+    sources: [{ label: 'SBA — pesquisa de mercado', url: 'https://www.sba.gov/counseling/plan-your-business/' }, { label: 'Atlassian — iniciação de projetos', url: 'https://www.atlassian.com/work-management/project-management/phases/' }],
+    realPlan: ['Formular hipótese', 'Pesquisar mercado/concorrência', 'Definir teste', 'Executar', 'Avaliar evidências', 'Decidir'],
+    idealPlan: ['Definir antes qual evidência muda a decisão', 'Testar a hipótese mais arriscada primeiro', 'Separar dados de interpretação', 'Não escalar antes de validar', 'Documentar decisão'],
+  },
+  'sales-process': {
+    sources: [{ label: 'HubSpot — qualificação', url: 'https://blog.hubspot.com/sales/ultimate-guide-to-sales-qualification' }, { label: 'HubSpot — pipeline', url: 'https://blog.hubspot.com/sales/sales-pipeline' }],
+    realPlan: ['Definir ICP', 'Definir critérios', 'Gerar leads', 'Classificar', 'Contato inicial', 'Qualificar', 'Proposta', 'Fechar', 'Revisar'],
+    idealPlan: ['Registrar critérios no lead', 'Separar estágios quando fizer sentido', 'Definir próxima ação', 'Medir conversão por etapa', 'Revisar gargalos'],
+  },
+  'customer-service': {
+    sources: [{ label: 'Atlassian — processos e execução', url: 'https://www.atlassian.com/work-management/project-management/phases/' }, { label: 'HubSpot — pipeline/ciclo de cliente', url: 'https://blog.hubspot.com/sales/sales-pipeline' }],
+    realPlan: ['Definir canal', 'Registrar demanda', 'Diagnosticar', 'Resolver', 'Registrar resultado', 'Acompanhar', 'Revisar padrões'],
+    idealPlan: ['Definir prioridade e prazo', 'Criar procedimentos reutilizáveis', 'Registrar problemas recorrentes', 'Transformar feedback em melhorias', 'Revisar qualidade'],
+  },
+  'hiring': {
+    sources: [{ label: 'SBA — organização do negócio', url: 'https://www.sba.gov/counseling/plan-your-business/' }, { label: 'Atlassian — iniciação e planejamento', url: 'https://www.atlassian.com/work-management/project-management/phases/' }],
+    realPlan: ['Definir necessidade', 'Definir função e critérios', 'Buscar', 'Filtrar', 'Entrevistar', 'Escolher', 'Integrar'],
+    idealPlan: ['Definir critérios antes de selecionar', 'Separar essenciais de desejáveis', 'Registrar evidências', 'Criar onboarding', 'Revisar contratação'],
+  },
+  'personal-routine': {
+    sources: [{ label: 'Todoist — revisão semanal', url: 'https://www.todoist.com/pt-BR/productivity-methods/weekly-review' }],
+    realPlan: ['Escolher dia/hora de revisão', 'Fazer inventário', 'Revisar concluídas e pendentes', 'Revisar metas/projetos', 'Planejar semana seguinte'],
+    idealPlan: ['Manter checklist pessoal', 'Usar métricas objetivas', 'Transformar pendências em próximas ações', 'Revisar o que realmente avançou', 'Manter o processo sustentável'],
+  },
+  'study-plan': {
+    sources: [{ label: 'Learning Scientists — spaced practice', url: 'https://www.learningscientists.org/blog/2016/7/21-1' }, { label: 'Learning Scientists — retrieval practice', url: 'https://www.learningscientists.org/blog/2016/6/23-1' }],
+    realPlan: ['Planejar sessões espaçadas', 'Distribuir o estudo no tempo', 'Recuperar informação da memória', 'Revisar conteúdo antigo', 'Avaliar o que ainda não domina'],
+    idealPlan: ['Combinar espaçamento e recuperação', 'Usar perguntas sem consultar o material', 'Intercalar quando fizer sentido', 'Registrar dúvidas', 'Revisar semanalmente'],
+  },
+  'health-project': {
+    sources: [{ label: 'CDC — atividade física para adultos', url: 'https://cdc.gov/physical-activity-basics/adding-adults/index.html' }, { label: 'NIH/NICHD — sono', url: 'https://www.nichd.nih.gov/health/topics/sleep/conditioninfo/how-much' }],
+    realPlan: ['Definir objetivo', 'Escolher atividades adequadas', 'Planejar frequência', 'Registrar atividade e sono', 'Revisar evolução'],
+    idealPlan: ['Usar métricas simples', 'Progredir conforme capacidade', 'Acompanhar sono', 'Usar histórico do Body Analytics', 'Adaptar orientações com profissional quando necessário'],
+  },
+  'personal-project': {
+    sources: [{ label: 'Atlassian — ciclo de projetos', url: 'https://www.atlassian.com/work-management/project-management/phases/' }, { label: 'Todoist — revisão semanal', url: 'https://www.todoist.com/pt-BR/productivity-methods/weekly-review' }],
+    realPlan: ['Definir resultado final', 'Iniciar', 'Planejar', 'Executar', 'Monitorar', 'Concluir e revisar'],
+    idealPlan: ['Definir critério de conclusão', 'Quebrar em próximas ações', 'Revisar semanalmente', 'Registrar bloqueios', 'Guardar aprendizados'],
+  },
+};
+
+function templateMode(template: Template): 'pessoal' | 'negocios' {
+  return template.category === 'Personal' ? 'pessoal' : 'negocios';
+}
 function moneyShort(v: number) {
   const n = Number(v || 0);
   if (n >= 1000000) return 'R$ ' + (n / 1000000).toFixed(1).replace('.', ',') + ' mi';
@@ -566,7 +698,7 @@ function CanvasNode({ node, selected, connectFrom, onSelect, onStartConnect, onD
 }
 
 export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void }) {
-  const { user } = useAuth();
+  const { user, workspaceMode } = useAuth();
   const [flows, setFlows] = useState<Flow[]>([]);
   const [runs, setRuns] = useState<Run[]>([]);
   const [loading, setLoading] = useState(true);
@@ -584,12 +716,13 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
   const [runNodes, setRunNodes] = useState<RunNode[]>([]);
   const [runLoading, setRunLoading] = useState(false);
   const [runModal, setRunModal] = useState(false);
+  const [researchTemplate, setResearchTemplate] = useState<Template | null>(null);
 
   async function loadLibrary() {
     if (!user) { setLoading(false); return; }
     setLoading(true); setError('');
     const [f, r] = await Promise.all([
-      supabase.from('action_flows').select('*').eq('user_id', user.id).order('updated_at', { ascending: false }),
+      supabase.from('action_flows').select('*').eq('user_id', user.id).eq('workspace_mode', workspaceMode).order('updated_at', { ascending: false }),
       supabase.from('action_flow_runs').select('*').eq('user_id', user.id).order('started_at', { ascending: false }),
     ]);
     const e = f.error || r.error;
@@ -599,7 +732,7 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
     setLoading(false);
   }
 
-  useEffect(() => { void loadLibrary(); }, [user?.id]);
+  useEffect(() => { void loadLibrary(); }, [user?.id, workspaceMode]);
 
   async function openFlow(flowItem: Flow) {
     setError('');
@@ -632,7 +765,7 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
       objective: '',
       goal: '',
     };
-    const { data, error: e } = await supabase.from('action_flows').insert({ user_id: user.id, ...base }).select().single();
+    const { data, error: e } = await supabase.from('action_flows').insert({ user_id: user.id, workspace_mode: workspaceMode, ...base }).select().single();
     if (e || !data) return setError(e?.message || 'Não foi possível criar o fluxo.');
     let createdNodes: FlowNode[] = [];
     if (template) {
@@ -773,6 +906,7 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
       objective: source.objective,
       goal: source.goal,
       status: 'draft',
+      workspace_mode: source.workspace_mode,
     }).select().single();
     if (fe || !copied) return setError(fe?.message || 'Não foi possível duplicar o fluxo.');
     const { data: sourceNodes, error: ne } = await supabase.from('action_flow_nodes').select('*').eq('flow_id', source.id).eq('user_id', user.id).order('sort_order');
@@ -892,7 +1026,7 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
     if (e) setError(e.message); else setError('');
   }
 
-  const filteredTemplates = TEMPLATES.filter(t => (category === 'Todos' || t.category === category) && (t.name.toLowerCase().includes(search.toLowerCase()) || t.description.toLowerCase().includes(search.toLowerCase())));
+  const filteredTemplates = TEMPLATES.filter(t => templateMode(t) === workspaceMode && (category === 'Todos' || t.category === category) && (t.name.toLowerCase().includes(search.toLowerCase()) || t.description.toLowerCase().includes(search.toLowerCase())));
   const currentNode = selectedNodeId ? nodes.find(n => n.id === selectedNodeId) || null : null;
   const currentRunNode = run?.current_node_id ? runNodes.find(n => n.node_id === run.current_node_id) : null;
   const currentRunNodeData = run?.current_node_id ? nodes.find(n => n.id === run.current_node_id) : null;
@@ -943,7 +1077,7 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
         <div className="flex flex-col md:flex-row gap-3">
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar fluxo ou template..." className="flex-1 h-11 rounded-xl border border-slate-200 px-3.5 text-sm outline-none focus:ring-4 focus:ring-slate-100" />
           <div className="flex gap-2 overflow-x-auto">
-            {['Todos','Negócios','Aquisição','Operação','Personal'].map(c=><button key={c} onClick={()=>setCategory(c)} className={'px-3.5 rounded-xl text-xs font-semibold whitespace-nowrap border ' + (category===c?'bg-slate-950 text-white border-slate-950':'bg-white text-slate-500 border-slate-200 hover:bg-slate-50')}>{c}</button>)}
+            {(workspaceMode === 'pessoal' ? ['Todos','Personal'] : ['Todos','Negócios','Aquisição','Operação']).map(c=><button key={c} onClick={()=>setCategory(c)} className={'px-3.5 rounded-xl text-xs font-semibold whitespace-nowrap border ' + (category===c?'bg-slate-950 text-white border-slate-950':'bg-white text-slate-500 border-slate-200 hover:bg-slate-50')}>{c}</button>)}
           </div>
         </div>
       </Card>
@@ -959,11 +1093,29 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
 
       <div>
         <div className="flex items-end justify-between mb-4"><div><p className="text-[10px] uppercase tracking-[0.16em] font-bold text-slate-400">Biblioteca</p><h3 className="text-lg font-black text-slate-950 mt-1">Comece por um fluxo pronto</h3></div><span className="text-xs text-slate-400">{filteredTemplates.length} modelos</span></div>
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">{filteredTemplates.map(t => <Card key={t.key} className="p-5 hover:border-slate-300 hover:shadow-md transition"><div className="flex items-center justify-between"><span className="text-[10px] uppercase tracking-[0.16em] font-bold text-slate-400">{t.category}</span><Sparkles className="w-4 h-4 text-slate-300"/></div><h4 className="text-base font-black text-slate-900 mt-2">{t.name}</h4><p className="text-xs text-slate-500 mt-1.5 leading-5">{t.description}</p><div className="mt-4 rounded-xl bg-slate-50 p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Objetivo</p><p className="text-xs font-semibold text-slate-700 mt-1">{t.goal}</p></div><button onClick={()=>void createFlow(t)} className="w-full mt-4 inline-flex justify-center items-center gap-2 h-10 rounded-xl bg-slate-950 text-white text-xs font-semibold hover:bg-slate-800"><Plus className="w-4 h-4"/> Usar este modelo</button></Card>)}</div>
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">{filteredTemplates.map(t => <Card key={t.key} className="p-5 hover:border-slate-300 hover:shadow-md transition"><div className="flex items-center justify-between"><span className="text-[10px] uppercase tracking-[0.16em] font-bold text-slate-400">{t.category}</span><Sparkles className="w-4 h-4 text-slate-300"/></div><h4 className="text-base font-black text-slate-900 mt-2">{t.name}</h4><p className="text-xs text-slate-500 mt-1.5 leading-5">{t.description}</p><div className="mt-4 rounded-xl bg-slate-50 p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Objetivo</p><p className="text-xs font-semibold text-slate-700 mt-1">{t.goal}</p></div><div className="flex gap-2 mt-4"><button onClick={()=>setResearchTemplate(t)} className="flex-1 inline-flex justify-center items-center gap-2 h-10 rounded-xl border border-slate-200 bg-white text-slate-600 text-xs font-semibold hover:bg-slate-50">Ver plano</button><button onClick={()=>void createFlow(t)} className="flex-1 inline-flex justify-center items-center gap-2 h-10 rounded-xl bg-slate-950 text-white text-xs font-semibold hover:bg-slate-800"><Plus className="w-4 h-4"/> Usar modelo</button></div></Card>)}</div>
       </div>
 
       {runs.length>0 && <div className="mt-7"><div className="flex items-end justify-between mb-4"><div><p className="text-[10px] uppercase tracking-[0.16em] font-bold text-slate-400">Execuções recentes</p><h3 className="text-lg font-black text-slate-950 mt-1">Continue de onde parou</h3></div></div><div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3">{runs.slice(0,6).map(r=>{const f=flows.find(x=>x.id===r.flow_id);return <button key={r.id} onClick={()=>void openExistingRun(r)} className="text-left"><Card className="p-4 hover:border-slate-300 hover:shadow-sm transition"><div className="flex items-center gap-3"><div className={'w-9 h-9 rounded-xl flex items-center justify-center '+(r.status==='completed'?'bg-emerald-50 text-emerald-700':'bg-blue-50 text-blue-700')}>{r.status==='completed'?<Check className="w-4 h-4"/>:<Play className="w-4 h-4"/>}</div><div className="min-w-0 flex-1"><p className="text-sm font-bold truncate">{f?.name || r.name}</p><p className="text-[11px] text-slate-400 mt-1">{r.status}</p></div><ArrowRight className="w-4 h-4 text-slate-300"/></div></Card></button>})}</div></div>}
-    </div>
+    {researchTemplate && (() => {
+      const research = TEMPLATE_RESEARCH[researchTemplate.key];
+      if (!research) return null;
+      return <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 backdrop-blur-sm p-4">
+        <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl p-6 shadow-2xl">
+          <div className="flex items-start justify-between gap-4">
+            <div><p className="text-[10px] uppercase tracking-[0.16em] font-bold text-slate-400">Plano pesquisado</p><h2 className="text-2xl font-black text-slate-950 mt-1">{researchTemplate.name}</h2><p className="text-sm text-slate-500 mt-1">{researchTemplate.description}</p></div>
+            <button onClick={()=>setResearchTemplate(null)} className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center"><X className="w-4 h-4"/></button>
+          </div>
+          <div className="grid lg:grid-cols-2 gap-4 mt-6">
+            <div className="rounded-2xl border border-slate-200 p-5"><p className="text-[10px] uppercase tracking-[0.16em] font-bold text-slate-400">Plano base / documentado</p><p className="text-xs text-slate-500 mt-1.5">Etapas resumidas a partir das fontes indicadas.</p><div className="space-y-2 mt-4">{research.realPlan.map((step,i)=><div key={step} className="flex gap-3 text-sm text-slate-700"><span className="w-6 h-6 shrink-0 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center text-[10px] font-bold">{i+1}</span><span>{step}</span></div>)}</div></div>
+            <div className="rounded-2xl border border-slate-200 p-5 bg-slate-50"><p className="text-[10px] uppercase tracking-[0.16em] font-bold text-slate-400">Plano ideal do RiseGoat</p><p className="text-xs text-slate-500 mt-1.5">Camada de organização e execução adicionada pelo sistema, não apresentada como exigência da fonte.</p><div className="space-y-2 mt-4">{research.idealPlan.map((step,i)=><div key={step} className="flex gap-3 text-sm text-slate-700"><span className="w-6 h-6 shrink-0 rounded-lg bg-white border border-slate-200 text-slate-500 flex items-center justify-center text-[10px] font-bold">{i+1}</span><span>{step}</span></div>)}</div></div>
+          </div>
+          <div className="mt-5 pt-5 border-t border-slate-100"><p className="text-[10px] uppercase tracking-[0.16em] font-bold text-slate-400">Fontes utilizadas</p><div className="flex flex-wrap gap-2 mt-3">{research.sources.map(s=><a key={s.url} href={s.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-white"><Link2 className="w-3.5 h-3.5"/>{s.label}</a>)}</div></div>
+          <div className="flex justify-end mt-5"><Button onClick={()=>{setResearchTemplate(null);void createFlow(researchTemplate)}}><Plus className="w-4 h-4"/> Usar este modelo</Button></div>
+        </Card>
+      </div>;
+    })()}
+      </div>
   );
 
   if (screen === 'builder' && flow) return (
