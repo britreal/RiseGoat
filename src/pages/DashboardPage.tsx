@@ -104,6 +104,23 @@ export function DashboardPage({ navigate }: { navigate: (path: string) => void }
         ))}
       </div>
 
+      <Card className="p-5 mb-6 overflow-hidden relative bg-slate-950 text-white border-0">
+        <div className="absolute -right-12 -top-16 w-48 h-48 rounded-full border border-white/10" />
+        <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="w-11 h-11 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center shrink-0">
+            <ArrowRight className="w-5 h-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-slate-400">Execução</p>
+            <h2 className="text-lg font-black text-white mt-1">Fluxos de Ação</h2>
+            <p className="text-xs text-slate-300 mt-1 max-w-xl">Desenhe processos para qualquer negócio, salve modelos e execute etapa por etapa conectando os módulos do RiseGoat.</p>
+          </div>
+          <button onClick={() => navigate('/action-flows')} className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white text-slate-950 text-sm font-semibold hover:bg-slate-100 transition shrink-0">
+            Abrir fluxos <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </Card>
+
       {/* Quick links */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
         <QuickLink
