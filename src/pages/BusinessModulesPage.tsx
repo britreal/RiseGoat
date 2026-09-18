@@ -217,7 +217,7 @@ export function RevenuePage() {
       setLoading(false);
     }
   }
-  useEffect(()=>{void load()},[user?.id]);
+  useEffect(()=>{void load()},[user?.id, workspaceMode]);
   async function save(){if(!user||!form.value)return;const {data,error:e}=await supabase.from('revenues').insert({user_id:user.id,source:form.source||'',value:Number(form.value||0),occurred_on:form.date||dateKey(),offer_id:form.offer_id||null,partnership_id:form.partnership_id||null,lead_id:form.lead_id||null,launch_id:form.launch_id||null,customer:form.customer||'',status:form.status||'received'}).select().single();if(e)return setError(e.message);setRows(v=>[data,...v]);setModal(false);setForm({date:dateKey(),status:'received'});}
   async function setStatus(id:string,status:string){const {error:e}=await supabase.from('revenues').update({status,updated_at:new Date().toISOString()}).eq('id',id).eq('user_id',user!.id);if(e)setError(e.message);else setRows(v=>v.map(x=>x.id===id?{...x,status}:x));}
   async function remove(id:string){if(!window.confirm('Excluir esta receita?'))return;const {error:e}=await supabase.from('revenues').delete().eq('id',id).eq('user_id',user!.id);if(e)setError(e.message);else setRows(v=>v.filter(x=>x.id!==id));}
@@ -313,7 +313,7 @@ export function LaunchesPage() {
 const goalModules=['Dashboard','Perfil','Links','Microblog','Newsletter','Leads','Analytics','Posts','Rascunhos','Páginas de Venda','Ofertas','Receita','Centro de Comando','GOAT','Parcerias','Lançamentos','Radar','Configurações'];
 
 export function GoalsPage() {
-  const {user}=useAuth(); const [rows,setRows]=useState<any[]>([]); const [links,setLinks]=useState<any[]>([]); const [loading,setLoading]=useState(true); const [error,setError]=useState(''); const [modal,setModal]=useState(false); const [form,setForm]=useState<any>({progress:'0'}); const [selectedModules,setSelectedModules]=useState<string[]>([]);
+  const {user, workspaceMode}=useAuth(); const [rows,setRows]=useState<any[]>([]); const [links,setLinks]=useState<any[]>([]); const [loading,setLoading]=useState(true); const [error,setError]=useState(''); const [modal,setModal]=useState(false); const [form,setForm]=useState<any>({progress:'0'}); const [selectedModules,setSelectedModules]=useState<string[]>([]);
   async function load(){if(!user)return;const [g,l]=await Promise.all([supabase.from('goals').select('*').eq('user_id',user.id).eq('workspace_mode',workspaceMode).order('deadline',{ascending:true,nullsFirst:false}),supabase.from('goal_links').select('*').eq('user_id',user.id).order('created_at',{ascending:false})]);const err=g.error||l.error;if(err)setError(err.message);setRows(g.data||[]);setLinks(l.data||[]);setLoading(false)}
   useEffect(()=>{void load()},[user?.id]);
   async function save(){if(!user||!form.objective_macro?.trim())return;const {data,error:e}=await supabase.from('goals').insert({user_id:user.id,objective_macro:form.objective_macro.trim(),key_result_1:form.key_result_1||'',key_result_2:form.key_result_2||'',key_result_3:form.key_result_3||'',progress:Number(form.progress||0),deadline:form.deadline||null,weekly_review:form.weekly_review||'',workspace_mode:workspaceMode}).select().single();if(e||!data)return setError(e?.message||'Não foi possível criar a meta.');if(selectedModules.length){const {error:le}=await supabase.from('goal_links').insert(selectedModules.map(module_name=>({user_id:user.id,goal_id:data.id,module_name,label:module_name})));if(le)setError(le.message)}setRows(v=>[data,...v]);setModal(false);setSelectedModules([]);setForm({progress:'0'})}
