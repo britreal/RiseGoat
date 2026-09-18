@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Spinner } from '@/components/ui';
 import {
   ArrowLeft, Plus, Trash2, GripVertical, Eye, Save, Loader2,
-  Type, Image as ImageIcon, MousePointer, Minus, Separator, Settings,
+  Type, Image as ImageIcon, MousePointer, Minus, Settings,
   X, ChevronUp, ChevronDown,
 } from 'lucide-react';
 import type { SalesPage, SalesBlock } from '@/types';
@@ -15,7 +15,7 @@ const BLOCK_TYPES = [
   { type: 'image', label: 'Imagem', icon: ImageIcon },
   { type: 'button', label: 'Botão', icon: MousePointer },
   { type: 'spacer', label: 'Espaço', icon: Minus },
-  { type: 'divider', label: 'Divisor', icon: Separator },
+  { type: 'divider', label: 'Divisor', icon: Minus },
 ] as const;
 
 type BlockType = typeof BLOCK_TYPES[number]['type'];
