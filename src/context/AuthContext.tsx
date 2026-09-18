@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import type { Profile } from '@/types';
+import type { Profile, WorkspaceMode } from '@/types';
 
 interface AuthContextValue {
   session: Session | null;
@@ -12,6 +12,8 @@ interface AuthContextValue {
   signUp: (email: string, password: string, username: string, displayName: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  workspaceMode: WorkspaceMode;
+  setWorkspaceMode: (mode: WorkspaceMode) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -21,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [workspaceMode, setWorkspaceModeState] = useState<WorkspaceMode>(() => (localStorage.getItem('risegoat-workspace-mode') as WorkspaceMode) || 'negocios');
 
   async function loadProfile(userId: string) {
     try {
@@ -38,7 +41,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // A missing profile should never block the entire application.
       // The Profile page can render a recovery state and the user can continue using the app.
-      setProfile(data as Profile | null);
+      const nextProfile = data as Profile | null;
+      setProfile(nextProfile);
+      const mode = nextProfile?.workspace_mode === 'pessoal' ? 'pessoal' : 'negocios';
+      setWorkspaceModeState(mode);
+      localStorage.setItem('risegoat-workspace-mode', mode);
     } catch (error) {
       console.error('Unexpected profile loading error:', error);
       setProfile(null);
@@ -83,6 +90,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) await loadProfile(user.id);
   }
 
+  async function setWorkspaceMode(mode: WorkspaceMode) {
+    if (!user) return;
+    const previous = workspaceMode;
+    setWorkspaceModeState(mode);
+    localStorage.setItem('risegoat-workspace-mode', mode);
+    const { error } = await supabase.from('profiles').update({ workspace_mode: mode }).eq('id', user.id);
+    if (error) {
+      setWorkspaceModeState(previous);
+      localStorage.setItem('risegoat-workspace-mode', previous);
+      return;
+    }
+    setProfile((current) => current ? { ...current, workspace_mode: mode } : current);
+  }
+
   async function signIn(email: string, password: string) {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error: error?.message ?? null };
@@ -104,10 +125,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signOut() {
     await supabase.auth.signOut();
     setProfile(null);
+    setWorkspaceModeState('negocios');
+    localStorage.removeItem('risegoat-workspace-mode');
   }
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, loading, signIn, signUp, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ session, user, profile, loading, signIn, signUp, signOut, refreshProfile, workspaceMode, setWorkspaceMode }}>
       {children}
     </AuthContext.Provider>
   );
