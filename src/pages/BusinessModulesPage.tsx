@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Card, PageHeader, Spinner } from '@/components/ui';
 import {
   ArrowLeft, ArrowRight, BarChart3, CalendarDays, Check, ChevronDown,
-  CircleDollarSign, Handshake, Layers3, Plus, Radar as RadarIcon, Target,
+  CircleDollarSign, Handshake, Layers3, Link2, Plus, Radar as RadarIcon, Target,
   Trash2, TrendingUp, X, Zap,
 } from 'lucide-react';
 
@@ -147,7 +147,11 @@ export function OffersPage() {
       <PageHeader title="Ofertas" subtitle="Transforme produtos, serviços e assinaturas em unidades de monetização." action={<Button tone="gold" onClick={() => setModal(true)}><Plus className="w-4 h-4" /> Nova oferta</Button>} />
       <ErrorNotice message={error} onClose={() => setError('')} />
       <div className="grid md:grid-cols-3 gap-4 mb-5">
-        {[['Ofertas', items.length, Layers3], ['Vendendo', items.filter(x => x.status === 'vendendo').length, TrendingUp], ['Receita gerada', shortMoney(items.reduce((s,x)=>s+Number(x.revenue_generated||0),0)), CircleDollarSign]].map(([label,value,Icon]) => <Card className="p-5" key={String(label)}><div className="flex justify-between items-center"><span className="text-[10px] uppercase tracking-[.16em] font-bold text-slate-400">{label}</span><Icon className="w-4 h-4 text-amber-500" /></div><p className="text-3xl font-black text-slate-950 mt-2">{String(value)}</p></Card>)}
+        {[
+          { label: 'Ofertas', value: items.length, Icon: Layers3 },
+          { label: 'Vendendo', value: items.filter(x => x.status === 'vendendo').length, Icon: TrendingUp },
+          { label: 'Receita gerada', value: shortMoney(items.reduce((s,x)=>s+Number(x.revenue_generated||0),0)), Icon: CircleDollarSign },
+        ].map(({ label, value, Icon }) => <Card className="p-5" key={label}><div className="flex justify-between items-center"><span className="text-[10px] uppercase tracking-[.16em] font-bold text-slate-400">{label}</span><Icon className="w-4 h-4 text-amber-500" /></div><p className="text-3xl font-black text-slate-950 mt-2">{String(value)}</p></Card>)}
       </div>
       <div className="grid xl:grid-cols-[1.5fr_.5fr] gap-5">
         <Card className="overflow-hidden">
