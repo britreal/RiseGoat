@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { PageHeader, Card, Spinner, EmptyState } from '@/components/ui';
-import { Plus, Trash2, Pin, FileText, Loader2, Send, Search } from 'lucide-react';
+import { Trash2, Pin, FileText, Loader2, Send, Search } from 'lucide-react';
 import type { MicroblogPost } from '@/types';
 import { timeAgo } from '@/lib/utils';
 
