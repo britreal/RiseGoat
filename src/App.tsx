@@ -15,6 +15,7 @@ import { AnalyticsPage } from '@/pages/AnalyticsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { SalesPagesPage } from '@/pages/SalesPagesPage';
 import { CommandCenterPage } from '@/pages/CommandCenterPage';
+import { GoatPage } from '@/pages/GoatPage';
 import { SalesBuilderPage } from '@/pages/SalesBuilderPage';
 import { PublicPage } from '@/pages/PublicPage';
 import { PublicMicroblogPage } from '@/pages/PublicMicroblogPage';
@@ -37,6 +38,8 @@ function AppContent() {
 
   if (loading) return <Spinner />;
   if (!session) return <AuthPage />;
+
+  if (route.name === 'goat') return <DashboardLayout currentPath="/goat" navigate={navigate}><GoatPage /></DashboardLayout>;
 
   if (route.name === 'sales-editor') {
     return <SalesBuilderPage pageId={route.pageId} navigate={navigate} />;
