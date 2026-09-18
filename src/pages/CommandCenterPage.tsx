@@ -564,7 +564,7 @@ export function CommandCenterPage() {
 
       {tab === 'defense' && <DefensePanel threats={threats} actions={defenseActions} nodes={nodes} onAddThreat={addThreat} onUpdateThreat={updateThreat} onAddAction={addDefenseAction} />}
 
-      {tab === 'finance' && <FinancePanel userId={user.id} products={products} commissions={commissions} nodeMonetization={nodeMonetization} nodes={nodes} onAddProduct={addProduct} onAddCommission={addCommission} onRefresh={load} />}
+      {tab === 'finance' && <FinancePanel userId={user?.id ?? ''} products={products} commissions={commissions} nodeMonetization={nodeMonetization} nodes={nodes} onAddProduct={addProduct} onAddCommission={addCommission} onRefresh={load} />}
     </div>
   );
 }
