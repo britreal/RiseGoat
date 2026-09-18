@@ -935,9 +935,25 @@ function DefensePanel(props:{
   );
 }
 
-function FinancePanel(props:{products:ProductPipelineItem[];commissions:Commission[];onAddProduct:(d:Partial<ProductPipelineItem>)=>void;onAddCommission:(d:Partial<Commission>)=>void}) {
+function FinancePanel(props:{
+  products:ProductPipelineItem[]; commissions:Commission[]; nodeMonetization:NodeMonetization[];
+  nodes:Array<{id:string;type:EntityType;name:string;label:string}>;
+  onAddProduct:(d:Partial<ProductPipelineItem>)=>void; onAddCommission:(d:Partial<Commission>)=>void; onRefresh:()=>void;
+}) {
   const [product,setProduct]=useState(''); const [status,setStatus]=useState('Ideia'); const [revenue,setRevenue]=useState(''); const [margin,setMargin]=useState('');
   const [business,setBusiness]=useState(''); const [rate,setRate]=useState(''); const [method,setMethod]=useState('');
+  const [node,setNode]=useState(props.nodes[0]?.id||''); const [direct,setDirect]=useState(''); const [indirect,setIndirect]=useState(''); const [cost,setCost]=useState('');
+  const selectedNode=props.nodes.find((n)=>n.id===node);
+  const saved=props.nodeMonetization.find((x)=>x.entity_id===node);
+  const roi=saved?.roi ?? ((Number(direct||0)+Number(indirect||0)-Number(cost||0))/(Number(cost||0)||1))*100;
+  async function saveNodeMoney(){
+    if(!node||!selectedNode)return;
+    const {error}=await supabase.from('node_monetization').upsert({
+      user_id:props.nodeMonetization[0]?.user_id,entity_id:node,entity_type:selectedNode.type,
+      direct_revenue:Number(direct||0),indirect_revenue:Number(indirect||0),cost:Number(cost||0)
+    },{onConflict:'user_id,entity_id,entity_type'});
+    if(!error){setDirect('');setIndirect('');setCost('');props.onRefresh();}
+  }
   return (
     <div className="space-y-5">
       <div className="grid lg:grid-cols-2 gap-5">
@@ -954,6 +970,12 @@ function FinancePanel(props:{products:ProductPipelineItem[];commissions:Commissi
           </form>
         </Card>
       </div>
+
+      <Card className="p-5">
+        <div className="mb-4"><h2 className="text-sm font-semibold text-slate-800">Monetização por nó</h2><p className="text-xs text-slate-400 mt-1">Registre receita direta, receita indireta e custo para acompanhar ROI de cada propriedade ou contato.</p></div>
+        {props.nodes.length>0?<><Select label="Nó" value={node} onChange={setNode} options={props.nodes.map((n)=>n.id)} labels={Object.fromEntries(props.nodes.map((n)=>[n.id,n.name]))}/><div className="grid sm:grid-cols-3 gap-2 mt-2"><Input label="Receita direta" value={direct} onChange={setDirect} type="number"/><Input label="Receita indireta" value={indirect} onChange={setIndirect} type="number"/><Input label="Custo" value={cost} onChange={setCost} type="number"/></div><div className="flex items-center justify-between mt-3"><span className="text-sm text-slate-500">ROI atual</span><span className="text-xl font-bold text-slate-900">{Number(roi).toFixed(1)}%</span></div><button onClick={saveNodeMoney} className="mt-3 px-3 py-2 bg-cyan-600 text-white text-xs rounded-lg">Salvar ROI</button></>:<p className="text-sm text-slate-400">Crie propriedades ou contatos.</p>}
+      </Card>
+
       <Card className="p-5">
         <h2 className="text-sm font-semibold text-slate-800 mb-3">Produtos</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">{['Ideia','Em criação','Pronto','Vendendo'].map((s)=><div key={s} className="p-3 rounded-xl bg-slate-50 min-h-[130px]"><p className="text-xs font-semibold text-slate-500 mb-2">{s}</p>{props.products.filter((p)=>p.status===s).map((p)=><div key={p.id} className="p-2 bg-white rounded-lg border mb-2"><p className="text-xs font-medium text-slate-700">{p.product}</p><p className="text-[11px] text-slate-400">{money(p.monthly_revenue)} / mês · {p.margin}% margem</p></div>)}</div>)}</div>
