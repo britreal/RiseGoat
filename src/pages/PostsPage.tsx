@@ -3,14 +3,16 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { PageHeader, Card, Spinner, EmptyState } from '@/components/ui';
 import { Trash2, Pin, FileText, Loader2, Send, Search, Image as ImageIcon } from 'lucide-react';
-import type { MicroblogPost } from '@/types';
+import type { Draft, MicroblogPost } from '@/types';
 import { uploadUserImage } from '@/lib/storage';
 import { timeAgo } from '@/lib/utils';
 
 export function PostsPage() {
   const { user } = useAuth();
   const [posts, setPosts] = useState<MicroblogPost[]>([]);
+  const [drafts, setDrafts] = useState<Draft[]>([]);
   const [loading, setLoading] = useState(true);
+  const [view, setView] = useState<'all'|'drafts'>('all');
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -19,17 +21,65 @@ export function PostsPage() {
 
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from('microblog_posts')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('is_pinned', { ascending: false })
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        setPosts((data as MicroblogPost[]) ?? []);
-        setLoading(false);
-      });
+    Promise.all([
+      supabase
+        .from('microblog_posts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('is_pinned', { ascending: false })
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('drafts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false }),
+    ]).then(([postResult, draftResult]) => {
+      setPosts((postResult.data as MicroblogPost[]) ?? []);
+      setDrafts((draftResult.data as Draft[]) ?? []);
+      setLoading(false);
+    });
   }, [user]);
+
+  async function saveDraft() {
+    if (!user || (!content.trim() && !title.trim())) return;
+    setPosting(true);
+    const { data, error } = await supabase.from('drafts').insert({
+      user_id: user.id,
+      title: title.trim() || 'Sem título',
+      content: content.trim(),
+    }).select().single();
+    if (!error && data) {
+      setDrafts((current) => [data as Draft, ...current]);
+      setTitle('');
+      setContent('');
+      setImageFile(null);
+      setView('drafts');
+    }
+    setPosting(false);
+  }
+
+  async function publishDraft(draft: Draft) {
+    if (!user) return;
+    setPosting(true);
+    const { data, error } = await supabase.from('microblog_posts').insert({
+      user_id: user.id,
+      content: draft.content || draft.title,
+      title: draft.title,
+    }).select().single();
+    if (!error && data) {
+      await supabase.from('drafts').delete().eq('id', draft.id).eq('user_id', user.id);
+      setPosts((current) => [data as MicroblogPost, ...current]);
+      setDrafts((current) => current.filter((item) => item.id !== draft.id));
+      setView('all');
+    }
+    setPosting(false);
+  }
+
+  async function deleteDraft(id: string) {
+    if (!user) return;
+    const { error } = await supabase.from('drafts').delete().eq('id', id).eq('user_id', user.id);
+    if (!error) setDrafts((current) => current.filter((draft) => draft.id !== id));
+  }
 
   async function post() {
     if (!user || !content.trim()) return;
@@ -86,7 +136,11 @@ export function PostsPage() {
 
   return (
     <div className="p-6 lg:p-8 max-w-3xl mx-auto">
-      <PageHeader title="Posts" subtitle="Todas as suas publicações" />
+      <PageHeader title="Posts" subtitle="Publicações e rascunhos em um só lugar" />
+      <div className="flex gap-2 mb-4">
+        <button onClick={() => setView('all')} className={'px-3 py-1.5 rounded-lg text-xs font-medium ' + (view==='all' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-500')}>Publicados ({posts.length})</button>
+        <button onClick={() => setView('drafts')} className={'px-3 py-1.5 rounded-lg text-xs font-medium ' + (view==='drafts' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-500')}>Rascunhos ({drafts.length})</button>
+      </div>
 
       <Card className="p-4 mb-6">
         <input
@@ -107,11 +161,19 @@ export function PostsPage() {
           <ImageIcon className="w-4 h-4" /> {imageFile?.name || 'Adicionar imagem do PC ou celular (opcional)'}
           <input type="file" accept="image/*" className="hidden" onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
         </label>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <span className="text-xs text-slate-400">{content.length} caracteres</span>
-          <button
-            onClick={post}
-            disabled={!content.trim() || posting}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={saveDraft}
+              disabled={(!content.trim() && !title.trim()) || posting}
+              className="px-3 py-2 text-sm font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition disabled:opacity-50"
+            >
+              Salvar rascunho
+            </button>
+            <button
+              onClick={post}
+              disabled={!content.trim() || posting}
             className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-lg transition disabled:opacity-50"
           >
             {posting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
@@ -120,7 +182,24 @@ export function PostsPage() {
         </div>
       </Card>
 
-      {posts.length === 0 ? (
+      {view === 'drafts' ? (
+        drafts.length === 0 ? <Card><EmptyState icon={FileText} title="Nenhum rascunho" subtitle="Use Salvar rascunho no editor acima para guardar uma ideia" /></Card> :
+        <div className="space-y-3">
+          {drafts.map((draft) => <Card key={draft.id} className="p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-slate-800 truncate">{draft.title || 'Sem título'}</p>
+                <p className="text-sm text-slate-600 whitespace-pre-wrap line-clamp-4 mt-1">{draft.content || 'Sem conteúdo'}</p>
+                <p className="text-xs text-slate-400 mt-2">Atualizado {timeAgo(draft.updated_at)}</p>
+              </div>
+              <div className="flex items-center gap-1">
+                <button onClick={() => void publishDraft(draft)} disabled={posting} className="px-3 py-1.5 text-xs rounded-lg bg-cyan-600 text-white disabled:opacity-50">Publicar</button>
+                <button onClick={() => void deleteDraft(draft.id)} className="p-1.5 rounded-lg text-slate-300 hover:bg-red-50 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+              </div>
+            </div>
+          </Card>)}
+        </div>
+      ) : posts.length === 0 ? (
         <Card>
           <EmptyState icon={FileText} title="Nenhuma postagem" subtitle="Suas publicações aparecem aqui" />
         </Card>
