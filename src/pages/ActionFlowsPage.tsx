@@ -50,6 +50,9 @@ type Flow = {
   workspace_mode: 'pessoal' | 'negocios';
   created_at: string;
   updated_at: string;
+  workspace_mode: 'pessoal' | 'negocios';
+  plan_mode: 'base' | 'ideal';
+  source_refs: Array<{ label: string; url: string }>;
 };
 
 type Run = {
@@ -764,10 +767,40 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
     setScreen('builder');
   }
 
-  async function createFlow(template?: Template) {
+  function resolveStepModule(step: string, template: Template) {
+    const normalized = step.toLowerCase();
+    const candidates: Array<keyof typeof MODULES> = [
+      'Receita','Ofertas','Páginas de Venda','Leads','Newsletter','Analytics','Lançamentos','Parcerias','Metas','GOAT',
+    ];
+    const direct = template.nodes.find(n => n.label.toLowerCase() === step.toLowerCase())?.module;
+    if (direct) return direct;
+    if (normalized.includes('receita') || normalized.includes('venda') || normalized.includes('compra')) return 'Receita';
+    if (normalized.includes('oferta') || normalized.includes('produto') || normalized.includes('assinatura')) return 'Ofertas';
+    if (normalized.includes('página') || normalized.includes('pagina') || normalized.includes('checkout') || normalized.includes('domínio') || normalized.includes('dominio')) return 'Páginas de Venda';
+    if (normalized.includes('lead') || normalized.includes('contato') || normalized.includes('captur')) return 'Leads';
+    if (normalized.includes('newsletter') || normalized.includes('e-mail') || normalized.includes('email')) return 'Newsletter';
+    if (normalized.includes('analytics') || normalized.includes('medir') || normalized.includes('métrica') || normalized.includes('metrica')) return 'Analytics';
+    if (normalized.includes('lançamento') || normalized.includes('lancamento')) return 'Lançamentos';
+    if (normalized.includes('parceria') || normalized.includes('influenci')) return 'Parcerias';
+    if (normalized.includes('meta') || normalized.includes('objetivo')) return 'Metas';
+    if (template.category === 'Pessoal' && (normalized.includes('hábito') || normalized.includes('habito') || normalized.includes('sono') || normalized.includes('atividade') || normalized.includes('rotina'))) return 'GOAT';
+    return null as typeof candidates[number] | null;
+  }
+
+  function resolveStepType(step: string, index: number, total: number): NodeType {
+    const normalized = step.toLowerCase().trim();
+    if (/[?]$/.test(step.trim()) || normalized.includes('decidir') || normalized.includes('validou')) return 'decision';
+    if (normalized.includes('medir') || normalized.includes('monitorar') || normalized.includes('acompanhar') || normalized.includes('avaliar')) return 'metric';
+    if (index === total - 1 && (normalized.includes('primeira') || normalized.includes('resultado') || normalized.includes('concluir') || normalized.includes('decid'))) return 'result';
+    return 'action';
+  }
+
+  async function createFlow(template?: Template, planMode: 'base' | 'ideal' = 'ideal') {
     if (!user) return;
+    const research = template ? TEMPLATE_RESEARCH[template.key] : undefined;
+    const selectedPlan = research ? (planMode === 'base' ? research.realPlan : research.idealPlan) : [];
     const base = template ? {
-      name: template.name,
+      name: template.name + (research ? (planMode === 'base' ? ' — Plano Base' : ' — Plano Ideal') : ''),
       category: template.category,
       template_key: template.key,
       objective: template.objective,
@@ -779,24 +812,31 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
       objective: '',
       goal: '',
     };
-    const { data, error: e } = await supabase.from('action_flows').insert({ user_id: user.id, workspace_mode: workspaceMode, ...base }).select().single();
+    const sourceRefs = research?.sources || [];
+    const { data, error: e } = await supabase.from('action_flows').insert({
+      user_id: user.id,
+      workspace_mode: workspaceMode,
+      plan_mode: template ? planMode : 'ideal',
+      source_refs: sourceRefs,
+      ...base,
+    }).select().single();
     if (e || !data) return setError(e?.message || 'Não foi possível criar o fluxo.');
     let createdNodes: FlowNode[] = [];
-    if (template) {
-      const payload = template.nodes.map((n, i) => {
-        const moduleName = n.module || null;
+    if (template && selectedPlan.length) {
+      const payload = selectedPlan.map((step, i) => {
+        const moduleName = resolveStepModule(step, template);
         return {
           id: crypto.randomUUID(),
           flow_id: data.id,
           user_id: user.id,
-          node_type: n.type || 'action',
-          label: n.label,
-          description: n.description || '',
+          node_type: resolveStepType(step, i, selectedPlan.length),
+          label: step,
+          description: planMode === 'base' ? 'Etapa do plano documentado nas fontes deste modelo.' : 'Etapa do plano ideal do RiseGoat, construída como camada de organização sobre as fontes.',
           module_name: moduleName,
           module_path: moduleName ? MODULES[moduleName] : null,
-          position_x: n.x ?? 70 + (i % 4) * 230,
-          position_y: n.y ?? 70 + Math.floor(i / 4) * 190,
-          metadata: {},
+          position_x: 70 + (i % 4) * 230,
+          position_y: 70 + Math.floor(i / 4) * 190,
+          metadata: { source_backed: planMode === 'base', source_labels: sourceRefs.map(s => s.label) },
           sort_order: i,
         };
       });
@@ -816,6 +856,16 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
         const { error: ee } = await supabase.from('action_flow_edges').insert(createdEdges);
         if (ee) return setError(ee.message);
       }
+    } else if (template) {
+      const payload = template.nodes.map((n, i) => ({
+        id: crypto.randomUUID(), flow_id: data.id, user_id: user.id, node_type: n.type || 'action',
+        label: n.label, description: n.description || '', module_name: n.module || null,
+        module_path: n.module ? MODULES[n.module] : null, position_x: n.x ?? 70 + (i % 4) * 230,
+        position_y: n.y ?? 70 + Math.floor(i / 4) * 190, metadata: {}, sort_order: i,
+      }));
+      const { data: nodeData, error: ne } = await supabase.from('action_flow_nodes').insert(payload).select();
+      if (ne) return setError(ne.message);
+      createdNodes = (nodeData || []) as FlowNode[];
     } else {
       const first: FlowNode = {
         id: crypto.randomUUID(), flow_id: data.id, user_id: user.id, node_type: 'action',
@@ -836,7 +886,7 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
     setSaving(true); setError('');
     const { error: fe } = await supabase.from('action_flows').update({
       name: flow.name.trim() || 'Fluxo sem nome', category: flow.category, objective: flow.objective,
-      goal: flow.goal, updated_at: new Date().toISOString(),
+      goal: flow.goal, plan_mode: flow.plan_mode, source_refs: flow.source_refs, updated_at: new Date().toISOString(),
     }).eq('id', flow.id).eq('user_id', user.id);
     if (fe) { setSaving(false); return setError(fe.message); }
     const nodeResults = await Promise.all(nodes.map(n => supabase.from('action_flow_nodes').update({
@@ -1125,7 +1175,10 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
             <div className="rounded-2xl border border-slate-200 p-5 bg-slate-50"><p className="text-[10px] uppercase tracking-[0.16em] font-bold text-slate-400">Plano ideal do RiseGoat</p><p className="text-xs text-slate-500 mt-1.5">Camada de organização e execução adicionada pelo sistema, não apresentada como exigência da fonte.</p><div className="space-y-2 mt-4">{research.idealPlan.map((step,i)=><div key={step} className="flex gap-3 text-sm text-slate-700"><span className="w-6 h-6 shrink-0 rounded-lg bg-white border border-slate-200 text-slate-500 flex items-center justify-center text-[10px] font-bold">{i+1}</span><span>{step}</span></div>)}</div></div>
           </div>
           <div className="mt-5 pt-5 border-t border-slate-100"><p className="text-[10px] uppercase tracking-[0.16em] font-bold text-slate-400">Fontes utilizadas</p><div className="flex flex-wrap gap-2 mt-3">{research.sources.map(s=><a key={s.url} href={s.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-white"><Link2 className="w-3.5 h-3.5"/>{s.label}</a>)}</div></div>
-          <div className="flex justify-end mt-5"><Button onClick={()=>{setResearchTemplate(null);void createFlow(researchTemplate)}}><Plus className="w-4 h-4"/> Usar este modelo</Button></div>
+          <div className="flex flex-wrap justify-end gap-2 mt-5">
+            <Button tone="ghost" onClick={()=>{setResearchTemplate(null);void createFlow(researchTemplate,'base')}}>Usar plano base</Button>
+            <Button onClick={()=>{setResearchTemplate(null);void createFlow(researchTemplate,'ideal')}}><Plus className="w-4 h-4"/> Usar plano ideal</Button>
+          </div>
         </Card>
       </div>;
     })()}
