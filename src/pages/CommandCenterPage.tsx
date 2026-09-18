@@ -6,7 +6,7 @@ import type {
   AuthorityProperty, AuthorityContact, AuthorityConnection, AuthorityTask,
   AuthorityContent, AuthorityOpportunity, ReciprocityEntry, LeverageNode,
   ProductPipelineItem, Commission, ContactDossier, AuthorityThreat, DefenseAction,
-  AuthoritySuggestion, AuthoritySource,
+  AuthoritySuggestion, AuthoritySource, NegotiationDossier, HiddenConnection, CrossInfluence, NodeMonetization,
 } from '@/types';
 import {
   Network, Search, Plus, Trash2, ExternalLink, Target, CheckSquare, Users,
@@ -98,6 +98,10 @@ export function CommandCenterPage() {
       supabase.from('authority_defense_actions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
       supabase.from('authority_suggestions').select('*').eq('user_id', user.id).order('score', { ascending: false }),
       supabase.from('authority_sources').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+      supabase.from('contact_negotiations').select('*').eq('user_id', user.id),
+      supabase.from('hidden_connections').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+      supabase.from('cross_influence').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+      supabase.from('node_monetization').select('*').eq('user_id', user.id).order('updated_at', { ascending: false }),
     ]);
     setProperties((results[0].data as AuthorityProperty[]) ?? []);
     setContacts((results[1].data as AuthorityContact[]) ?? []);
