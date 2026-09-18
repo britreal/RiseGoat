@@ -101,7 +101,7 @@ export interface GoalLink {
 }
 
 export interface ActionFlow {
-  id:string; user_id:string; name:string; category:string; template_key:string|null; objective:string; goal:string; status:string; created_at:string; updated_at:string;
+  id:string; user_id:string; name:string; category:string; template_key:string|null; objective:string; goal:string; status:string; workspace_mode:WorkspaceMode; plan_mode:'base'|'ideal'; source_refs:Array<{label:string;url:string}>; created_at:string; updated_at:string;
 }
 export interface ActionFlowNode {
   id:string; flow_id:string; user_id:string; node_type:string; label:string; description:string; module_name:string|null; module_path:string|null; position_x:number; position_y:number; metadata:Record<string,unknown>; sort_order:number;
