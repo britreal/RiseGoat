@@ -9,7 +9,6 @@ import { LinksPage } from '@/pages/LinksPage';
 import { MicroblogPage } from '@/pages/MicroblogPage';
 import { NewsletterPage } from '@/pages/NewsletterPage';
 import { PostsPage } from '@/pages/PostsPage';
-import { DraftsPage } from '@/pages/DraftsPage';
 import { LeadsPage } from '@/pages/LeadsPage';
 import { AnalyticsPage } from '@/pages/AnalyticsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
@@ -43,7 +42,7 @@ function AppContent() {
   if (loading) return <Spinner />;
   if (!session) return <AuthPage />;
 
-  const businessOnly = new Set(['profile','links','microblog','newsletter','posts','drafts','leads','analytics','sales','offers','revenue','command-center','partnerships','launches','radar','sales-editor']);
+  const businessOnly = new Set(['profile','links','microblog','newsletter','posts','leads','analytics','sales','offers','revenue','command-center','partnerships','launches','radar','sales-editor']);
   if (workspaceMode === 'pessoal' && businessOnly.has(route.name)) {
     navigate('/dashboard');
     return <Spinner />;
@@ -59,7 +58,7 @@ function AppContent() {
     return <SalesBuilderPage pageId={route.pageId} navigate={navigate} />;
   }
 
-  const currentPath = `/${route.name}`;
+  const currentPath = route.name === 'drafts' ? '/posts' : `/${route.name}`;
   const pageMap: Record<string, React.ReactNode> = {
     dashboard: <DashboardPage navigate={navigate} />,
     'action-flows': <ActionFlowsPage navigate={navigate} />,
@@ -68,7 +67,7 @@ function AppContent() {
     microblog: <MicroblogPage />,
     newsletter: <NewsletterPage />,
     posts: <PostsPage />,
-    drafts: <DraftsPage />,
+    drafts: <PostsPage />,
     leads: <LeadsPage />,
     analytics: <AnalyticsPage />,
     settings: <SettingsPage />,
