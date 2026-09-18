@@ -48,11 +48,10 @@ type Flow = {
   goal: string;
   status: FlowStatus;
   workspace_mode: 'pessoal' | 'negocios';
-  created_at: string;
-  updated_at: string;
-  workspace_mode: 'pessoal' | 'negocios';
   plan_mode: 'base' | 'ideal';
   source_refs: Array<{ label: string; url: string }>;
+  created_at: string;
+  updated_at: string;
 };
 
 type Run = {
