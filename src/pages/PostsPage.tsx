@@ -48,7 +48,7 @@ export function PostsPage() {
         user_id: user.id,
         content: content.trim(),
         title: title.trim(),
-        image_url: imageUrl.trim(),
+        image_url: nextImageUrl.trim(),
       })
       .select()
       .single();
@@ -57,6 +57,7 @@ export function PostsPage() {
       setContent('');
       setTitle('');
       setImageUrl('');
+      setImageFile(null);
     }
     setPosting(false);
   }
