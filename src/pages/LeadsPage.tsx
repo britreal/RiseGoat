@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { PageHeader, Card, Spinner, EmptyState } from '@/components/ui';
-import { Users, Download, Trash2, MapPin } from 'lucide-react';
+import { Users, Download, Trash2, MapPin, MailCheck, MailX } from 'lucide-react';
 import type { NewsletterLead } from '@/types';
 import { exportToCSV, timeAgo } from '@/lib/utils';
 
@@ -28,6 +28,17 @@ export function LeadsPage() {
   async function deleteLead(id: string) {
     const { error } = await supabase.from('newsletter_leads').delete().eq('id', id);
     if (!error) setLeads(leads.filter((l) => l.id !== id));
+  }
+
+  async function toggleSubscription(lead: NewsletterLead) {
+    const subscribed = !lead.unsubscribed_at;
+    const nextUnsubscribedAt = subscribed ? new Date().toISOString() : null;
+    const { error } = await supabase.from('newsletter_leads')
+      .update({ unsubscribed_at: nextUnsubscribedAt })
+      .eq('id', lead.id)
+      .eq('user_id', user?.id);
+    if (error) return;
+    setLeads((current) => current.map((item) => item.id === lead.id ? { ...item, unsubscribed_at: nextUnsubscribedAt } : item));
   }
 
   function handleExport() {
@@ -56,10 +67,14 @@ export function LeadsPage() {
         }
       />
 
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <Card className="p-4">
           <p className="text-xs text-slate-500 mb-1">Total</p>
           <p className="text-2xl font-bold text-slate-900">{leads.length}</p>
+        </Card>
+        <Card className="p-4">
+          <p className="text-xs text-slate-500 mb-1">Inscritos ativos</p>
+          <p className="text-2xl font-bold text-slate-900">{leads.filter((l) => l.marketing_consent && !l.unsubscribed_at).length}</p>
         </Card>
         <Card className="p-4">
           <p className="text-xs text-slate-500 mb-1">Origens</p>
@@ -118,6 +133,10 @@ export function LeadsPage() {
                     </span>
                   </div>
                 </div>
+                <span className={'text-[10px] px-1.5 py-0.5 rounded shrink-0 ' + (lead.unsubscribed_at ? 'bg-slate-100 text-slate-400' : 'bg-emerald-50 text-emerald-600')}>{lead.unsubscribed_at ? 'opt-out' : 'ativo'}</span>
+                <button onClick={() => void toggleSubscription(lead)} className="p-1.5 rounded-lg text-slate-300 hover:bg-slate-100 hover:text-slate-600 transition shrink-0" title={lead.unsubscribed_at ? 'Reinscrever' : 'Descadastrar'}>
+                  {lead.unsubscribed_at ? <MailCheck className="w-4 h-4" /> : <MailX className="w-4 h-4" />}
+                </button>
                 <span className="text-xs text-slate-400 shrink-0 hidden sm:block">{timeAgo(lead.created_at)}</span>
                 <button
                   onClick={() => deleteLead(lead.id)}
