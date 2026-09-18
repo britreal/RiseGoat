@@ -4,6 +4,7 @@ ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS business_type text NOT NULL DEFAULT 'criador';
 
 ALTER TABLE public.newsletter_leads
+  ADD COLUMN IF NOT EXISTS unsubscribe_token uuid NOT NULL DEFAULT gen_random_uuid(),
   ADD COLUMN IF NOT EXISTS marketing_consent boolean NOT NULL DEFAULT false,
   ADD COLUMN IF NOT EXISTS consented_at timestamptz,
   ADD COLUMN IF NOT EXISTS unsubscribed_at timestamptz,
@@ -50,3 +51,6 @@ CREATE INDEX IF NOT EXISTS idx_revenues_utm
   ON public.revenues(user_id, utm_source, utm_campaign, occurred_on DESC);
 
 NOTIFY pgrst, 'reload schema';
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_newsletter_leads_unsubscribe_token
+  ON public.newsletter_leads(unsubscribe_token);
