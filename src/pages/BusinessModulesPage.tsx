@@ -197,13 +197,26 @@ export function RevenuePage() {
   const [rows,setRows]=useState<any[]>([]); const [offers,setOffers]=useState<any[]>([]); const [partners,setPartners]=useState<any[]>([]); const [leads,setLeads]=useState<any[]>([]); const [launches,setLaunches]=useState<any[]>([]);
   const [loading,setLoading]=useState(true); const [error,setError]=useState(''); const [modal,setModal]=useState(false);
   const [form,setForm]=useState<any>({date:dateKey(),status:'received'});
-  async function load(){if(!user)return;setLoading(true);const [r,o,p,l,x]=await Promise.all([
-    supabase.from('revenues').select('*').eq('user_id',user.id).order('occurred_on',{ascending:false}),
-    supabase.from('offers').select('id,name').eq('user_id',user.id).order('name'),
-    supabase.from('partnerships').select('id,name').eq('user_id',user.id).order('name'),
-    supabase.from('newsletter_leads').select('id,name,email').eq('user_id',user.id).order('created_at',{ascending:false}),
-    supabase.from('launches').select('id,name').eq('user_id',user.id).order('date_start',{ascending:false}),
-  ]);const err=[r,o,p,l,x].find(z=>z.error)?.error;if(err)setError(err.message);setRows(r.data||[]);setOffers(o.data||[]);setPartners(p.data||[]);setLeads(l.data||[]);setLaunches(x.data||[]);setLoading(false);}
+  async function load(){
+    if(!user){setLoading(false);return;}
+    setLoading(true);setError('');
+    try{
+      const [r,o,p,l,x]=await Promise.all([
+        supabase.from('revenues').select('*').eq('user_id',user.id).order('occurred_on',{ascending:false}),
+        supabase.from('offers').select('id,name').eq('user_id',user.id).order('name'),
+        supabase.from('partnerships').select('id,name').eq('user_id',user.id).order('name'),
+        supabase.from('newsletter_leads').select('id,name,email').eq('user_id',user.id).order('created_at',{ascending:false}),
+        supabase.from('launches').select('id,name').eq('user_id',user.id).order('date_start',{ascending:false}),
+      ]);
+      const err=[r,o,p,l,x].find(z=>z.error)?.error;
+      if(err) throw err;
+      setRows(r.data||[]);setOffers(o.data||[]);setPartners(p.data||[]);setLeads(l.data||[]);setLaunches(x.data||[]);
+    }catch(e:any){
+      setError(e?.message||'Não foi possível carregar a Receita.');
+    }finally{
+      setLoading(false);
+    }
+  }
   useEffect(()=>{void load()},[user?.id]);
   async function save(){if(!user||!form.value)return;const {data,error:e}=await supabase.from('revenues').insert({user_id:user.id,source:form.source||'',value:Number(form.value||0),occurred_on:form.date||dateKey(),offer_id:form.offer_id||null,partnership_id:form.partnership_id||null,lead_id:form.lead_id||null,launch_id:form.launch_id||null,customer:form.customer||'',status:form.status||'received'}).select().single();if(e)return setError(e.message);setRows(v=>[data,...v]);setModal(false);setForm({date:dateKey(),status:'received'});}
   async function setStatus(id:string,status:string){const {error:e}=await supabase.from('revenues').update({status,updated_at:new Date().toISOString()}).eq('id',id).eq('user_id',user!.id);if(e)setError(e.message);else setRows(v=>v.map(x=>x.id===id?{...x,status}:x));}
@@ -232,7 +245,12 @@ export function RevenuePage() {
     </div>
     <Card className="overflow-hidden"><div className="p-5 border-b border-slate-100"><Section title="Registros de receita" subtitle="Cada receita pode apontar para oferta, parceria, lead e lançamento." icon={Link2} tone="green"/></div>
       <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="bg-slate-50 text-[10px] uppercase tracking-wide text-slate-400"><tr>{['Fonte','Valor','Data','Oferta','Parceria','Lead','Lançamento','Status',''].map(h=><th key={h} className="px-4 py-3">{h}</th>)}</tr></thead><tbody className="divide-y divide-slate-100">{rows.map(x=><tr key={x.id}><td className="px-4 py-3 font-semibold text-slate-800">{x.source||'—'}<p className="text-[11px] text-slate-400">{x.customer||''}</p></td><td className="px-4 py-3 font-bold">{money(x.value)}</td><td className="px-4 py-3">{formatDate(x.occurred_on)}</td><td className="px-4 py-3 text-xs">{offers.find(o=>o.id===x.offer_id)?.name||'—'}</td><td className="px-4 py-3 text-xs">{partners.find(o=>o.id===x.partnership_id)?.name||'—'}</td><td className="px-4 py-3 text-xs">{leads.find(o=>o.id===x.lead_id)?.name||'—'}</td><td className="px-4 py-3 text-xs">{launches.find(o=>o.id===x.launch_id)?.name||'—'}</td><td className="px-4 py-3"><select value={x.status} onChange={e=>void setStatus(x.id,e.target.value)} className="border border-slate-200 rounded-lg px-2 py-1 text-xs"><option value="received">recebido</option><option value="pending">pendente</option></select></td><td className="px-4 py-3 text-right"><button onClick={()=>void remove(x.id)} className="p-2 text-slate-300 hover:text-red-500"><Trash2 className="w-4 h-4"/></button></td></tr>)}</tbody></table></div>
-      {rows.length===0&&<div className="p-10 text-center text-sm text-slate-400">Registre sua primeira receita.</div>}
+      {rows.length===0&&<div className="p-10 text-center">
+        <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center mx-auto"><CircleDollarSign className="w-6 h-6"/></div>
+        <p className="text-sm font-bold text-slate-700 mt-4">Nenhuma receita registrada</p>
+        <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Comece registrando uma entrada. Depois você poderá vinculá-la a uma oferta, parceria, lead ou lançamento.</p>
+        <button onClick={()=>setModal(true)} className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold"><Plus className="w-4 h-4"/> Registrar primeira receita</button>
+      </div>
     </Card>
     {modal&&<Modal title="Registrar receita" subtitle="Conecte o recebimento às peças que geraram o dinheiro." onClose={()=>setModal(false)}><div className="grid sm:grid-cols-2 gap-3">
       <Field label="Fonte" value={form.source||''} onChange={v=>setForm({...form,source:v})} placeholder="Venda direta, checkout, afiliado..." />
