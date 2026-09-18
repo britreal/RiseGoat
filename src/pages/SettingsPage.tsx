@@ -255,7 +255,7 @@ export function SettingsPage() {
                 },
                 {
                   title: 'Fluxos de Ação 2.0',
-                  text: 'Biblioteca com templates pessoais e de negócios, Canvas, execução e duplicação. Os templates atuais possuem plano base/documentado e plano ideal do RiseGoat.',
+                  text: 'Biblioteca com 23 templates pessoais e de negócios, Canvas, execução e duplicação. Cada template pesquisado possui plano base/documentado e plano ideal do RiseGoat.',
                 },
                 {
                   title: 'Proveniência das fontes',
@@ -392,6 +392,8 @@ export function SettingsPage() {
             </div>
           </div>
         </div>
+        </Card>
+
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-1"><Database className="w-4 h-4 text-cyan-500" /><h2 className="text-sm font-semibold text-slate-800">Supabase</h2></div>
           <p className="text-xs text-slate-500 mb-4">Banco de dados e autenticação do RiseGoat.</p>
