@@ -26,7 +26,7 @@ import { Spinner } from '@/components/ui';
 
 function AppContent() {
   const { route, navigate } = useRouter();
-  const { session, loading } = useAuth();
+  const { session, loading, workspaceMode } = useAuth();
 
   if (route.name === 'public') return <PublicPage username={route.username} />;
   if (route.name === 'public-microblog') return <PublicMicroblogPage username={route.username} postId={route.postId} />;
@@ -40,6 +40,16 @@ function AppContent() {
 
   if (loading) return <Spinner />;
   if (!session) return <AuthPage />;
+
+  const businessOnly = new Set(['profile','links','microblog','newsletter','posts','drafts','leads','analytics','sales','offers','revenue','command-center','partnerships','launches','radar','sales-editor']);
+  if (workspaceMode === 'pessoal' && businessOnly.has(route.name)) {
+    navigate('/dashboard');
+    return <Spinner />;
+  }
+  if (workspaceMode === 'negocios' && route.name === 'goat') {
+    navigate('/dashboard');
+    return <Spinner />;
+  }
 
   if (route.name === 'goat') return <DashboardLayout currentPath="/goat" navigate={navigate}><GoatPage /></DashboardLayout>;
 
