@@ -69,3 +69,32 @@ export interface CrossInfluence {
 export interface NodeMonetization {
   id:string; user_id:string; entity_id:string; entity_type:'property'|'contact'; direct_revenue:number; indirect_revenue:number; cost:number; roi:number; created_at:string; updated_at:string;
 }
+
+export interface Offer {
+  id:string; user_id:string; sales_page_id:string|null; name:string; type:string; status:string;
+  price:number; margin:number; commission:number; channel:string; revenue_generated:number;
+  needs_audience:string; created_at:string; updated_at:string;
+}
+export interface Revenue {
+  id:string; user_id:string; offer_id:string|null; partnership_id:string|null; lead_id:string|null;
+  launch_id:string|null; source:string; value:number; occurred_on:string; customer:string; status:string;
+  created_at:string; updated_at:string;
+}
+export interface Partnership {
+  id:string; user_id:string; lead_id:string|null; name:string; type:string; contact:string;
+  commission:number; sales:number; value_to_pay:number; status:string; created_at:string; updated_at:string;
+}
+export interface Launch {
+  id:string; user_id:string; name:string; product:string; date_start:string; date_end:string;
+  phase:string; target_revenue:number; real_result:number; created_at:string; updated_at:string;
+}
+export interface LaunchContentLink {
+  id:string; user_id:string; launch_id:string; content_type:string; post_id:string|null; campaign_id:string|null; created_at:string;
+}
+export interface Goal {
+  id:string; user_id:string; objective_macro:string; key_result_1:string; key_result_2:string; key_result_3:string;
+  progress:number; deadline:string|null; weekly_review:string; created_at:string; updated_at:string;
+}
+export interface GoalLink {
+  id:string; user_id:string; goal_id:string; module_name:string; record_id:string|null; label:string; created_at:string;
+}
