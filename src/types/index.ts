@@ -42,3 +42,18 @@ export interface ProductPipelineItem {
 export interface Commission {
   id:string; user_id:string; business_value:number; rate:number; payment_method:string; status:string; due_date:string|null; received_at:string|null; created_at:string;
 }
+export interface ContactDossier {
+  id:string; user_id:string; contact_id:string; wants:string; fears:string; failed_before:string; allies:string; rivals:string; public_secret:string; created_at:string; updated_at:string;
+}
+export interface AuthorityThreat {
+  id:string; user_id:string; title:string; category:string; severity:string; source_url:string; evidence:string; status:string; linked_entity_id:string|null; linked_entity_type:'property'|'contact'|null; detected_at:string; due_date:string|null; response_summary:string; created_at:string; updated_at:string;
+}
+export interface DefenseAction {
+  id:string; user_id:string; threat_id:string; action_type:string; status:string; action_title:string; response_text:string; created_at:string; executed_at:string|null;
+}
+export interface AuthoritySuggestion {
+  id:string; user_id:string; source_entity_id:string; source_entity_type:'property'|'contact'; target_entity_id:string; target_entity_type:'property'|'contact'; score:number; reason:string; status:string; created_at:string; updated_at:string;
+}
+export interface AuthoritySource {
+  id:string; user_id:string; source_type:string; name:string; url:string; status:string; last_checked_at:string|null; metadata:Record<string,unknown>; created_at:string;
+}
