@@ -3,7 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import {
   Sparkles, LayoutDashboard, Link2, MessageSquare, Mail, FileText, Users,
-  BarChart3, Settings, LogOut, ExternalLink, Menu, X, ShoppingBag,
+  BarChart3, Settings, LogOut, ExternalLink, Menu, X, ShoppingBag, Network,
 } from 'lucide-react';
 
 interface NavItem { label: string; path: string; icon: typeof LayoutDashboard; group: string; }
@@ -17,6 +17,7 @@ const navItems: NavItem[] = [
   { label: 'Posts', path: '/posts', icon: FileText, group: 'Conteúdo' },
   { label: 'Rascunhos', path: '/drafts', icon: FileText, group: 'Conteúdo' },
   { label: 'Páginas de venda', path: '/sales', icon: ShoppingBag, group: 'Monetização' },
+  { label: 'Centro de Comando', path: '/command-center', icon: Network, group: 'Estratégia' },
   { label: 'Leads', path: '/leads', icon: Users, group: 'Crescimento' },
   { label: 'Analytics', path: '/analytics', icon: BarChart3, group: 'Crescimento' },
   { label: 'Configurações', path: '/settings', icon: Settings, group: 'Conta' },
