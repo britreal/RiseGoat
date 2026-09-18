@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { uploadUserImage } from '@/lib/storage';
 import { useAuth } from '@/context/AuthContext';
 import { PageHeader, Card, Spinner, EmptyState } from '@/components/ui';
-import { Plus, Trash2, GripVertical, Eye, EyeOff, ExternalLink, Link2, Youtube, GraduationCap, ShoppingBag, Image as ImageIcon, ShieldAlert } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Eye, EyeOff, ExternalLink, Link2, Youtube, GraduationCap, ShoppingBag, Image as ImageIcon, ShieldAlert, Upload } from 'lucide-react';
 import type { Link } from '@/types';
 
 type LinkType = 'link' | 'youtube' | 'course' | 'affiliate';
@@ -45,6 +46,7 @@ export function LinksPage() {
   const [newUrl, setNewUrl] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newThumbnail, setNewThumbnail] = useState('');
+  const [newThumbnailFile, setNewThumbnailFile] = useState<File | null>(null);
   const [newPrice, setNewPrice] = useState('');
   const [newSensitive, setNewSensitive] = useState(false);
   const [newIcon, setNewIcon] = useState('link');
@@ -60,14 +62,18 @@ export function LinksPage() {
 
   function resetForm() {
     setNewType('link'); setNewLabel(''); setNewUrl(''); setNewDescription('');
-    setNewThumbnail(''); setNewPrice(''); setNewSensitive(false); setNewIcon('link'); setFormError('');
+    setNewThumbnail(''); setNewThumbnailFile(null); setNewPrice(''); setNewSensitive(false); setNewIcon('link'); setFormError('');
   }
 
   async function addLink() {
     setFormError('');
     if (!user || !newLabel.trim() || !newUrl.trim()) return setFormError('Preencha título e URL.');
     if (newType === 'youtube' && !youtubeId(newUrl.trim())) return setFormError('Cole uma URL válida do YouTube.');
-    if (newType === 'affiliate' && !newThumbnail.trim()) return setFormError('Produtos afiliados precisam de uma imagem.');
+    if (newType === 'affiliate' && !newThumbnailFile && !newThumbnail.trim()) return setFormError('Produtos afiliados precisam de uma imagem.');
+    let thumbnailUrl = newThumbnail.trim();
+    try {
+      if (newThumbnailFile) thumbnailUrl = await uploadUserImage(user.id, newThumbnailFile, 'links');
+    } catch (error: any) { return setFormError(error?.message || 'Não foi possível enviar a imagem.'); }
 
     const { data, error } = await supabase.from('links').insert({
       user_id: user.id,
@@ -76,7 +82,7 @@ export function LinksPage() {
       icon: newType === 'youtube' ? 'youtube' : newType === 'course' ? 'book' : newType === 'affiliate' ? 'shopping-bag' : newIcon,
       link_type: newType,
       description: newDescription.trim(),
-      thumbnail_url: newThumbnail.trim(),
+      thumbnail_url: thumbnailUrl,
       sensitive: newSensitive,
       product_price: newPrice.trim(),
       product_currency: 'BRL',
@@ -152,7 +158,7 @@ export function LinksPage() {
           {newType === 'affiliate' && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
               <div className="sm:col-span-2"><label className="block text-xs font-medium text-slate-500 mb-1"><ImageIcon className="w-3 h-3 inline mr-1" />Imagem do produto</label>
-                <input type="url" value={newThumbnail} onChange={(e) => setNewThumbnail(e.target.value)} placeholder="https://.../produto.jpg" className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg" />
+                <label className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-sm text-slate-600"><Upload className="w-4 h-4" /> {newThumbnailFile?.name || 'Escolher imagem do PC ou celular'}<input type="file" accept="image/*" className="hidden" onChange={(e) => setNewThumbnailFile(e.target.files?.[0] || null)} /></label>
               </div>
               <div><label className="block text-xs font-medium text-slate-500 mb-1">Preço</label>
                 <input value={newPrice} onChange={(e) => setNewPrice(e.target.value)} placeholder="R$ 99,90" className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg" />
