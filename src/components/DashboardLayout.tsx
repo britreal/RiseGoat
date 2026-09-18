@@ -10,27 +10,27 @@ import {
 interface NavItem { label: string; path: string; icon: typeof LayoutDashboard; group: string; mode: 'shared' | 'pessoal' | 'negocios'; }
 
 const navItems: NavItem[] = [
+  { label: 'Metas', path: '/goals', icon: Target, group: 'Planejamento', mode: 'shared' },
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, group: 'Início', mode: 'shared' },
-  { label: 'Fluxos de Ação', path: '/action-flows', icon: Workflow, group: 'Início', mode: 'shared' },
-  { label: 'Perfil', path: '/profile', icon: Users, group: 'Minha Página', mode: 'negocios' },
-  { label: 'Links', path: '/links', icon: Link2, group: 'Minha Página', mode: 'negocios' },
-  { label: 'Microblog', path: '/microblog', icon: MessageSquare, group: 'Minha Página', mode: 'negocios' },
-  { label: 'Newsletter', path: '/newsletter', icon: Mail, group: 'Crescimento', mode: 'negocios' },
-  { label: 'Leads', path: '/leads', icon: Users, group: 'Crescimento', mode: 'negocios' },
-  { label: 'Analytics', path: '/analytics', icon: BarChart3, group: 'Crescimento', mode: 'negocios' },
+  { label: 'Perfil', path: '/profile', icon: Users, group: 'Presença', mode: 'negocios' },
+  { label: 'Links', path: '/links', icon: Link2, group: 'Presença', mode: 'negocios' },
   { label: 'Posts', path: '/posts', icon: FileText, group: 'Conteúdo', mode: 'negocios' },
+  { label: 'Microblog', path: '/microblog', icon: MessageSquare, group: 'Conteúdo', mode: 'negocios' },
   { label: 'Rascunhos', path: '/drafts', icon: FileText, group: 'Conteúdo', mode: 'negocios' },
-  { label: 'Páginas de Venda', path: '/sales', icon: ShoppingBag, group: 'Monetização', mode: 'negocios' },
+  { label: 'Newsletter', path: '/newsletter', icon: Mail, group: 'Captação', mode: 'negocios' },
+  { label: 'Leads', path: '/leads', icon: Users, group: 'Captação', mode: 'negocios' },
+  { label: 'Analytics', path: '/analytics', icon: BarChart3, group: 'Medição', mode: 'negocios' },
   { label: 'Ofertas', path: '/offers', icon: ShoppingBag, group: 'Monetização', mode: 'negocios' },
+  { label: 'Páginas de Venda', path: '/sales', icon: ShoppingBag, group: 'Monetização', mode: 'negocios' },
   { label: 'Receita', path: '/revenue', icon: CircleDollarSign, group: 'Monetização', mode: 'negocios' },
   { label: 'Centro de Comando', path: '/command-center', icon: Network, group: 'Estratégia', mode: 'negocios' },
   { label: 'Parcerias', path: '/partnerships', icon: Handshake, group: 'Estratégia', mode: 'negocios' },
   { label: 'Lançamentos', path: '/launches', icon: CalendarDays, group: 'Estratégia', mode: 'negocios' },
   { label: 'Radar', path: '/radar', icon: RadarIcon, group: 'Estratégia', mode: 'negocios' },
+  { label: 'Fluxos de Ação', path: '/action-flows', icon: Workflow, group: 'Execução', mode: 'shared' },
   { label: 'GOAT', path: '/goat', icon: Activity, group: 'Pessoal', mode: 'pessoal' },
   { label: 'Configurações', path: '/settings', icon: Settings, group: 'Conta', mode: 'shared' },
-  { label: 'Metas', path: '/goals', icon: Target, group: 'Conta', mode: 'shared' },
-];
+
 
 interface DashboardLayoutProps { children: ReactNode; currentPath: string; navigate: (path: string) => void; }
 
@@ -40,10 +40,13 @@ export function DashboardLayout({ children, currentPath, navigate }: DashboardLa
   const visibleNavItems = navItems.filter((item) => item.mode === 'shared' || item.mode === workspaceMode);
   const groups = [...new Set(visibleNavItems.map((n) => n.group))];
   const groupTone: Record<string, string> = {
-    'Minha Página': 'text-blue-700 bg-blue-50',
-    'Crescimento': 'text-emerald-700 bg-emerald-50',
+    'Presença': 'text-blue-700 bg-blue-50',
+    'Captação': 'text-emerald-700 bg-emerald-50',
     'Conteúdo': 'text-violet-700 bg-violet-50',
+    'Medição': 'text-cyan-700 bg-cyan-50',
     'Monetização': 'text-amber-700 bg-amber-50',
+    'Planejamento': 'text-slate-700 bg-slate-100',
+    'Execução': 'text-indigo-700 bg-indigo-50',
     'Estratégia': 'text-red-700 bg-red-50',
     'Pessoal': 'text-slate-700 bg-slate-100',
     'Conta': 'text-slate-600 bg-slate-100',
