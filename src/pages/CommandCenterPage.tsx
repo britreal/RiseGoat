@@ -1064,6 +1064,7 @@ function Cell(props:{children:React.ReactNode;strong?:boolean}) { return <td cla
   negotiations:NegotiationDossier[]; hiddenConnections:HiddenConnection[]; crossInfluence:CrossInfluence[];
   onRefresh:()=>void;
 }) {
+  const userId=props.userId;
   const degreeMap=new Map<string,number>();
   props.connections.forEach((x)=>{degreeMap.set(x.origin_id,(degreeMap.get(x.origin_id)||0)+1);degreeMap.set(x.destination_id,(degreeMap.get(x.destination_id)||0)+1)});
   const maxDegree=Math.max(1,...degreeMap.values());
