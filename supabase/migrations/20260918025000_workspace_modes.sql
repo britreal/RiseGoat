@@ -18,3 +18,9 @@ where workspace_mode = 'negocios';
 update public.goals
 set workspace_mode = 'negocios'
 where workspace_mode is null;
+alter table public.action_flows
+  add column if not exists plan_mode text not null default 'ideal'
+  check (plan_mode in ('base','ideal'));
+
+alter table public.action_flows
+  add column if not exists source_refs jsonb not null default '[]'::jsonb;
