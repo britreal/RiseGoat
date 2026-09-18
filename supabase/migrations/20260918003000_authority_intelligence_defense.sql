@@ -22,17 +22,17 @@ ALTER TABLE public.authority_contents
   ADD COLUMN IF NOT EXISTS source_kind text NOT NULL DEFAULT '',
   ADD COLUMN IF NOT EXISTS source_id uuid;
 
-CREATE UNIQUE INDEX IF NOT EXISTS authority_contacts_source_unique
-  ON public.authority_contacts(user_id, source_kind, source_id)
-  WHERE source_kind <> '' AND source_id IS NOT NULL;
+DROP INDEX IF EXISTS public.authority_contacts_source_unique;
+CREATE UNIQUE INDEX authority_contacts_source_unique
+  ON public.authority_contacts(user_id, source_kind, source_id);
 
-CREATE UNIQUE INDEX IF NOT EXISTS authority_properties_source_unique
-  ON public.authority_properties(user_id, source_kind, source_id)
-  WHERE source_kind <> '' AND source_id IS NOT NULL;
+DROP INDEX IF EXISTS public.authority_properties_source_unique;
+CREATE UNIQUE INDEX authority_properties_source_unique
+  ON public.authority_properties(user_id, source_kind, source_id);
 
-CREATE UNIQUE INDEX IF NOT EXISTS authority_contents_source_unique
-  ON public.authority_contents(user_id, source_kind, source_id)
-  WHERE source_kind <> '' AND source_id IS NOT NULL;
+DROP INDEX IF EXISTS public.authority_contents_source_unique;
+CREATE UNIQUE INDEX authority_contents_source_unique
+  ON public.authority_contents(user_id, source_kind, source_id);
 
 CREATE TABLE IF NOT EXISTS public.authority_threats (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -225,7 +225,13 @@ BEGIN
 END;
 $$;
 
+REVOKE ALL ON FUNCTION public.authority_run_radar(uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.authority_run_radar(uuid) FROM anon;
 GRANT EXECUTE ON FUNCTION public.authority_run_radar(uuid) TO authenticated;
+
+REVOKE ALL ON FUNCTION public.authority_refresh_leverage(uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.authority_refresh_leverage(uuid) FROM anon;
+GRANT EXECUTE ON FUNCTION public.authority_refresh_leverage(uuid) TO authenticated;
 
 CREATE OR REPLACE FUNCTION public.authority_refresh_leverage(p_user_id uuid)
 RETURNS void
@@ -250,6 +256,14 @@ BEGIN
     ) edges
     GROUP BY entity_id
   ) d;
+
+DELETE FROM public.authority_leverage l
+WHERE l.user_id = p_user_id
+  AND NOT EXISTS (
+    SELECT 1 FROM public.authority_properties p WHERE p.user_id=p_user_id AND p.id=l.entity_id AND l.entity_type='property'
+    UNION ALL
+    SELECT 1 FROM public.authority_contacts c WHERE c.user_id=p_user_id AND c.id=l.entity_id AND l.entity_type='contact'
+  );
 
   INSERT INTO authority_leverage (
     user_id, entity_id, entity_type, connection_degree, centrality, decision_power, resources, updated_at
@@ -311,6 +325,23 @@ CREATE TRIGGER trg_authority_connections_refresh_leverage
 AFTER INSERT OR UPDATE OR DELETE ON public.authority_connections
 FOR EACH ROW EXECUTE FUNCTION public.authority_connections_refresh_leverage();
 
+CREATE OR REPLACE FUNCTION public.authority_property_refresh_leverage()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $
+BEGIN
+  PERFORM public.authority_refresh_leverage(COALESCE(NEW.user_id, OLD.user_id));
+  RETURN COALESCE(NEW, OLD);
+END;
+$;
+
+DROP TRIGGER IF EXISTS trg_authority_properties_refresh_leverage ON public.authority_properties;
+CREATE TRIGGER trg_authority_properties_refresh_leverage
+AFTER INSERT OR UPDATE OR DELETE ON public.authority_properties
+FOR EACH ROW EXECUTE FUNCTION public.authority_property_refresh_leverage();
+
 CREATE OR REPLACE FUNCTION public.authority_contact_refresh_leverage()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -325,7 +356,7 @@ $;
 
 DROP TRIGGER IF EXISTS trg_authority_contacts_refresh_leverage ON public.authority_contacts;
 CREATE TRIGGER trg_authority_contacts_refresh_leverage
-AFTER INSERT OR UPDATE ON public.authority_contacts
+AFTER INSERT OR UPDATE OR DELETE ON public.authority_contacts
 FOR EACH ROW EXECUTE FUNCTION public.authority_contact_refresh_leverage();
 
 CREATE UNIQUE INDEX IF NOT EXISTS product_pipeline_user_product_unique ON public.product_pipeline(user_id, product);
