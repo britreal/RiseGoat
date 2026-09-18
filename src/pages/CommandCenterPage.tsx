@@ -211,7 +211,7 @@ export function CommandCenterPage() {
     if (row) setCommissions((v) => [row as Commission, ...v]);
   }
 
-  async function deleteRow(table: string, id: string, setter: (fn: (v: never[]) => never[]) => void) {
+  async function deleteRow(table: string, id: string) {
     if (!user) return;
     const { error } = await supabase.from(table).delete().eq('id', id).eq('user_id', user.id);
     if (error) setNotice(error.message);
@@ -286,7 +286,7 @@ export function CommandCenterPage() {
       {tab === 'crm' && <CRM
         properties={properties} contacts={contacts} connections={connections} contents={contents}
         nodes={nodes} onAddProperty={addProperty} onAddContact={addContact} onAddConnection={addConnection}
-        onRefresh={load} onDelete={async (table, id) => { await deleteRow(table, id, (() => {}) as never); await load(); }}
+        onRefresh={load} onDelete={async (table, id) => { await deleteRow(table, id); await load(); }}
       />}
 
       {tab === 'action' && <ActionPanel tasks={tasks} contents={contents} isolated={isolated} today={today} onAddTask={addTask} onUpdateTask={updateTask} nodes={nodes} />}
@@ -369,40 +369,47 @@ function NetworkMap(props: {
   allNodes:Array<{id:string;type:EntityType;name:string;label:string}>;
   connections:AuthorityConnection[]; search:string; setSearch:(v:string)=>void;
 }) {
-  const visible = props.nodes.slice(0, 50);
-  const positions = useMemo(() => visible.map((node, i) => {
-    const angle = (i / Math.max(1, visible.length)) * Math.PI * 2;
-    return { ...node, x: 50 + Math.cos(angle) * 37, y: 50 + Math.sin(angle) * 34 };
-  }), [visible.map((x) => x.id).join('|')]);
-  const lookup = new Map(positions.map((n) => [n.id, n]));
-  const lineData = props.connections.filter((c) => lookup.has(c.origin_id) && lookup.has(c.destination_id));
+  const [typeFilter,setTypeFilter]=useState<'all'|'property'|'contact'>('all');
+  const [selectedId,setSelectedId]=useState<string|null>(null);
+  const filtered = props.nodes.filter((n)=>typeFilter==='all'||n.type===typeFilter);
+  const visible = filtered.slice(0,50);
+  const positions = useMemo(() => visible.map((node,i) => {
+    const angle=(i/Math.max(1,visible.length))*Math.PI*2;
+    return {...node,x:50+Math.cos(angle)*37,y:50+Math.sin(angle)*34};
+  }),[visible.map((x)=>x.id).join('|')]);
+  const lookup=new Map(positions.map((n)=>[n.id,n]));
+  const lineData=props.connections.filter((c)=>lookup.has(c.origin_id)&&lookup.has(c.destination_id));
+  const selected=props.allNodes.find((n)=>n.id===selectedId);
+  const selectedConnections=selected?props.connections.filter((c)=>c.origin_id===selected.id||c.destination_id===selected.id):[];
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-2">
-        <div className="relative flex-1"><Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" /><input value={props.search} onChange={(e) => props.setSearch(e.target.value)} placeholder="Buscar um nó..." className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg" /></div>
-        <div className="px-3 py-2 text-xs text-slate-500 bg-slate-50 rounded-lg">{visible.length} nós exibidos · {props.allNodes.length} no total</div>
+      <div className="flex flex-col lg:flex-row gap-2">
+        <div className="relative flex-1"><Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" /><input value={props.search} onChange={(e)=>props.setSearch(e.target.value)} placeholder="Buscar um nó..." className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg" /></div>
+        <div className="flex gap-1 p-1 bg-slate-100 rounded-lg">
+          {(['all','property','contact'] as const).map((t)=><button key={t} onClick={()=>setTypeFilter(t)} className={'px-3 py-1.5 rounded-md text-xs font-medium '+(typeFilter===t?'bg-white text-slate-900 shadow-sm':'text-slate-500')}>{t==='all'?'Todos':t==='property'?'Propriedades':'Contatos'}</button>)}
+        </div>
+        <div className="px-3 py-2 text-xs text-slate-500 bg-slate-50 rounded-lg">{visible.length} nós · {props.connections.length} conexões</div>
       </div>
       <Card className="p-3 overflow-hidden">
-        {visible.length === 0 ? <div className="h-[520px] flex items-center justify-center text-sm text-slate-400">Crie propriedades ou contatos para começar.</div> : (
+        {visible.length===0?<div className="h-[520px] flex items-center justify-center text-sm text-slate-400">Crie propriedades ou contatos para começar.</div>:(
           <div className="relative h-[520px] rounded-xl bg-slate-950 overflow-hidden">
             <svg className="absolute inset-0 w-full h-full">
-              {lineData.map((line) => {
-                const a = lookup.get(line.origin_id)!; const b = lookup.get(line.destination_id)!;
-                return <line key={line.id} x1={a.x + '%'} y1={a.y + '%'} x2={b.x + '%'} y2={b.y + '%'} stroke="rgba(255,255,255,0.16)" strokeWidth="1.3" />;
-              })}
+              {lineData.map((line)=>{const a=lookup.get(line.origin_id)!;const b=lookup.get(line.destination_id)!;return <line key={line.id} x1={a.x+'%'} y1={a.y+'%'} x2={b.x+'%'} y2={b.y+'%'} stroke="rgba(255,255,255,0.16)" strokeWidth="1.3"/>;})}
             </svg>
-            {positions.map((node) => (
-              <div key={node.id} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: node.x + '%', top: node.y + '%' }}>
-                <div className={'w-20 h-20 rounded-full border flex items-center justify-center text-center px-2 shadow-lg ' + (node.type === 'property' ? 'bg-violet-500/20 border-violet-300/40 text-violet-100' : 'bg-cyan-500/20 border-cyan-300/40 text-cyan-100')}>
-                  <span className="text-[10px] font-semibold leading-tight">{node.name.slice(0, 28)}</span>
-                </div>
-                <p className="text-[9px] text-center text-white/40 mt-1">{node.label}</p>
+            {positions.map((node)=><button key={node.id} onClick={()=>setSelectedId(node.id)} className="absolute -translate-x-1/2 -translate-y-1/2 text-left" style={{left:node.x+'%',top:node.y+'%'}}>
+              <div className={'w-20 h-20 rounded-full border flex items-center justify-center text-center px-2 shadow-lg transition hover:scale-105 '+(node.type==='property'?'bg-violet-500/20 border-violet-300/40 text-violet-100':'bg-cyan-500/20 border-cyan-300/40 text-cyan-100')}>
+                <span className="text-[10px] font-semibold leading-tight">{node.name.slice(0,28)}</span>
               </div>
-            ))}
+              <p className="text-[9px] text-center text-white/40 mt-1">{node.label}</p>
+            </button>)}
             <div className="absolute left-3 bottom-3 flex gap-2 text-[10px]">
               <span className="px-2 py-1 rounded-full bg-violet-500/20 text-violet-200 border border-violet-300/20">Propriedade</span>
               <span className="px-2 py-1 rounded-full bg-cyan-500/20 text-cyan-200 border border-cyan-300/20">Contato</span>
             </div>
+            {selected && <div className="absolute top-3 right-3 w-72 max-w-[calc(100%-1.5rem)] p-4 rounded-xl bg-white shadow-xl">
+              <div className="flex items-start gap-3"><div className="flex-1 min-w-0"><p className="text-xs uppercase tracking-wider text-slate-400">{selected.type==='property'?'Propriedade':'Contato'}</p><h3 className="text-sm font-semibold text-slate-900 mt-1 truncate">{selected.name}</h3><p className="text-xs text-slate-400 mt-0.5">{selected.label}</p></div><button onClick={()=>setSelectedId(null)} className="p-1 text-slate-400 hover:text-slate-700"><X className="w-4 h-4"/></button></div>
+              <div className="mt-4 grid grid-cols-2 gap-2"><MiniStat label="Conexões" value={String(selectedConnections.length)}/><MiniStat label="Tipo" value={selected.type==='property'?'Ativo':'Pessoa'}/></div>
+            </div>}
           </div>
         )}
       </Card>
@@ -551,31 +558,58 @@ function OpportunityPanel(props:{opportunities:AuthorityOpportunity[];onAdd:(d:P
 
 function StrategyPanel(props:{contacts:AuthorityContact[];leverage:LeverageNode[];ledger:ReciprocityEntry[];connections:AuthorityConnection[];nodes:Array<{id:string;type:EntityType;name:string;label:string}>;onRefresh:()=>void}) {
   const nameMap=new Map(props.nodes.map((x)=>[x.id,x.name]));
+  const degreeMap=new Map<string,number>();
+  props.connections.forEach((x)=>{degreeMap.set(x.origin_id,(degreeMap.get(x.origin_id)||0)+1);degreeMap.set(x.destination_id,(degreeMap.get(x.destination_id)||0)+1)});
+  const maxDegree=Math.max(1,...degreeMap.values());
+  const stored=new Map(props.leverage.map((x)=>[x.entity_id,x]));
+  const scored=props.nodes.map((node)=>{
+    const degree=degreeMap.get(node.id)||0;
+    const connectionScore=Math.min(100,(degree/maxDegree)*100);
+    const centrality=connectionScore;
+    const saved=stored.get(node.id);
+    const decision=Number(saved?.decision_power||0);
+    const resources=Number(saved?.resources||0);
+    const score=(connectionScore*0.3)+(centrality*0.3)+(decision*0.2)+(resources*0.2);
+    return { ...node, degree, connectionScore, centrality, decision, resources, score };
+  }).sort((a,b)=>b.score-a.score).slice(0,10);
+
   const totals=new Map<string,number>();
   props.ledger.forEach((e)=>totals.set(e.contact_id,(totals.get(e.contact_id)||0)+Number(e.value_given||0)-Number(e.value_received||0)));
-  const scored=props.leverage.slice(0,10);
   const [selected,setSelected]=useState(props.contacts[0]?.id||'');
   const [given,setGiven]=useState(''); const [received,setReceived]=useState(''); const [context,setContext]=useState('');
   const [wants,setWants]=useState(''); const [fears,setFears]=useState('');
-  const saveLedger=async()=>{if(!selected)return;await supabase.from('reciprocity_ledger').insert({user_id:props.contacts[0]?.user_id,contact_id:selected,favor_given:given,favor_received:received,value_given:Number(given||0),value_received:Number(received||0),context,entry_date:new Date().toISOString().slice(0,10)});setGiven('');setReceived('');setContext('');props.onRefresh()};
-  const saveDossier=async()=>{if(!selected)return;await supabase.from('contact_dossiers').upsert({user_id:props.contacts[0]?.user_id,contact_id:selected,wants,fears},{onConflict:'contact_id'});setWants('');setFears('');props.onRefresh()};
+  async function saveLedger(){
+    if(!selected||!props.contacts[0]?.user_id)return;
+    const {error}=await supabase.from('reciprocity_ledger').insert({user_id:props.contacts[0].user_id,contact_id:selected,favor_given:given,favor_received:received,value_given:Number(given||0),value_received:Number(received||0),context,entry_date:new Date().toISOString().slice(0,10)});
+    if(!error){setGiven('');setReceived('');setContext('');props.onRefresh();}
+  }
+  async function saveDossier(){
+    if(!selected||!props.contacts[0]?.user_id)return;
+    const {error}=await supabase.from('contact_dossiers').upsert({user_id:props.contacts[0].user_id,contact_id:selected,wants,fears},{onConflict:'contact_id'});
+    if(!error){setWants('');setFears('');props.onRefresh();}
+  }
   return (
     <div className="space-y-5">
       <div className="grid lg:grid-cols-2 gap-5">
-        <Card className="p-5"><SectionHeader title="Mapa de alavancagem" action={()=>{}} />{scored.length===0?<p className="text-sm text-slate-400">Edite as métricas de alavancagem nos próximos passos. O score usa 30% conexão + 30% centralidade + 20% decisão + 20% recursos.</p>:<div className="space-y-2">{scored.map((x,i)=><div key={x.id} className="flex items-center gap-3"><span className="w-6 text-xs text-slate-400">{i+1}</span><div className="flex-1"><p className="text-sm text-slate-700">{nameMap.get(x.entity_id)||'Nó'}</p><div className="h-1.5 bg-slate-100 rounded-full mt-1"><div className="h-1.5 bg-cyan-500 rounded-full" style={{width:Math.min(100,Number(x.score))+'%'}}/></div></div><span className="text-sm font-semibold text-slate-800">{Number(x.score).toFixed(0)}</span></div>)}</div>}</Card>
+        <Card className="p-5">
+          <SectionHeader title="Mapa de alavancagem" action={()=>{}} />
+          <p className="text-xs text-slate-400 mb-3">Score automático: conexão 30% + centralidade 30% + decisão 20% + recursos 20%.</p>
+          {scored.length===0?<p className="text-sm text-slate-400">Crie nós e conexões para gerar o ranking.</p>:<div className="space-y-2">{scored.map((x,i)=><div key={x.id} className="flex items-center gap-3"><span className="w-6 text-xs text-slate-400">{i+1}</span><div className="flex-1"><p className="text-sm text-slate-700 truncate">{x.name}</p><div className="h-1.5 bg-slate-100 rounded-full mt-1"><div className="h-1.5 bg-cyan-500 rounded-full" style={{width:Math.min(100,x.score)+'%'}}/></div></div><span className="text-sm font-semibold text-slate-800">{x.score.toFixed(0)}</span></div>)}</div>}
+        </Card>
         <Card className="p-5">
           <SectionHeader title="Ledger de reciprocidade" action={()=>{}} />
           <div className="space-y-2 mb-4">{props.contacts.slice(0,6).map((c)=><div key={c.id} className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50"><span className="text-sm text-slate-700">{c.name}</span><span className={'text-sm font-semibold '+((totals.get(c.id)||0)>=0?'text-emerald-600':'text-red-500')}>{money(totals.get(c.id)||0)}</span></div>)}</div>
-          <div className="grid grid-cols-2 gap-2"><Select label="Contato" value={selected} onChange={setSelected} options={props.contacts.map((c)=>c.id)} labels={Object.fromEntries(props.contacts.map((c)=>[c.id,c.name]))}/><Input label="Valor dado" value={given} onChange={setGiven} placeholder="0" type="number"/><Input label="Valor recebido" value={received} onChange={setReceived} placeholder="0" type="number"/><Input label="Contexto" value={context} onChange={setContext}/></div>
-          <button onClick={saveLedger} className="mt-2 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg">Registrar</button>
+          {props.contacts.length>0?<><div className="grid grid-cols-2 gap-2"><Select label="Contato" value={selected} onChange={setSelected} options={props.contacts.map((c)=>c.id)} labels={Object.fromEntries(props.contacts.map((c)=>[c.id,c.name]))}/><Input label="Contexto" value={context} onChange={setContext}/><Input label="Valor dado" value={given} onChange={setGiven} placeholder="0" type="number"/><Input label="Valor recebido" value={received} onChange={setReceived} placeholder="0" type="number"/></div><button onClick={saveLedger} className="mt-2 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg">Registrar</button></>:<p className="text-sm text-slate-400">Cadastre contatos para usar o ledger.</p>}
         </Card>
       </div>
       <Card className="p-5">
         <SectionHeader title="Dossiê de interesses e dores" action={()=>{}} />
-        <div className="grid sm:grid-cols-3 gap-2"><Select label="Contato" value={selected} onChange={setSelected} options={props.contacts.map((c)=>c.id)} labels={Object.fromEntries(props.contacts.map((c)=>[c.id,c.name]))}/><Input label="O que quer" value={wants} onChange={setWants}/><Input label="O que teme" value={fears} onChange={setFears}/></div>
-        <button onClick={saveDossier} className="mt-3 px-3 py-2 bg-cyan-600 text-white text-xs rounded-lg">Salvar dossiê</button>
+        {props.contacts.length>0?<><div className="grid sm:grid-cols-3 gap-2"><Select label="Contato" value={selected} onChange={setSelected} options={props.contacts.map((c)=>c.id)} labels={Object.fromEntries(props.contacts.map((c)=>[c.id,c.name]))}/><Input label="O que quer" value={wants} onChange={setWants}/><Input label="O que teme" value={fears} onChange={setFears}/></div><button onClick={saveDossier} className="mt-3 px-3 py-2 bg-cyan-600 text-white text-xs rounded-lg">Salvar dossiê</button></>:<p className="text-sm text-slate-400">Cadastre um contato para criar seu dossiê.</p>}
       </Card>
-      <Card className="p-5"><SectionHeader title="Sinais de rede" action={()=>{}} /><div className="grid sm:grid-cols-3 gap-3"><MiniStat label="Conexões" value={String(props.connections.length)}/><MiniStat label="Contatos" value={String(props.contacts.length)}/><MiniStat label="Saldo negativo" value={String([...totals.values()].filter((v)=>v<0).length)}/></div></Card>
+      <Card className="p-5">
+        <SectionHeader title="Sinais de rede" action={()=>{}} />
+        <div className="grid sm:grid-cols-4 gap-3"><MiniStat label="Conexões" value={String(props.connections.length)}/><MiniStat label="Contatos" value={String(props.contacts.length)}/><MiniStat label="Saldos negativos" value={String([...totals.values()].filter((v)=>v<0).length)}/><MiniStat label="Nós avaliados" value={String(scored.length)}/></div>
+      </Card>
     </div>
   );
 }
