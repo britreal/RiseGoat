@@ -521,7 +521,7 @@ export function CommandCenterPage() {
 
       {tab === 'action' && <ActionPanel tasks={tasks} contents={contents} isolated={isolated} today={today} onAddTask={addTask} onUpdateTask={updateTask} nodes={nodes} />}
 
-      {tab === 'opportunities' && <OpportunityPanel opportunities={opportunities} onAdd={addOpportunity} onUpdate={updateOpportunity} />}
+      {tab === 'opportunities' && <OpportunityPanel opportunities={opportunities} onAdd={addOpportunity} onUpdate={updateOpportunity} nodes={nodes} contacts={contacts} properties={properties} />}
 
       {tab === 'intelligence' && <IntelligencePanel contacts={contacts} properties={properties} dossiers={dossiers} suggestions={suggestions} nodes={nodes} connections={connections} onUpdateContact={updateContactIntelligence} onSaveSuggestion={createSuggestion} />}
 
@@ -761,10 +761,19 @@ function ActionPanel(props: {
   );
 }
 
-function OpportunityPanel(props:{opportunities:AuthorityOpportunity[];onAdd:(d:Partial<AuthorityOpportunity>)=>void;onUpdate:(id:string,status:string)=>void}) {
+function OpportunityPanel(props:{
+  opportunities:AuthorityOpportunity[];
+  onAdd:(d:Partial<AuthorityOpportunity>)=>void;
+  onUpdate:(id:string,status:string)=>void;
+  nodes:Array<{id:string;type:EntityType;name:string;label:string}>;
+  contacts:AuthorityContact[];
+  properties:AuthorityProperty[];
+}) {
   const [opportunity,setOpportunity]=useState(''); const [value,setValue]=useState(''); const [status,setStatus]=useState('Identificada');
+  const degree=new Map<string,number>();
+  const connected=new Set<string>();
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <Card className="p-5">
         <form className="grid sm:grid-cols-[1fr_160px_180px_auto] gap-2" onSubmit={(e)=>{e.preventDefault();props.onAdd({opportunity,estimated_value:Number(value||0),status});setOpportunity('');setValue('')}}>
           <input required value={opportunity} onChange={(e)=>setOpportunity(e.target.value)} placeholder="Nova oportunidade..." className="px-3 py-2 border rounded-lg text-sm" />
@@ -786,68 +795,19 @@ function OpportunityPanel(props:{opportunities:AuthorityOpportunity[];onAdd:(d:P
           </Card>
         ))}
       </div>
-    </div>
-  );
-}
-
-function StrategyPanel(props:{contacts:AuthorityContact[];leverage:LeverageNode[];ledger:ReciprocityEntry[];connections:AuthorityConnection[];nodes:Array<{id:string;type:EntityType;name:string;label:string}>;onRefresh:()=>void}) {
-  const nameMap=new Map(props.nodes.map((x)=>[x.id,x.name]));
-  const degreeMap=new Map<string,number>();
-  props.connections.forEach((x)=>{degreeMap.set(x.origin_id,(degreeMap.get(x.origin_id)||0)+1);degreeMap.set(x.destination_id,(degreeMap.get(x.destination_id)||0)+1)});
-  const maxDegree=Math.max(1,...degreeMap.values());
-  const stored=new Map(props.leverage.map((x)=>[x.entity_id,x]));
-  const scored=props.nodes.map((node)=>{
-    const degree=degreeMap.get(node.id)||0;
-    const connectionScore=Math.min(100,(degree/maxDegree)*100);
-    const centrality=connectionScore;
-    const saved=stored.get(node.id);
-    const decision=Number(saved?.decision_power||0);
-    const resources=Number(saved?.resources||0);
-    const score=(connectionScore*0.3)+(centrality*0.3)+(decision*0.2)+(resources*0.2);
-    return { ...node, degree, connectionScore, centrality, decision, resources, score };
-  }).sort((a,b)=>b.score-a.score).slice(0,10);
-
-  const totals=new Map<string,number>();
-  props.ledger.forEach((e)=>totals.set(e.contact_id,(totals.get(e.contact_id)||0)+Number(e.value_given||0)-Number(e.value_received||0)));
-  const [selected,setSelected]=useState(props.contacts[0]?.id||'');
-  const [given,setGiven]=useState(''); const [received,setReceived]=useState(''); const [context,setContext]=useState('');
-  const [wants,setWants]=useState(''); const [fears,setFears]=useState('');
-  async function saveLedger(){
-    if(!selected||!props.contacts[0]?.user_id)return;
-    const {error}=await supabase.from('reciprocity_ledger').insert({user_id:props.contacts[0].user_id,contact_id:selected,favor_given:given,favor_received:received,value_given:Number(given||0),value_received:Number(received||0),context,entry_date:new Date().toISOString().slice(0,10)});
-    if(!error){setGiven('');setReceived('');setContext('');props.onRefresh();}
-  }
-  async function saveDossier(){
-    if(!selected||!props.contacts[0]?.user_id)return;
-    const {error}=await supabase.from('contact_dossiers').upsert({user_id:props.contacts[0].user_id,contact_id:selected,wants,fears},{onConflict:'contact_id'});
-    if(!error){setWants('');setFears('');props.onRefresh();}
-  }
-  return (
-    <div className="space-y-5">
-      <div className="grid lg:grid-cols-2 gap-5">
-        <Card className="p-5">
-          <SectionHeader title="Mapa de alavancagem" action={()=>{}} />
-          <p className="text-xs text-slate-400 mb-3">Score automático: conexão 30% + centralidade 30% + decisão 20% + recursos 20%.</p>
-          {scored.length===0?<p className="text-sm text-slate-400">Crie nós e conexões para gerar o ranking.</p>:<div className="space-y-2">{scored.map((x,i)=><div key={x.id} className="flex items-center gap-3"><span className="w-6 text-xs text-slate-400">{i+1}</span><div className="flex-1"><p className="text-sm text-slate-700 truncate">{x.name}</p><div className="h-1.5 bg-slate-100 rounded-full mt-1"><div className="h-1.5 bg-cyan-500 rounded-full" style={{width:Math.min(100,x.score)+'%'}}/></div></div><span className="text-sm font-semibold text-slate-800">{x.score.toFixed(0)}</span></div>)}</div>}
-        </Card>
-        <Card className="p-5">
-          <SectionHeader title="Ledger de reciprocidade" action={()=>{}} />
-          <div className="space-y-2 mb-4">{props.contacts.slice(0,6).map((c)=><div key={c.id} className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50"><span className="text-sm text-slate-700">{c.name}</span><span className={'text-sm font-semibold '+((totals.get(c.id)||0)>=0?'text-emerald-600':'text-red-500')}>{money(totals.get(c.id)||0)}</span></div>)}</div>
-          {props.contacts.length>0?<><div className="grid grid-cols-2 gap-2"><Select label="Contato" value={selected} onChange={setSelected} options={props.contacts.map((c)=>c.id)} labels={Object.fromEntries(props.contacts.map((c)=>[c.id,c.name]))}/><Input label="Contexto" value={context} onChange={setContext}/><Input label="Valor dado" value={given} onChange={setGiven} placeholder="0" type="number"/><Input label="Valor recebido" value={received} onChange={setReceived} placeholder="0" type="number"/></div><button onClick={saveLedger} className="mt-2 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg">Registrar</button></>:<p className="text-sm text-slate-400">Cadastre contatos para usar o ledger.</p>}
-        </Card>
-      </div>
       <Card className="p-5">
-        <SectionHeader title="Dossiê de interesses e dores" action={()=>{}} />
-        {props.contacts.length>0?<><div className="grid sm:grid-cols-3 gap-2"><Select label="Contato" value={selected} onChange={setSelected} options={props.contacts.map((c)=>c.id)} labels={Object.fromEntries(props.contacts.map((c)=>[c.id,c.name]))}/><Input label="O que quer" value={wants} onChange={setWants}/><Input label="O que teme" value={fears} onChange={setFears}/></div><button onClick={saveDossier} className="mt-3 px-3 py-2 bg-cyan-600 text-white text-xs rounded-lg">Salvar dossiê</button></>:<p className="text-sm text-slate-400">Cadastre um contato para criar seu dossiê.</p>}
-      </Card>
-      <Card className="p-5">
-        <SectionHeader title="Sinais de rede" action={()=>{}} />
-        <div className="grid sm:grid-cols-4 gap-3"><MiniStat label="Conexões" value={String(props.connections.length)}/><MiniStat label="Contatos" value={String(props.contacts.length)}/><MiniStat label="Saldos negativos" value={String([...totals.values()].filter((v)=>v<0).length)}/><MiniStat label="Nós avaliados" value={String(scored.length)}/></div>
+        <div className="mb-4"><h2 className="text-sm font-semibold text-slate-800">Mapa de calor de oportunidades</h2><p className="text-xs text-slate-400 mt-1">Potencial relativo estimado a partir do que já existe na sua teia: conexões e sinais de influência cadastrados.</p></div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+          {props.nodes.slice(0,24).map((n)=>{
+            const value=n.type==='contact'?(((Number(props.contacts.find((x)=>x.id===n.id)?.wealth_score||0)+Number(props.contacts.find((x)=>x.id===n.id)?.fame_score||0)+Number(props.contacts.find((x)=>x.id===n.id)?.decision_power_score||0))/3)):Number(props.properties.find((x)=>x.id===n.id)?.audience_score||0);
+            const heat=Math.max(8,Math.min(100,value));
+            return <div key={n.id} className="rounded-xl border border-slate-200 p-3" style={{backgroundColor:'rgba(108,99,255,'+(heat/500)+')'}}><p className="text-xs font-medium text-slate-800 truncate">{n.name}</p><p className="text-[11px] text-slate-500 mt-1">{n.label}</p><p className="text-sm font-bold text-slate-900 mt-2">{Math.round(heat)}</p></div>;
+          })}
+        </div>
       </Card>
     </div>
   );
 }
-
 
 function dialogGrade(score:number) {
   if (score >= 80) return 'C';
