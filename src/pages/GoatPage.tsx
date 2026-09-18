@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { Card, PageHeader, Spinner } from '@/components/ui';
-import { Activity, Check, Plus, Trash2 } from 'lucide-react';
+import { Activity, Check, Plus, Trash2, X, Upload } from 'lucide-react';
 
 const cats = ['Mente', 'Físico', 'Espiritual', 'Trabalho', 'Relacionamentos', 'Outro'];
 const dayKey = (d = new Date()) => {
@@ -11,11 +11,7 @@ const dayKey = (d = new Date()) => {
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 };
-const offsetDate = (days: number) => {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return dayKey(d);
-};
+const offsetDate = (days: number) => { const d = new Date(); d.setDate(d.getDate() + days); return dayKey(d); };
 const goatScore = (m: any) => {
   if (!m) return 0;
   const values = [
@@ -27,8 +23,7 @@ const goatScore = (m: any) => {
 };
 const scorePeriod = (metrics: any[], from: string, to: string) => {
   const rows = metrics.filter(m => m.recorded_on >= from && m.recorded_on <= to);
-  if (!rows.length) return 0;
-  return Math.round(rows.reduce((sum, m) => sum + goatScore(m), 0) / rows.length);
+  return rows.length ? Math.round(rows.reduce((sum, m) => sum + goatScore(m), 0) / rows.length) : 0;
 };
 
 export function GoatPage() {
@@ -43,6 +38,8 @@ export function GoatPage() {
   const [metrics, setMetrics] = useState<any[]>([]);
   const [form, setForm] = useState<any>({});
   const [modal, setModal] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [bulkText, setBulkText] = useState('');
 
   const today = dayKey();
   const last7 = offsetDate(-6);
@@ -51,8 +48,7 @@ export function GoatPage() {
 
   async function load() {
     if (!user) { setLoading(false); return; }
-    setLoading(true);
-    setError('');
+    setLoading(true); setError('');
     try {
       const [h, l, b, a, m] = await Promise.all([
         supabase.from('goat_habits').select('*').eq('user_id', user.id).eq('is_active', true).order('sort_order'),
@@ -63,16 +59,10 @@ export function GoatPage() {
       ]);
       const firstError = [h, l, b, a, m].find(x => x.error)?.error;
       if (firstError) throw firstError;
-      setHabits(h.data || []);
-      setLogs(l.data || []);
-      setBooks(b.data || []);
-      setAudio(a.data || []);
-      setMetrics(m.data || []);
-    } catch (e: any) {
-      setError(e?.message || 'Não foi possível carregar o GOAT.');
-    } finally {
-      setLoading(false);
-    }
+      setHabits(h.data || []); setLogs(l.data || []); setBooks(b.data || []);
+      setAudio(a.data || []); setMetrics(m.data || []);
+    } catch (e: any) { setError(e?.message || 'Não foi possível carregar o GOAT.'); }
+    finally { setLoading(false); }
   }
 
   useEffect(() => { void load(); }, [user?.id]);
@@ -87,10 +77,28 @@ export function GoatPage() {
     await load();
   }
 
+  async function uploadImage(file: File) {
+    if (!user) return '';
+    if (!file.type.startsWith('image/')) throw new Error('Selecione uma imagem válida.');
+    if (file.size > 8 * 1024 * 1024) throw new Error('A imagem deve ter no máximo 8 MB.');
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+    const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+    const result = await supabase.storage.from('goat-media').upload(path, file, { upsert: false, contentType: file.type });
+    if (result.error) throw result.error;
+    return supabase.storage.from('goat-media').getPublicUrl(path).data.publicUrl;
+  }
+
+  function resetModal() {
+    setModal(''); setForm({}); setSelectedFile(null); setBulkText('');
+  }
+
   async function add() {
     if (!user) return;
     try {
-      let result;
+      let imageUrl = form.image_url || '';
+      if (selectedFile) imageUrl = await uploadImage(selectedFile);
+
+      let result: any;
       if (modal === 'metric') {
         result = await supabase.from('goat_body_metrics').upsert({
           user_id: user.id, recorded_on: form.recorded_on || today,
@@ -109,19 +117,25 @@ export function GoatPage() {
           notes: form.notes || null,
         }, { onConflict: 'user_id,recorded_on' });
       } else if (modal === 'habit') {
-        result = await supabase.from('goat_habits').insert({ user_id: user.id, name: form.name, image_url: form.image_url || '', duration_minutes: Number(form.duration || 15), category: form.category || 'Mente', sort_order: habits.length });
-      } else if (modal === 'book') {
-        result = await supabase.from('goat_books').insert({ user_id: user.id, title: form.title, author: form.author || '', image_url: form.image_url || '', status: form.status || 'Ainda vou ler', progress: Number(form.progress || 0) });
+        result = await supabase.from('goat_habits').insert({
+          user_id: user.id, name: form.name, image_url: imageUrl,
+          duration_minutes: Number(form.duration || 15), category: form.category || 'Mente', sort_order: habits.length
+        });
       } else {
-        result = await supabase.from('goat_audiobooks').insert({ user_id: user.id, title: form.title, author: form.author || '', image_url: form.image_url || '', status: form.status || 'Ainda vou ouvir', progress: Number(form.progress || 0) });
+        const lines = bulkText.split('\n').map(x => x.trim()).filter(Boolean);
+        if (!lines.length) throw new Error('Adicione pelo menos um item.');
+        const table = modal === 'book' ? 'goat_books' : 'goat_audiobooks';
+        const status = form.status || (modal === 'book' ? 'Ainda vou ler' : 'Ainda vou ouvir');
+        const rows = lines.map(line => {
+          const [title, ...authorParts] = line.split('|');
+          return { user_id: user.id, title: title.trim(), author: authorParts.join('|').trim(), image_url: imageUrl, status, progress: 0 };
+        }).filter(x => x.title);
+        result = await supabase.from(table).insert(rows);
       }
       if (result?.error) throw result.error;
-      setModal('');
-      setForm({});
+      resetModal();
       await load();
-    } catch (e: any) {
-      setError(e?.message || 'Não foi possível salvar.');
-    }
+    } catch (e: any) { setError(e?.message || 'Não foi possível salvar.'); }
   }
 
   async function del(table: string, id: string) {
@@ -156,21 +170,46 @@ export function GoatPage() {
       <Card className='p-5'><h2 className='font-semibold mb-4'>Mapa de calor — 365 dias</h2><div className='flex flex-wrap gap-1'>{Array.from({ length: 365 }, (_, i) => { const k = offsetDate(i - 364); const n = logs.filter(x => x.completed_on === k).length; return <div key={k} title={`${k}: ${n} check-ins`} className={`w-3 h-3 rounded-sm ${n ? 'bg-emerald-500' : 'bg-slate-100'}`} />; })}</div></Card>
       <Card className='p-5'><h2 className='font-semibold mb-4'>Tracking semanal · mensal · anual</h2><div className='grid md:grid-cols-3 gap-4'>{counts.map(([name, count]) => <div className='border rounded-xl p-4' key={name}><b>{name}</b><p className='text-3xl mt-3'>{count}</p><span className='text-xs text-slate-400'>check-ins registrados</span></div>)}</div></Card>
       <Card className='p-5'><div className='flex justify-between items-center mb-4'><h2 className='font-semibold'>GOAT Body Analytics</h2><button onClick={() => { setForm({ recorded_on: today }); setModal('metric'); }} className='bg-slate-900 text-white px-3 py-2 rounded-lg text-sm'>Registrar evolução</button></div>
-        <div className='grid grid-cols-2 md:grid-cols-4 gap-3 mb-5'>{[['Peso', 'weight_kg', 'kg'], ['Gordura', 'body_fat_pct', '%'], ['Cintura', 'waist_cm', 'cm'], ['Peito', 'chest_cm', 'cm'], ['Braço', 'arm_cm', 'cm'], ['Perna', 'leg_cm', 'cm'], ['Sono', 'sleep_hours', 'h'], ['Treino', 'training_minutes', 'min']].map(([label, key, unit]) => <div className='border rounded-xl p-3' key={key}><p className='text-xs text-slate-400'>{label}</p><b className='text-xl'>{metrics.at(-1)?.[key] ?? '—'}{metrics.at(-1)?.[key] != null ? unit : ''}</b></div>)}</div>
+        <div className='grid grid-cols-2 md:grid-cols-4 gap-3 mb-5'>{[['Peso', 'weight_kg', 'kg'], ['Gordura', 'body_fat_pct', '%'], ['Cintura', 'waist_cm', 'cm'], ['Peito', 'chest_cm', 'cm'], ['Braço', 'arm_cm', 'cm'], ['Perna', 'leg_cm', 'cm'], ['Sono', 'sleep_hours', 'h'], ['Treino', 'training_minutes', 'min']].map(([label, key, unit]) => { const latest = metrics.length ? metrics[metrics.length - 1] : null; return <div className='border rounded-xl p-3' key={key}><p className='text-xs text-slate-400'>{label}</p><b className='text-xl'>{latest?.[key] ?? '—'}{latest?.[key] != null ? unit : ''}</b></div>; })}</div>
         <div className='grid grid-cols-3 gap-3 mb-5'>{[['Hoje', daily], ['7 dias', weekly], ['Mês', monthly]].map(([label, value]) => <div className='border rounded-xl p-4' key={label}><p className='text-xs text-slate-400'>GOAT Score {label}</p><b className='text-3xl'>{value || '—'}{value ? '/100' : ''}</b></div>)}</div>
         <div className='grid md:grid-cols-2 items-center'><svg viewBox='0 0 180 360' className='h-80 mx-auto'><circle cx='90' cy='32' r='25' fill='none' stroke='currentColor' strokeWidth='3' /><path d='M90 57C65 58 58 82 60 115L65 180 45 250 55 345M90 57C115 58 122 82 120 115L115 180 135 250 125 345M30 115L65 180M150 115L115 180M65 180H115M78 345L90 180 102 345' fill='none' stroke='currentColor' strokeWidth='5' /><text x='90' y='95' textAnchor='middle' fontSize='9'>MENTE</text><text x='90' y='150' textAnchor='middle' fontSize='9'>FÍSICO</text><text x='90' y='220' textAnchor='middle' fontSize='9'>CORE</text></svg><div>{cats.map(c => <div key={c} className='py-2 border-b text-sm flex justify-between'><span>{c}</span><span>{habits.filter(h => h.category === c).filter(done).length}/{habits.filter(h => h.category === c).length}</span></div>)}</div></div>
       </Card>
     </div>}
 
-    {(tab === 'Livros' || tab === 'Audiobooks') && <Library items={tab === 'Livros' ? books : audio} audio={tab === 'Audiobooks'} add={() => { setForm({ status: tab === 'Livros' ? 'Ainda vou ler' : 'Ainda vou ouvir' }); setModal(tab === 'Livros' ? 'book' : 'audio'); }} del={del} />}
+    {(tab === 'Livros' || tab === 'Audiobooks') && <Library items={tab === 'Livros' ? books : audio} audio={tab === 'Audiobooks'} add={() => { setForm({ status: tab === 'Livros' ? 'Ainda vou ler' : 'Ainda vou ouvir' }); setBulkText(''); setSelectedFile(null); setModal(tab === 'Livros' ? 'book' : 'audio'); }} del={del} />}
 
-    {modal && <div className='fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4'><Card className='p-6 w-full max-w-md max-h-[90vh] overflow-y-auto'><h2 className='font-bold mb-4'>Adicionar</h2>
-      {modal === 'metric' ? <><input type='date' className='w-full border p-2 rounded mb-2' value={form.recorded_on || today} onChange={e => setForm({ ...form, recorded_on: e.target.value })} />{[['weight_kg','Peso (kg)'],['body_fat_pct','Gordura corporal (%)'],['waist_cm','Cintura (cm)'],['chest_cm','Peito (cm)'],['arm_cm','Braço (cm)'],['leg_cm','Perna (cm)'],['sleep_hours','Sono (horas)'],['training_minutes','Treino (minutos)']].map(([key, placeholder]) => <input key={key} type='number' step='0.1' className='w-full border p-2 rounded mb-2' placeholder={placeholder} value={form[key] ?? ''} onChange={e => setForm({ ...form, [key]: e.target.value })} />)}<div className='grid grid-cols-2 gap-2'>{[['nutrition_score','Nutrição'],['energy_score','Energia'],['focus_score','Foco'],['spiritual_score','Espiritual']].map(([key, placeholder]) => <input key={key} type='number' min='0' max='100' className='border p-2 rounded' placeholder={`${placeholder} (0-100)`} value={form[key] ?? ''} onChange={e => setForm({ ...form, [key]: e.target.value })} />)}</div><textarea className='w-full border p-2 rounded mt-2' placeholder='Observações' value={form.notes || ''} onChange={e => setForm({ ...form, notes: e.target.value })} /></> : modal === 'habit' ? <><input className='w-full border p-2 rounded mb-2' placeholder='Nome' value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} /><input className='w-full border p-2 rounded mb-2' placeholder='URL da imagem' value={form.image_url || ''} onChange={e => setForm({ ...form, image_url: e.target.value })} /><input className='w-full border p-2 rounded mb-2' type='number' placeholder='Minutos' value={form.duration || 15} onChange={e => setForm({ ...form, duration: e.target.value })} /><select className='w-full border p-2 rounded' value={form.category || 'Mente'} onChange={e => setForm({ ...form, category: e.target.value })}>{cats.map(c => <option key={c}>{c}</option>)}</select></> : <><input className='w-full border p-2 rounded mb-2' placeholder='Título' value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} /><input className='w-full border p-2 rounded mb-2' placeholder='Autor' value={form.author || ''} onChange={e => setForm({ ...form, author: e.target.value })} /><input className='w-full border p-2 rounded mb-2' placeholder='URL da capa' value={form.image_url || ''} onChange={e => setForm({ ...form, image_url: e.target.value })} /><input className='w-full border p-2 rounded mb-2' type='number' min='0' max='100' placeholder='Progresso %' value={form.progress || 0} onChange={e => setForm({ ...form, progress: e.target.value })} /></>}
-      <button onClick={() => void add()} className='w-full mt-4 bg-slate-900 text-white p-2 rounded'>Salvar</button></Card></div>}
+    {modal && <div className='fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4' onMouseDown={e => { if (e.target === e.currentTarget) resetModal(); }}>
+      <Card className='relative p-6 w-full max-w-md max-h-[90vh] overflow-y-auto'>
+        <button type='button' aria-label='Fechar' onClick={resetModal} className='absolute right-4 top-4 p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700'><X className='w-5 h-5' /></button>
+        <h2 className='font-bold mb-4 pr-8'>{modal === 'metric' ? 'Registrar evolução' : modal === 'habit' ? 'Novo hábito' : modal === 'book' ? 'Adicionar livros' : 'Adicionar audiobooks'}</h2>
+        {modal === 'metric' ? <>
+          <input type='date' className='w-full border p-2 rounded mb-2' value={form.recorded_on || today} onChange={e => setForm({ ...form, recorded_on: e.target.value })} />
+          {[['weight_kg','Peso (kg)'],['body_fat_pct','Gordura corporal (%)'],['waist_cm','Cintura (cm)'],['chest_cm','Peito (cm)'],['arm_cm','Braço (cm)'],['leg_cm','Perna (cm)'],['sleep_hours','Sono (horas)'],['training_minutes','Treino (minutos)']].map(([key, placeholder]) => <input key={key} type='number' step='0.1' className='w-full border p-2 rounded mb-2' placeholder={placeholder} value={form[key] ?? ''} onChange={e => setForm({ ...form, [key]: e.target.value })} />)}
+          <div className='grid grid-cols-2 gap-2'>{[['nutrition_score','Nutrição'],['energy_score','Energia'],['focus_score','Foco'],['spiritual_score','Espiritual']].map(([key, placeholder]) => <input key={key} type='number' min='0' max='100' className='border p-2 rounded' placeholder={`${placeholder} (0-100)`} value={form[key] ?? ''} onChange={e => setForm({ ...form, [key]: e.target.value })} />)}</div>
+          <textarea className='w-full border p-2 rounded mt-2' rows={4} placeholder='Observações' value={form.notes || ''} onChange={e => setForm({ ...form, notes: e.target.value })} />
+        </> : modal === 'habit' ? <>
+          <input className='w-full border p-2 rounded mb-2' placeholder='Nome' value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} />
+          <label className='flex items-center gap-2 border rounded-lg p-3 mb-2 cursor-pointer hover:bg-slate-50'><Upload className='w-4 h-4' /><span className='text-sm flex-1'>{selectedFile ? selectedFile.name : 'Escolher imagem do PC ou celular'}</span><input type='file' accept='image/*' className='hidden' onChange={e => setSelectedFile(e.target.files?.[0] || null)} /></label>
+          <input className='w-full border p-2 rounded mb-2' type='number' min='1' max='1440' placeholder='Minutos' value={form.duration || 15} onChange={e => setForm({ ...form, duration: e.target.value })} />
+          <select className='w-full border p-2 rounded' value={form.category || 'Mente'} onChange={e => setForm({ ...form, category: e.target.value })}>{cats.map(c => <option key={c}>{c}</option>)}</select>
+        </> : <>
+          <textarea rows={9} className='w-full border p-3 rounded-lg mb-2 resize-y' placeholder={'Um item por linha.\nFormato opcional: Título | Autor\nExemplo:\nO Príncipe | Nicolau Maquiavel\nAtomic Habits | James Clear'} value={bulkText} onChange={e => setBulkText(e.target.value)} />
+          <label className='flex items-center gap-2 border rounded-lg p-3 mb-2 cursor-pointer hover:bg-slate-50'><Upload className='w-4 h-4' /><span className='text-sm flex-1'>{selectedFile ? selectedFile.name : 'Capa opcional — escolher do PC ou celular'}</span><input type='file' accept='image/*' className='hidden' onChange={e => setSelectedFile(e.target.files?.[0] || null)} /></label>
+          <select className='w-full border p-2 rounded' value={form.status || ''} onChange={e => setForm({ ...form, status: e.target.value })}>{(modal === 'book' ? ['Lendo', 'Ainda vou ler', 'Completo'] : ['Ouvindo', 'Ainda vou ouvir', 'Completo']).map(s => <option key={s}>{s}</option>)}</select>
+          <p className='text-xs text-slate-400 mt-2'>Sem porcentagem: o acompanhamento é feito pelo status.</p>
+        </>}
+        <button onClick={() => void add()} className='w-full mt-4 bg-slate-900 text-white p-2.5 rounded-lg'>Salvar</button>
+      </Card>
+    </div>}
   </div>;
 }
 
 function Library({ items, audio, add, del }: { items: any[]; audio: boolean; add: () => void; del: (table: string, id: string) => void }) {
   const statuses = audio ? ['Ouvindo', 'Ainda vou ouvir', 'Completo'] : ['Lendo', 'Ainda vou ler', 'Completo'];
-  return <div className='space-y-4'><button onClick={add} className='bg-slate-900 text-white px-3 py-2 rounded-lg'><Plus className='w-4 inline' /> Adicionar</button>{statuses.map(status => <Card className='p-5' key={status}><h2 className='font-semibold mb-3'>{status}</h2><div className='grid md:grid-cols-3 gap-3'>{items.filter(x => x.status === status).map(x => <div className='border rounded-xl p-3 flex gap-3' key={x.id}><div className='w-14 h-16 bg-slate-100'>{x.image_url && <img src={x.image_url} className='w-full h-full object-cover' />}</div><div className='flex-1'><b className='text-sm'>{x.title}</b><p className='text-xs text-slate-400'>{x.author}</p><p className='text-xs mt-2'>{x.progress}%</p></div><button onClick={() => void del(audio ? 'goat_audiobooks' : 'goat_books', x.id)}><Trash2 className='w-4' /></button></div>)}</div></Card>)}</div>;
+  return <div className='space-y-4'>
+    <button onClick={add} className='bg-slate-900 text-white px-3 py-2 rounded-lg'><Plus className='w-4 inline' /> Adicionar</button>
+    {statuses.map(status => <Card className='p-5' key={status}><h2 className='font-semibold mb-3'>{status}</h2><div className='grid md:grid-cols-3 gap-3'>
+      {items.filter(x => x.status === status).map(x => <div className='border rounded-xl p-3 flex gap-3' key={x.id}><div className='w-14 h-16 bg-slate-100 rounded overflow-hidden'>{x.image_url && <img src={x.image_url} className='w-full h-full object-cover' />}</div><div className='flex-1'><b className='text-sm'>{x.title}</b><p className='text-xs text-slate-400'>{x.author}</p><p className='text-xs mt-2'>{status}</p></div><button aria-label='Excluir' onClick={() => void del(audio ? 'goat_audiobooks' : 'goat_books', x.id)}><Trash2 className='w-4' /></button></div>)}
+    </div></Card>)}
+  </div>;
 }
