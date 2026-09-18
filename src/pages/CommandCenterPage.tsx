@@ -118,7 +118,7 @@ export function CommandCenterPage() {
 
   useEffect(() => {
     if (!user) return;
-    load().then(() => syncRiseGoatData());
+    syncRiseGoatData();
   }, [user]);
 
   async function runRadar() {
@@ -280,7 +280,6 @@ export function CommandCenterPage() {
       ]);
 
       setNotice('Dados do RiseGoat sincronizados com o Centro de Comando.');
-      await load();
       await runRadar();
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Falha ao sincronizar os dados.');
