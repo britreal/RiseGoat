@@ -10,8 +10,8 @@ import {
 interface NavItem { label: string; path: string; icon: typeof LayoutDashboard; group: string; mode: 'shared' | 'pessoal' | 'negocios'; }
 
 const navItems: NavItem[] = [
-  { label: 'Metas', path: '/goals', icon: Target, group: 'Planejamento', mode: 'shared' },
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, group: 'Início', mode: 'shared' },
+  { label: 'Metas', path: '/goals', icon: Target, group: 'Planejamento', mode: 'shared' },
   { label: 'Perfil', path: '/profile', icon: Users, group: 'Presença', mode: 'negocios' },
   { label: 'Links', path: '/links', icon: Link2, group: 'Presença', mode: 'negocios' },
   { label: 'Posts', path: '/posts', icon: FileText, group: 'Conteúdo', mode: 'negocios' },
