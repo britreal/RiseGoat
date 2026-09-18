@@ -23,23 +23,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   async function loadProfile(userId: string) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-    setProfile(data as Profile | null);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Failed to load profile:', error);
+        setProfile(null);
+        return;
+      }
+
+      // A missing profile should never block the entire application.
+      // The Profile page can render a recovery state and the user can continue using the app.
+      setProfile(data as Profile | null);
+    } catch (error) {
+      console.error('Unexpected profile loading error:', error);
+      setProfile(null);
+    }
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    let mounted = true;
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        loadProfile(session.user.id).finally(() => setLoading(false));
-      } else {
-        setLoading(false);
+        await loadProfile(session.user.id);
       }
+      if (mounted) setLoading(false);
+    }).catch((error) => {
+      console.error('Failed to initialize authentication:', error);
+      if (mounted) setLoading(false);
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -54,7 +73,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   async function refreshProfile() {
