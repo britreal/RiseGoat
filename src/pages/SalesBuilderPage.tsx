@@ -4,8 +4,8 @@ import { useAuth } from '@/context/AuthContext';
 import { Spinner } from '@/components/ui';
 import type { SalesBlock, SalesPage } from '@/types';
 import {
-  ArrowLeft, ChevronDown, ChevronUp, Copy, Eye, Image as ImageIcon, Loader2, Smartphone, Monitor,
-  Minus, MousePointer, Palette, Plus, Save, Settings2, Trash2, Type, X,
+  ArrowLeft, ChevronDown, ChevronUp, Copy, Image as ImageIcon, Loader2, Smartphone, Monitor,
+  Minus, MousePointer, Palette, Plus, Save, Settings2, Trash2, Type,
 } from 'lucide-react';
 
 type BlockType = 'heading' | 'text' | 'image' | 'button' | 'spacer' | 'divider';
