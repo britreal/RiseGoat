@@ -662,7 +662,7 @@ function CRM(props: {
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState(''); const [type, setType] = useState('Site'); const [platform, setPlatform] = useState('');
   const [url, setUrl] = useState(''); const [status, setStatus] = useState('Ativo'); const [objective, setObjective] = useState('Atrair'); const [tags, setTags] = useState('');
-  const [email, setEmail] = useState(''); const [occupation, setOccupation] = useState(''); const [contactStatus, setContactStatus] = useState('Frio'); const [nextAction, setNextAction] = useState('');
+  const [email, setEmail] = useState(''); const [occupation, setOccupation] = useState(''); const [contactStatus, setContactStatus] = useState('Frio'); const [nextAction, setNextAction] = useState(''); const [wealth, setWealth] = useState('0'); const [fame, setFame] = useState('0'); const [decisionPower, setDecisionPower] = useState('0'); const [resourcesScore, setResourcesScore] = useState('0');
   const [origin, setOrigin] = useState(''); const [destination, setDestination] = useState(''); const [connectionType, setConnectionType] = useState('Link'); const [strength, setStrength] = useState('Média'); const [description, setDescription] = useState('');
 
   function submit(e: FormEvent) {
@@ -670,12 +670,12 @@ function CRM(props: {
     if (subtab === 'properties') {
       props.onAddProperty({ name, property_type:type, platform, url, status, objective, tags });
     } else if (subtab === 'contacts') {
-      props.onAddContact({ name, email, occupation, status:contactStatus, next_action:nextAction, tags });
+      props.onAddContact({ name, email, occupation, status:contactStatus, next_action:nextAction, tags, wealth_score:Number(wealth||0), fame_score:Number(fame||0), decision_power_score:Number(decisionPower||0), resources_score:Number(resourcesScore||0) });
     } else if (subtab === 'connections') {
       const a = props.nodes.find((x) => x.id === origin); const b = props.nodes.find((x) => x.id === destination);
       if (a && b) props.onAddConnection({ origin_id:a.id, origin_type:a.type, destination_id:b.id, destination_type:b.type, connection_type:connectionType, strength, description });
     }
-    setShowForm(false); setName(''); setEmail(''); setOccupation(''); setUrl(''); setPlatform(''); setTags(''); setNextAction(''); setDescription('');
+    setShowForm(false); setName(''); setEmail(''); setOccupation(''); setUrl(''); setPlatform(''); setTags(''); setNextAction(''); setDescription(''); setWealth('0'); setFame('0'); setDecisionPower('0'); setResourcesScore('0');
   }
 
   return (
@@ -704,6 +704,15 @@ function CRM(props: {
               <Select label="Status" value={contactStatus} onChange={setContactStatus} options={contactStatuses} />
               <Input label="Próxima ação" value={nextAction} onChange={setNextAction} placeholder="Enviar proposta..." />
               <Input label="Tags" value={tags} onChange={setTags} placeholder="creator, afiliado" />
+              <div className="sm:col-span-2 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <p className="text-[11px] font-semibold text-slate-500 mb-2">Dados do perfil estratégico</p>
+                <div className="grid grid-cols-4 gap-2">
+                  <Input label="Riqueza 0–100" value={wealth} onChange={setWealth} type="number" />
+                  <Input label="Fama 0–100" value={fame} onChange={setFame} type="number" />
+                  <Input label="Decisão 0–100" value={decisionPower} onChange={setDecisionPower} type="number" />
+                  <Input label="Recursos 0–100" value={resourcesScore} onChange={setResourcesScore} type="number" />
+                </div>
+              </div>
             </>}
             {subtab === 'connections' && <>
               <Select label="Origem" value={origin} onChange={setOrigin} options={props.nodes.map((x) => x.id)} labels={Object.fromEntries(props.nodes.map((x) => [x.id, x.name + ' · ' + x.label]))} />
@@ -723,7 +732,7 @@ function CRM(props: {
         const a=props.nodes.find((n)=>n.id===x.origin_id); const b=props.nodes.find((n)=>n.id===x.destination_id);
         return <><Cell strong>{a?.name || '—'}</Cell><Cell>{x.connection_type}</Cell><Cell>{b?.name || '—'}</Cell><Cell>{x.strength}</Cell></>;
       }} actions={(x) => <button onClick={() => props.onDelete('authority_connections', x.id)} className="p-1.5 text-red-400 hover:bg-red-50 rounded"><Trash2 className="w-4 h-4" /></button>} />}
-      {subtab === 'contents' && <Card className="p-5"><p className="text-sm text-slate-500">O núcleo atual organiza conteúdos existentes do RiseGoat. Aqui você pode usar as propriedades como estrutura estratégica e, nas próximas iterações, sincronizar Posts/Microblog diretamente neste catálogo.</p></Card>}
+      {subtab === 'contents' && <Card className="overflow-hidden"><div className="overflow-x-auto"><table className="w-full text-left"><thead><tr className="border-b border-slate-100 bg-slate-50"><th className="px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase">Título</th><th className="px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase">Tipo</th><th className="px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase">Status</th><th className="px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase">Origem</th></tr></thead><tbody className="divide-y divide-slate-100">{props.contents.slice(0,100).map((x)=><tr key={x.id}><Cell strong>{x.title}</Cell><Cell>{x.content_type}</Cell><Cell>{x.status}</Cell><Cell>{x.source_kind||'manual'}</Cell></tr>)}</tbody></table></div></Card>}
     </div>
   );
 }
