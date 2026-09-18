@@ -45,13 +45,14 @@ export function DashboardLayout({ children, currentPath, navigate }: DashboardLa
     'Conteúdo': 'text-violet-700 bg-violet-50',
     'Monetização': 'text-amber-700 bg-amber-50',
     'Estratégia': 'text-red-700 bg-red-50',
-    'Personal': 'text-slate-700 bg-slate-100',
+    'Pessoal': 'text-slate-700 bg-slate-100',
     'Conta': 'text-slate-600 bg-slate-100',
     'Início': 'text-slate-700 bg-slate-100',
   };
   function handleNav(path: string) { navigate(path); setMobileOpen(false); }
   async function handleWorkspaceMode(mode: 'pessoal' | 'negocios') {
-    await setWorkspaceMode(mode);
+    const saved = await setWorkspaceMode(mode);
+    if (!saved) return;
     const businessPaths = ['/profile','/links','/microblog','/newsletter','/leads','/analytics','/posts','/drafts','/sales','/offers','/revenue','/command-center','/partnerships','/launches','/radar'];
     if (mode === 'pessoal' && businessPaths.includes(currentPath)) navigate('/dashboard');
     if (mode === 'negocios' && currentPath === '/goat') navigate('/dashboard');
