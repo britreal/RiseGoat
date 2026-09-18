@@ -32,7 +32,7 @@ export function NewsletterPage() {
     if (connectionError || !connectionStatus?.connection) { setSending(false); setSendError('Conecte seu e-mail em Configurações antes de enviar uma campanha.'); return; }
     const { data: campaign, error: campaignError } = await supabase.from('campaigns').insert({ user_id:user.id, subject:subject.trim(), body:body.trim(), status:'draft' }).select('id').single();
     if (campaignError || !campaign) { setSending(false); setSendError(campaignError?.message || 'Não foi possível criar a campanha.'); return; }
-    const { data, error } = await supabase.functions.invoke('send-campaign', { body:{ campaign_id:campaign.id, user_id:user.id } });
+    const { data, error } = await supabase.functions.invoke('send-campaign', { body:{ campaign_id:campaign.id, user_id:user.id, app_origin:window.location.origin } });
     setSending(false);
     if (error || !data?.ok) { setSendError(data?.error || error?.message || 'Falha ao enviar campanha.'); return; }
     setSubject(''); setBody(''); setSent(true);
