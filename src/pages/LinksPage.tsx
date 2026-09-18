@@ -29,7 +29,9 @@ function youtubeId(url: string): string | null {
       const shortsIndex = parts.indexOf('shorts');
       if (shortsIndex >= 0 && parts[shortsIndex + 1]) return parts[shortsIndex + 1];
     }
-  } catch {}
+  } catch (error) {
+    void error;
+  }
   return null;
 }
 
