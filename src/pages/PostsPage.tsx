@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { PageHeader, Card, Spinner, EmptyState } from '@/components/ui';
-import { Trash2, Pin, FileText, Loader2, Send, Search } from 'lucide-react';
+import { Trash2, Pin, FileText, Loader2, Send, Search, Image as ImageIcon } from 'lucide-react';
 import type { MicroblogPost } from '@/types';
+import { uploadUserImage } from '@/lib/storage';
 import { timeAgo } from '@/lib/utils';
 
 export function PostsPage() {
@@ -13,6 +14,7 @@ export function PostsPage() {
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [posting, setPosting] = useState(false);
 
   useEffect(() => {
@@ -32,6 +34,14 @@ export function PostsPage() {
   async function post() {
     if (!user || !content.trim()) return;
     setPosting(true);
+    let nextImageUrl = imageUrl;
+    try {
+      if (imageFile && user) nextImageUrl = await uploadUserImage(user.id, imageFile, 'posts');
+    } catch (error: any) {
+      window.alert(error?.message || 'Não foi possível enviar a imagem.');
+      setPosting(false);
+      return;
+    }
     const { data, error } = await supabase
       .from('microblog_posts')
       .insert({
@@ -92,13 +102,10 @@ export function PostsPage() {
           rows={3}
           className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 resize-none mb-3"
         />
-        <input
-          type="url"
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          placeholder="URL da imagem (opcional)"
-          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 mb-3"
-        />
+        <label className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-sm text-slate-600 mb-3">
+          <ImageIcon className="w-4 h-4" /> {imageFile?.name || 'Adicionar imagem do PC ou celular (opcional)'}
+          <input type="file" accept="image/*" className="hidden" onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
+        </label>
         <div className="flex items-center justify-between">
           <span className="text-xs text-slate-400">{content.length} caracteres</span>
           <button
