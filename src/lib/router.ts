@@ -14,7 +14,13 @@ export type Route =
   | { name: 'analytics' }
   | { name: 'settings' }
   | { name: 'sales' }
+  | { name: 'offers' }
+  | { name: 'revenue' }
   | { name: 'command-center' }
+  | { name: 'partnerships' }
+  | { name: 'launches' }
+  | { name: 'radar' }
+  | { name: 'goals' }
   | { name: 'goat' }
   | { name: 'sales-editor'; pageId: string }
   | { name: 'public'; username: string }
