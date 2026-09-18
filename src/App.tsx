@@ -22,6 +22,7 @@ import { SalesBuilderPage } from '@/pages/SalesBuilderPage';
 import { PublicPage } from '@/pages/PublicPage';
 import { PublicMicroblogPage } from '@/pages/PublicMicroblogPage';
 import { PublicSalesPage } from '@/pages/PublicSalesPage';
+import { UnsubscribePage } from '@/pages/UnsubscribePage';
 import { Spinner } from '@/components/ui';
 
 function AppContent() {
@@ -31,6 +32,7 @@ function AppContent() {
   if (route.name === 'public') return <PublicPage username={route.username} />;
   if (route.name === 'public-microblog') return <PublicMicroblogPage username={route.username} postId={route.postId} />;
   if (route.name === 'public-sales') return <PublicSalesPage slug={route.slug} />;
+  if (route.name === 'unsubscribe') return <UnsubscribePage token={route.token} />;
 
   if (route.name === 'auth') {
     if (loading) return <Spinner />;
