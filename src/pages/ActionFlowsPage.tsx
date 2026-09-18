@@ -520,7 +520,7 @@ function Field({ label, value, onChange, placeholder = '', type = 'text' }: { la
   return <label className="block"><span className="block text-[11px] font-semibold text-slate-500 mb-1.5">{label}</span><input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100" /></label>;
 }
 
-function SelectField({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: string[] }) {
+function SelectField({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: Array<string | { value: string; label: string }> }) {
   return <label className="block"><span className="block text-[11px] font-semibold text-slate-500 mb-1.5">{label}</span><div className="relative"><select value={value} onChange={e => onChange(e.target.value)} className="w-full h-10 appearance-none rounded-xl border border-slate-200 bg-white px-3 pr-9 text-sm text-slate-800 outline-none focus:border-slate-400"><option value="">Nenhum</option>{options.map(o => <option key={o}>{o}</option>)}</select><ChevronDown className="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none" /></div></label>;
 }
 
