@@ -57,3 +57,15 @@ export interface AuthoritySuggestion {
 export interface AuthoritySource {
   id:string; user_id:string; source_type:string; name:string; url:string; status:string; last_checked_at:string|null; metadata:Record<string,unknown>; created_at:string;
 }
+export interface NegotiationDossier {
+  id:string; user_id:string; contact_id:string; history:string; style:string; limits:string; triggers:string; alternatives:string; created_at:string; updated_at:string;
+}
+export interface HiddenConnection {
+  id:string; user_id:string; person_a:string; person_b:string; relation:string; source:string; strength:string; created_at:string;
+}
+export interface CrossInfluence {
+  id:string; user_id:string; influencer:string; influenced:string; intensity:number; topic:string; created_at:string;
+}
+export interface NodeMonetization {
+  id:string; user_id:string; entity_id:string; entity_type:'property'|'contact'; direct_revenue:number; indirect_revenue:number; cost:number; roi:number; created_at:string; updated_at:string;
+}
