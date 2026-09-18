@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// RiseGoat is intentionally connected only to the Fluently Supabase project.
+const supabaseUrl = 'https://xofrlyblnsvcjsywynzu.supabase.co';
+const supabaseAnonKey = 'sb_publishable_V1WJVeWemXn45P1HnLXANQ_I_AhtYnU';
 
 function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit) {
   const controller = new AbortController();
