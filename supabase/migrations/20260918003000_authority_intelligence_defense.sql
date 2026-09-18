@@ -215,6 +215,8 @@ BEGIN
     HAVING sum(value_given - value_received) < 0
   ) balances;
 
+  PERFORM public.authority_refresh_leverage(p_user_id);
+
   RETURN jsonb_build_object(
     'isolated_nodes', isolated_count,
     'stagnant_opportunities', stagnant_count,
@@ -224,6 +226,107 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.authority_run_radar(uuid) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.authority_refresh_leverage(p_user_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $
+DECLARE
+  max_degree numeric := 1;
+BEGIN
+  IF auth.uid() IS NULL OR auth.uid() <> p_user_id THEN
+    RAISE EXCEPTION 'not authorized';
+  END IF;
+
+  SELECT GREATEST(1, COALESCE(MAX(degree), 0)) INTO max_degree
+  FROM (
+    SELECT entity_id, count(*)::numeric AS degree
+    FROM (
+      SELECT origin_id AS entity_id FROM authority_connections WHERE user_id = p_user_id
+      UNION ALL
+      SELECT destination_id AS entity_id FROM authority_connections WHERE user_id = p_user_id
+    ) edges
+    GROUP BY entity_id
+  ) d;
+
+  INSERT INTO authority_leverage (
+    user_id, entity_id, entity_type, connection_degree, centrality, decision_power, resources, updated_at
+  )
+  SELECT
+    p_user_id,
+    n.entity_id,
+    n.entity_type,
+    n.degree,
+    LEAST(100, (n.degree / max_degree) * 100),
+    n.decision_power,
+    n.resources,
+    now()
+  FROM (
+    SELECT
+      p.id AS entity_id,
+      'property'::text AS entity_type,
+      COALESCE((SELECT count(*) FROM authority_connections c WHERE c.user_id=p_user_id AND ((c.origin_id=p.id AND c.origin_type='property') OR (c.destination_id=p.id AND c.destination_type='property'))),0)::numeric AS degree,
+      0::numeric AS decision_power,
+      p.resources_score::numeric AS resources
+    FROM authority_properties p
+    WHERE p.user_id=p_user_id
+    UNION ALL
+    SELECT
+      c.id AS entity_id,
+      'contact'::text AS entity_type,
+      COALESCE((SELECT count(*) FROM authority_connections x WHERE x.user_id=p_user_id AND ((x.origin_id=c.id AND x.origin_type='contact') OR (x.destination_id=c.id AND x.destination_type='contact'))),0)::numeric AS degree,
+      c.decision_power_score::numeric AS decision_power,
+      c.resources_score::numeric AS resources
+    FROM authority_contacts c
+    WHERE c.user_id=p_user_id
+  ) n
+  ON CONFLICT (user_id, entity_id, entity_type)
+  DO UPDATE SET
+    connection_degree=EXCLUDED.connection_degree,
+    centrality=EXCLUDED.centrality,
+    decision_power=EXCLUDED.decision_power,
+    resources=EXCLUDED.resources,
+    updated_at=now();
+END;
+$;
+
+GRANT EXECUTE ON FUNCTION public.authority_refresh_leverage(uuid) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.authority_connections_refresh_leverage()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $
+BEGIN
+  PERFORM public.authority_refresh_leverage(COALESCE(NEW.user_id, OLD.user_id));
+  RETURN COALESCE(NEW, OLD);
+END;
+$;
+
+DROP TRIGGER IF EXISTS trg_authority_connections_refresh_leverage ON public.authority_connections;
+CREATE TRIGGER trg_authority_connections_refresh_leverage
+AFTER INSERT OR UPDATE OR DELETE ON public.authority_connections
+FOR EACH ROW EXECUTE FUNCTION public.authority_connections_refresh_leverage();
+
+CREATE OR REPLACE FUNCTION public.authority_contact_refresh_leverage()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $
+BEGIN
+  PERFORM public.authority_refresh_leverage(NEW.user_id);
+  RETURN NEW;
+END;
+$;
+
+DROP TRIGGER IF EXISTS trg_authority_contacts_refresh_leverage ON public.authority_contacts;
+CREATE TRIGGER trg_authority_contacts_refresh_leverage
+AFTER INSERT OR UPDATE ON public.authority_contacts
+FOR EACH ROW EXECUTE FUNCTION public.authority_contact_refresh_leverage();
 
 CREATE INDEX IF NOT EXISTS idx_authority_threats_user_status ON public.authority_threats(user_id, status, severity);
 CREATE INDEX IF NOT EXISTS idx_authority_defense_actions_threat ON public.authority_defense_actions(user_id, threat_id);
