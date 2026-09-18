@@ -75,7 +75,8 @@ export function CommandCenterPage() {
   const load = async () => {
     if (!user) return;
     setRefreshing(true);
-    const results = await Promise.all([
+    try {
+      const results = await Promise.all([
       supabase.from('authority_properties').select('*').eq('user_id', user.id).order('updated_at', { ascending: false }),
       supabase.from('authority_contacts').select('*').eq('user_id', user.id).order('updated_at', { ascending: false }),
       supabase.from('authority_connections').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
@@ -116,8 +117,13 @@ export function CommandCenterPage() {
     setNodeMonetization((results[18].data as NodeMonetization[]) ?? []);
     const failed = results.find((x) => x.error);
     if (failed?.error) setNotice(failed.error.message);
-    setLoading(false);
-    setRefreshing(false);
+      setLoading(false);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Falha ao carregar o Centro de Comando.');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   };
 
   useEffect(() => {
