@@ -56,6 +56,12 @@ function parseHash(): Route {
   // Backward-compatible support for the previous editor URL.
   if (parts[0] === 'sales-editor' && parts[1]) return { name: 'sales-editor', pageId: parts[1] };
   if (parts[0] === 'sales') return { name: 'sales' };
+  if (parts[0] === 'offers') return { name: 'offers' };
+  if (parts[0] === 'revenue') return { name: 'revenue' };
+  if (parts[0] === 'partnerships') return { name: 'partnerships' };
+  if (parts[0] === 'launches') return { name: 'launches' };
+  if (parts[0] === 'radar') return { name: 'radar' };
+  if (parts[0] === 'goals') return { name: 'goals' };
   return { name: 'dashboard' };
 }
 
