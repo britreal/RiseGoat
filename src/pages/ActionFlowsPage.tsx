@@ -435,6 +435,63 @@ const TEMPLATES: Template[] = [
       { label: 'Registrar responsabilidades', type: 'note' },
     ],
   },
+  {
+    key: 'personal-routine', name: 'Rotina Pessoal', category: 'Personal',
+    description: 'Organize uma sequência diária de ações e decisões pessoais.',
+    objective: 'Criar uma rotina executável e repetível.',
+    goal: 'Rotina concluída',
+    nodes: [
+      { label: 'Definir prioridade do dia', type: 'action' },
+      { label: 'Planejar blocos de tempo', type: 'task' },
+      { label: 'Executar hábitos', type: 'module', module: 'GOAT' },
+      { label: 'Revisar o dia', type: 'metric', module: 'GOAT' },
+      { label: 'Dia cumprido?', type: 'decision' },
+      { label: 'Ajustar amanhã', type: 'action' },
+    ],
+  },
+  {
+    key: 'study-plan', name: 'Plano de Estudos', category: 'Personal',
+    description: 'Do objetivo de aprendizado até revisão e execução.',
+    objective: 'Transformar estudo em um processo consistente.',
+    goal: 'Conteúdo dominado',
+    nodes: [
+      { label: 'Definir objetivo', type: 'action' },
+      { label: 'Escolher material', type: 'action', module: 'GOAT' },
+      { label: 'Criar sessão de estudo', type: 'task' },
+      { label: 'Registrar aprendizado', type: 'note' },
+      { label: 'Revisar', type: 'task' },
+      { label: 'Dominou?', type: 'decision' },
+      { label: 'Voltar ao estudo', type: 'action' },
+    ],
+  },
+  {
+    key: 'health-project', name: 'Projeto de Saúde', category: 'Personal',
+    description: 'Meta, rotina, acompanhamento corporal e revisão.',
+    objective: 'Executar um projeto pessoal de evolução física.',
+    goal: 'Meta física atingida',
+    nodes: [
+      { label: 'Definir meta', type: 'metric', module: 'Metas' },
+      { label: 'Criar hábitos', type: 'module', module: 'GOAT' },
+      { label: 'Executar treino e rotina', type: 'task' },
+      { label: 'Registrar Body Analytics', type: 'module', module: 'GOAT' },
+      { label: 'Revisar evolução', type: 'decision' },
+      { label: 'Ajustar rotina', type: 'action' },
+    ],
+  },
+  {
+    key: 'personal-project', name: 'Projeto Pessoal', category: 'Personal',
+    description: 'Estruture qualquer projeto pessoal em etapas reutilizáveis.',
+    objective: 'Tirar um projeto da cabeça e levar até a conclusão.',
+    goal: 'Projeto concluído',
+    nodes: [
+      { label: 'Definir resultado final', type: 'result' },
+      { label: 'Quebrar em etapas', type: 'action' },
+      { label: 'Executar próxima etapa', type: 'task' },
+      { label: 'Verificar progresso', type: 'metric' },
+      { label: 'Concluiu?', type: 'decision' },
+      { label: 'Corrigir ou continuar', type: 'action' },
+    ],
+  },
 ];
 
 function moneyShort(v: number) {
