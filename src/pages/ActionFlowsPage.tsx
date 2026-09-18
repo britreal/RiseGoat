@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
+import { useEffect, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { Card, PageHeader, Spinner } from '@/components/ui';
 import {
-  ArrowLeft, ArrowRight, BarChart3, BriefcaseBusiness, Check, ChevronDown, CircleDollarSign,
+  ArrowLeft, ArrowRight, BarChart3, Check, ChevronDown,
   Clock3, Copy, GripVertical, Layers3, Link2, ListChecks, Map as MapIcon, MessageSquare,
-  Network, Pause, Play, Plus, Radar, Rocket, Save, Settings2, ShoppingBag, Sparkles,
+  Network, Pause, Play, Plus, Save, Settings2, Sparkles,
   Target, Trash2, UserRound, X, Zap,
 } from 'lucide-react';
 
@@ -24,7 +24,7 @@ type FlowNode = {
   module_path: string | null;
   position_x: number;
   position_y: number;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   sort_order: number;
 };
 
@@ -628,13 +628,6 @@ const TEMPLATE_RESEARCH: Record<string, TemplateResearch> = {
 function templateMode(template: Template): 'pessoal' | 'negocios' {
   return template.category === 'Pessoal' ? 'pessoal' : 'negocios';
 }
-function moneyShort(v: number) {
-  const n = Number(v || 0);
-  if (n >= 1000000) return 'R$ ' + (n / 1000000).toFixed(1).replace('.', ',') + ' mi';
-  if (n >= 1000) return 'R$ ' + (n / 1000).toFixed(1).replace('.', ',') + ' mil';
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n);
-}
-
 function nodeClass(type: NodeType) {
   return NODE_META[type]?.className || NODE_META.note.className;
 }
@@ -739,8 +732,8 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
       if (runError) throw runError;
       setFlows(currentFlows);
       setRuns((runData || []) as Run[]);
-    } catch (e: any) {
-      setError(e?.message || 'Não foi possível carregar os fluxos.');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Não foi possível carregar os fluxos.');
       setFlows([]);
       setRuns([]);
     } finally {
@@ -1232,7 +1225,7 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
                 <SelectField label="Tipo" value={currentNode.node_type} onChange={v=>updateNode(currentNode.id,{node_type:v as NodeType})} options={(Object.keys(NODE_META) as NodeType[]).map(type=>({ value:type, label:NODE_META[type].label }))}/>
                 <Field label="Nome" value={currentNode.label} onChange={v=>updateNode(currentNode.id,{label:v})}/>
                 <label className="block"><span className="block text-[11px] font-semibold text-slate-500 mb-1.5">Descrição</span><textarea rows={4} value={currentNode.description} onChange={e=>updateNode(currentNode.id,{description:e.target.value})} className="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:ring-4 focus:ring-slate-100"/></label>
-                <SelectField label="Módulo RiseGoat" value={currentNode.module_name || ''} onChange={v=>updateNode(currentNode.id,{module_name:v||null,module_path:v?(MODULES as any)[v]:null})} options={Object.keys(MODULES)}/>
+                <SelectField label="Módulo RiseGoat" value={currentNode.module_name || ''} onChange={v=>updateNode(currentNode.id,{module_name:v||null,module_path:v ? MODULES[v as keyof typeof MODULES] : null})} options={Object.keys(MODULES)}/>
                 <div className="grid grid-cols-2 gap-2"><Field label="X" value={Math.round(currentNode.position_x)} onChange={v=>updateNode(currentNode.id,{position_x:Number(v)||0})} type="number"/><Field label="Y" value={Math.round(currentNode.position_y)} onChange={v=>updateNode(currentNode.id,{position_y:Number(v)||0})} type="number"/></div>
               </div>
               <div className="mt-6">
