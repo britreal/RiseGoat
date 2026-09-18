@@ -176,8 +176,8 @@ export function GoatPage() {
     {(tab === 'Livros' || tab === 'Audiobooks') && <Library items={tab === 'Livros' ? books : audio} audio={tab === 'Audiobooks'} add={() => { setForm({ status: tab === 'Livros' ? 'Ainda vou ler' : 'Ainda vou ouvir' }); setBulkText(''); setSelectedFile(null); setModal(tab === 'Livros' ? 'book' : 'audio'); }} del={del} />}
 
     {modal && <div className='fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4' onMouseDown={e => { if (e.target === e.currentTarget) resetModal(); }}>
-      <Card className='relative p-6 w-full max-w-md max-h-[90vh] overflow-y-auto'>
-        <button type='button' aria-label='Fechar popup' title='Fechar' onClick={resetModal} className='absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-100 hover:text-slate-900' ><X className='w-5 h-5' strokeWidth={2.5} /></button>
+      <Card className='relative p-6 pt-14 w-full max-w-md max-h-[90vh] overflow-y-auto'>
+        <button type='button' aria-label='Fechar popup' title='Fechar popup' onClick={resetModal} className='absolute right-3 top-3 z-20 flex h-10 w-10 items-center justify-center rounded-full border-2 border-slate-300 bg-white text-slate-900 shadow-md hover:bg-slate-100 hover:text-black focus:outline-none focus:ring-2 focus:ring-slate-400' ><X className='w-6 h-6' strokeWidth={3} /></button>
         <h2 className='font-bold mb-4 pr-8'>{modal === 'metric' ? 'Registrar evolução' : modal === 'habit' ? 'Novo hábito' : modal === 'book' ? 'Adicionar livros' : 'Adicionar audiobooks'}</h2>
         {modal === 'metric' ? <>
           <input type='date' className='w-full border p-2 rounded mb-2' value={form.recorded_on || today} onChange={e => setForm({ ...form, recorded_on: e.target.value })} />
