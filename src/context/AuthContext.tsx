@@ -89,16 +89,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signUp(email: string, password: string, username: string, displayName: string) {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { username: username.toLowerCase().trim(), display_name: displayName.trim() } },
+    });
     if (error) return { error: error.message };
     if (!data.user) return { error: 'Falha ao criar conta' };
 
-    const { error: profileError } = await supabase.from('profiles').insert({
-      id: data.user.id,
-      username: username.toLowerCase(),
-      display_name: displayName,
-    });
-    if (profileError) return { error: profileError.message };
+    // The profile is created by the database trigger so signup also works when email confirmation is enabled.
     return { error: null };
   }
 
