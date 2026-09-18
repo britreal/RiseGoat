@@ -725,13 +725,21 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
     }).eq('id', currentRunNode.id).eq('user_id', user.id);
     if (ce) return setError(ce.message);
 
+    const outgoingEdges = edges
+      .filter(e => e.source_node_id === run.current_node_id)
+      .map(e => ({ edge: e, node: nodes.find(n => n.id === e.target_node_id) }))
+      .filter(x => x.node) as Array<{ edge: FlowEdge; node: FlowNode }>;
+
+    if (!nextNodeId && outgoingEdges.length > 1) {
+      setError('Escolha o próximo caminho antes de concluir esta decisão.');
+      return;
+    }
+
     const nextCandidates = nextNodeId
       ? [nodes.find(n => n.id === nextNodeId)].filter(Boolean) as FlowNode[]
-      : edges.filter(e => e.source_node_id === run.current_node_id).map(e => nodes.find(n => n.id === e.target_node_id)).filter(Boolean) as FlowNode[];
+      : outgoingEdges.map(x => x.node);
 
-    const next = nextCandidates.length === 1
-      ? nextCandidates[0]
-      : nextCandidates.sort((a,b)=>a.sort_order-b.sort_order)[0];
+    const next = nextCandidates.length ? nextCandidates[0] : undefined;
 
     if (!next) {
       const { error: re } = await supabase.from('action_flow_runs').update({ status: 'completed', current_node_id: null, completed_at: now, updated_at: now }).eq('id', run.id).eq('user_id', user.id);
