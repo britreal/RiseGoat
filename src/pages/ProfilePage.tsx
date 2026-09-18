@@ -49,6 +49,8 @@ export function ProfilePage() {
   const [seoTitle, setSeoTitle] = useState('');
   const [seoDescription, setSeoDescription] = useState('');
   const [seoImageUrl, setSeoImageUrl] = useState('');
+  const [targetAudience, setTargetAudience] = useState('');
+  const [businessType, setBusinessType] = useState('criador');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [seoImageFile, setSeoImageFile] = useState<File | null>(null);
@@ -76,6 +78,8 @@ export function ProfilePage() {
     setSeoTitle(profile.seo_title || '');
     setSeoDescription(profile.seo_description || '');
     setSeoImageUrl(profile.seo_image_url || '');
+    setTargetAudience(profile.target_audience || '');
+    setBusinessType(profile.business_type || 'criador');
     setLoading(false);
   }, [profile, user]);
 
@@ -104,6 +108,8 @@ export function ProfilePage() {
         seo_title: seoTitle.trim(),
         seo_description: seoDescription.trim(),
         seo_image_url: nextSeoImage.trim(),
+        target_audience: targetAudience.trim(),
+        business_type: businessType,
       })
       .eq('id', user!.id);
       if (error) throw error;
@@ -198,6 +204,27 @@ export function ProfilePage() {
               <Upload className="w-4 h-4" /> {coverFile?.name || 'Escolher imagem do PC ou celular'}
               <input type="file" accept="image/*" className="hidden" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} />
             </label>
+          </div>
+        </Card>
+
+        <Card className="p-6 space-y-4">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-800">Direção do negócio</h2>
+            <p className="text-xs text-slate-400 mt-1">Defina para quem você cria e qual tipo de operação o RiseGoat deve priorizar.</p>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1.5">Público-alvo</label>
+            <textarea value={targetAudience} onChange={(e) => setTargetAudience(e.target.value)} placeholder="Ex.: criadores iniciantes que querem transformar audiência em negócio" rows={3} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 resize-none" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1.5">Modelo de operação</label>
+            <select value={businessType} onChange={(e) => setBusinessType(e.target.value)} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:outline-none focus:border-cyan-400">
+              <option value="criador">Criador / marca pessoal</option>
+              <option value="infoprodutor">Infoprodutor</option>
+              <option value="servico">Prestador de serviço</option>
+              <option value="agencia">Agência / equipe</option>
+              <option value="negocio">Negócio / empresa</option>
+            </select>
           </div>
         </Card>
 
