@@ -21,7 +21,7 @@ const navItems: NavItem[] = [
   { label: 'Ofertas', path: '/offers', icon: ShoppingBag, group: 'Monetização' },
   { label: 'Receita', path: '/revenue', icon: CircleDollarSign, group: 'Monetização' },
   { label: 'Centro de Comando', path: '/command-center', icon: Network, group: 'Estratégia' },
-  { label: 'GOAT', path: '/goat', icon: Activity, group: 'Estratégia' },
+  { label: 'GOAT', path: '/goat', icon: Activity, group: 'Personal' },
   { label: 'Parcerias', path: '/partnerships', icon: Handshake, group: 'Estratégia' },
   { label: 'Lançamentos', path: '/launches', icon: CalendarDays, group: 'Estratégia' },
   { label: 'Radar', path: '/radar', icon: RadarIcon, group: 'Estratégia' },
@@ -43,6 +43,7 @@ export function DashboardLayout({ children, currentPath, navigate }: DashboardLa
     'Conteúdo': 'text-violet-700 bg-violet-50',
     'Monetização': 'text-amber-700 bg-amber-50',
     'Estratégia': 'text-red-700 bg-red-50',
+    'Personal': 'text-slate-700 bg-slate-100',
     'Conta': 'text-slate-600 bg-slate-100',
     'Início': 'text-slate-700 bg-slate-100',
   };
