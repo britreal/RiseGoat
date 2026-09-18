@@ -18,6 +18,7 @@ const navItems: NavItem[] = [
   { label: 'Rascunhos', path: '/drafts', icon: FileText, group: 'Conteúdo' },
   { label: 'Páginas de venda', path: '/sales', icon: ShoppingBag, group: 'Monetização' },
   { label: 'Centro de Comando', path: '/command-center', icon: Network, group: 'Estratégia' },
+  { label: 'GOAT', path: '/goat', icon: Activity, group: 'Estratégia' },
   { label: 'Leads', path: '/leads', icon: Users, group: 'Crescimento' },
   { label: 'Analytics', path: '/analytics', icon: BarChart3, group: 'Crescimento' },
   { label: 'Configurações', path: '/settings', icon: Settings, group: 'Conta' },
