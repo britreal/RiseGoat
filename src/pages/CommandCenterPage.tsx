@@ -122,8 +122,14 @@ export function CommandCenterPage() {
 
   useEffect(() => {
     if (!user) return;
-    void syncRiseGoatData();
-    // syncRiseGoatData is intentionally invoked only when the authenticated user changes.
+
+    // Render the existing data first. The synchronization/radar process is secondary
+    // and must never be allowed to keep the entire page stuck on the spinner.
+    void (async () => {
+      await load();
+      await syncRiseGoatData();
+    })();
+    // The initialization intentionally runs only when the authenticated user changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
@@ -131,7 +137,10 @@ export function CommandCenterPage() {
     if (!user) return;
     const { error } = await supabase.rpc('authority_run_radar', { p_user_id: user.id });
     if (error) {
-      setNotice(error.message);
+      setNotice(`Radar indisponível: ${error.message}`);
+      // A radar failure must not leave the whole Command Center in a permanent loading state.
+      setLoading(false);
+      setRefreshing(false);
       return;
     }
     await load();
