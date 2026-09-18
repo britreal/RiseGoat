@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
-import { Card, Spinner } from '@/components/ui';
+import { Spinner } from '@/components/ui';
 import type {
   AuthorityProperty, AuthorityContact, AuthorityConnection, AuthorityTask,
   AuthorityContent, AuthorityOpportunity, ReciprocityEntry, LeverageNode,
@@ -519,39 +519,39 @@ export function CommandCenterPage() {
   if (loading) return <Spinner />;
 
   return (
-    <div className="p-6 lg:p-8 max-w-7xl mx-auto">
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6">
+    <div className="min-h-full bg-gradient-to-br from-slate-50 via-white to-cyan-50/30 p-4 sm:p-6 lg:p-8 max-w-[1500px] mx-auto">
+      <div className="mb-7 rounded-3xl border border-slate-200/80 bg-white/85 backdrop-blur-sm shadow-[0_12px_40px_rgba(15,23,42,0.06)] p-5 lg:p-6"><div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-cyan-600">Centro de Comando</p>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight mt-1">Teia de Autoridade</h1>
           <p className="text-sm text-slate-500 mt-1 max-w-2xl">Conecte propriedades, pessoas, conteúdo, tarefas e oportunidades em uma visão única.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={syncRiseGoatData} className="flex items-center gap-2 px-3 py-2 border border-cyan-200 bg-cyan-50 text-cyan-700 rounded-lg text-xs font-medium hover:bg-cyan-100">
+          <button onClick={syncRiseGoatData} className="flex items-center gap-2 px-3.5 py-2.5 border border-cyan-200 bg-cyan-50 text-cyan-700 rounded-xl text-xs font-semibold hover:bg-cyan-100 transition shadow-sm">
             <RefreshCw className="w-4 h-4" /> Sincronizar RiseGoat
           </button>
-          <button onClick={runRadar} className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50">
+          <button onClick={runRadar} className="flex items-center gap-2 px-3.5 py-2.5 border border-slate-200/80 bg-white rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm">
             <Target className="w-4 h-4" /> Rodar radar
           </button>
-          <label className="inline-flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 cursor-pointer hover:bg-slate-50">
+          <label className="inline-flex items-center gap-2 px-3.5 py-2.5 border border-slate-200/80 bg-white rounded-xl text-xs font-semibold text-slate-600 cursor-pointer hover:bg-slate-50 transition shadow-sm">
             <Upload className="w-4 h-4" /> Importar
             <input type="file" accept="application/json" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) importData(file); e.currentTarget.value = ''; }} />
           </label>
-          <button onClick={exportData} className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50"><Download className="w-4 h-4" /> Exportar</button>
-          <button onClick={load} className="p-2 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50" title="Atualizar"><RefreshCw className={'w-4 h-4 ' + (refreshing ? 'animate-spin' : '')} /></button>
+          <button onClick={exportData} className="flex items-center gap-2 px-3.5 py-2.5 border border-slate-200/80 bg-white rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm"><Download className="w-4 h-4" /> Exportar</button>
+          <button onClick={load} className="p-2.5 border border-slate-200/80 bg-white rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition shadow-sm" title="Atualizar"><RefreshCw className={'w-4 h-4 ' + (refreshing ? 'animate-spin' : '')} /></button>
         </div>
-      </div>
+      </div></div>
 
-      <div className="flex flex-wrap gap-1 mb-5 p-1 bg-slate-100 rounded-xl w-fit">
+      <div className="mb-6 flex w-full items-center gap-1 overflow-x-auto rounded-2xl border border-slate-200/80 bg-white/75 p-1.5 shadow-sm backdrop-blur-sm">
         {tabs.map((item) => (
-          <button key={item.id} onClick={() => setTab(item.id)} className={'flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition ' + (tab === item.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
+          <button key={item.id} onClick={() => setTab(item.id)} className={'flex shrink-0 items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ' + (tab === item.id ? 'bg-slate-950 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800')}>
             <item.icon className="w-3.5 h-3.5" />{item.label}
           </button>
         ))}
       </div>
 
       {notice && (
-        <div className="mb-4 flex items-start gap-2 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50 text-sm text-amber-800">
+        <div className="mb-5 flex items-start gap-3 rounded-2xl border border-amber-200/80 bg-amber-50/80 px-4 py-3.5 text-sm text-amber-900 shadow-sm">
           <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
           <span className="flex-1">{notice}</span>
           <button onClick={() => setNotice('')}><X className="w-4 h-4" /></button>
@@ -587,6 +587,8 @@ export function CommandCenterPage() {
   );
 }
 
+function CommandCard({ children, className = '' }: { children: React.ReactNode; className?: string }) { return <div className={'group bg-white/95 rounded-2xl border border-slate-200/80 shadow-[0_8px_30px_rgba(15,23,42,0.05)] transition duration-200 hover:border-slate-300/80 hover:shadow-[0_14px_34px_rgba(15,23,42,0.08)] ' + className}>{children}</div>; }
+
 function Overview(props: {
   totals: { activeProperties:number; warmContacts:number; openValue:number; monthlyRevenue:number };
   nodes: Array<{id:string;type:EntityType;name:string;label:string}>;
@@ -603,7 +605,7 @@ function Overview(props: {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-5">
-        <Card className="p-5">
+        <CommandCard className="p-5">
           <SectionHeader title="Painel de ação" action={() => props.onTab('action')} />
           <div className="space-y-2">
             <AlertLine label="Tarefas para hoje" value={String(props.todayTasks.length)} tone={props.todayTasks.length ? 'warn' : 'ok'} />
@@ -611,9 +613,9 @@ function Overview(props: {
             <AlertLine label="Nós isolados" value={String(props.isolated.length)} tone={props.isolated.length ? 'warn' : 'ok'} />
             <AlertLine label="Oportunidades paradas +7d" value={String(props.stagnant.length)} tone={props.stagnant.length ? 'warn' : 'ok'} />
           </div>
-        </Card>
+        </CommandCard>
 
-        <Card className="p-5">
+        <CommandCard className="p-5">
           <SectionHeader title="Top oportunidades" action={() => props.onTab('opportunities')} />
           {props.topOpportunities.length === 0 ? (
             <p className="text-sm text-slate-400 py-6 text-center">Nenhuma oportunidade aberta.</p>
@@ -628,10 +630,10 @@ function Overview(props: {
               ))}
             </div>
           )}
-        </Card>
+        </CommandCard>
       </div>
 
-      <Card className="p-5">
+      <CommandCard className="p-5">
         <SectionHeader title="Tamanho da teia" action={() => props.onTab('map')} />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <MiniStat label="Nós" value={String(props.nodes.length)} />
@@ -639,17 +641,17 @@ function Overview(props: {
           <MiniStat label="Contatos" value={String(props.nodes.filter((x) => x.type === 'contact').length)} />
           <MiniStat label="Conexões" value="Use o mapa" />
         </div>
-      </Card>
+      </CommandCard>
     </div>
   );
 }
 
 function Metric({ label, value, icon: Icon }: { label:string; value:string; icon: typeof Users }) {
-  return <Card className="p-4"><div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center mb-3"><Icon className="w-4 h-4 text-slate-600" /></div><p className="text-xl font-bold text-slate-900">{value}</p><p className="text-xs text-slate-500 mt-1">{label}</p></Card>;
+  return <CommandCard className="p-4"><div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center mb-3"><Icon className="w-4 h-4 text-slate-600" /></div><p className="text-xl font-bold text-slate-900">{value}</p><p className="text-xs text-slate-500 mt-1">{label}</p></CommandCard>;
 }
-function MiniStat({ label, value }: { label:string; value:string }) { return <div className="p-3 rounded-xl border border-slate-200 bg-slate-50"><p className="text-lg font-bold text-slate-800">{value}</p><p className="text-xs text-slate-400">{label}</p></div>; }
-function SectionHeader({ title, action }: { title:string; action:()=>void }) { return <div className="flex items-center justify-between mb-3"><h2 className="text-sm font-semibold text-slate-800">{title}</h2><button onClick={action} className="text-xs text-cyan-600 hover:text-cyan-500">Abrir <ArrowRight className="w-3 h-3 inline ml-1" /></button></div>; }
-function AlertLine({ label, value, tone }: { label:string; value:string; tone:'warn'|'ok' }) { return <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50"><span className="text-sm text-slate-600">{label}</span><span className={'text-sm font-semibold ' + (tone === 'warn' ? 'text-amber-600' : 'text-emerald-600')}>{value}</span></div>; }
+function MiniStat({ label, value }: { label:string; value:string }) { return <div className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/80"><p className="text-xl font-bold tracking-tight text-slate-900">{value}</p><p className="text-[11px] font-medium uppercase tracking-wide text-slate-400 mt-1">{label}</p></div>; }
+function SectionHeader({ title, action }: { title:string; action:()=>void }) { return <div className="flex items-center justify-between gap-3 mb-4"><div className="flex items-center gap-2.5"><span className="h-5 w-1 rounded-full bg-cyan-500" /><h2 className="text-sm font-bold text-slate-900">{title}</h2></div><button onClick={action} className="inline-flex items-center gap-1 text-xs font-semibold text-cyan-600 hover:text-cyan-500">Abrir <ArrowRight className="w-3 h-3" /></button></div>; }
+function AlertLine({ label, value, tone }: { label:string; value:string; tone:'warn'|'ok' }) { return <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/70 px-3.5 py-3"><span className="text-sm text-slate-600">{label}</span><span className={'inline-flex min-w-8 justify-center rounded-full px-2 py-1 text-xs font-bold ' + (tone === 'warn' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700')}>{value}</span></div>; }
 
 function NetworkMap(props: {
   nodes:Array<{id:string;type:EntityType;name:string;label:string}>;
@@ -671,13 +673,13 @@ function NetworkMap(props: {
   return (
     <div className="space-y-4">
       <div className="flex flex-col lg:flex-row gap-2">
-        <div className="relative flex-1"><Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" /><input value={props.search} onChange={(e)=>props.setSearch(e.target.value)} placeholder="Buscar um nó..." className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg" /></div>
+        <div className="relative flex-1 lg:max-w-xl"><Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" /><input value={props.search} onChange={(e)=>props.setSearch(e.target.value)} placeholder="Buscar um nó..." className="w-full rounded-xl border border-slate-200/90 bg-white pl-10 pr-3.5 py-2.5 text-sm shadow-sm outline-none transition focus:border-cyan-400 focus:ring-4 focus:ring-cyan-50" /></div>
         <div className="flex gap-1 p-1 bg-slate-100 rounded-lg">
           {(['all','property','contact'] as const).map((t)=><button key={t} onClick={()=>setTypeFilter(t)} className={'px-3 py-1.5 rounded-md text-xs font-medium '+(typeFilter===t?'bg-white text-slate-900 shadow-sm':'text-slate-500')}>{t==='all'?'Todos':t==='property'?'Propriedades':'Contatos'}</button>)}
         </div>
         <div className="px-3 py-2 text-xs text-slate-500 bg-slate-50 rounded-lg">{visible.length} nós · {props.connections.length} conexões</div>
       </div>
-      <Card className="p-3 overflow-hidden">
+      <CommandCard className="p-3 overflow-hidden">
         {visible.length===0?<div className="h-[520px] flex items-center justify-center text-sm text-slate-400">Crie propriedades ou contatos para começar.</div>:(
           <div className="relative h-[520px] rounded-xl bg-slate-950 overflow-hidden">
             <svg className="absolute inset-0 w-full h-full">
@@ -699,7 +701,7 @@ function NetworkMap(props: {
             </div>}
           </div>
         )}
-      </Card>
+      </CommandCard>
     </div>
   );
 }
@@ -739,7 +741,7 @@ function CRM(props: {
       </div>
 
       {showForm && (
-        <Card className="p-4">
+        <CommandCard className="p-4">
           <form onSubmit={submit} className="grid sm:grid-cols-2 gap-3">
             {subtab === 'properties' && <>
               <Input label="Nome" value={name} onChange={setName} required />
@@ -776,7 +778,7 @@ function CRM(props: {
             </>}
             <div className="sm:col-span-2 flex gap-2 pt-1"><button type="submit" className="px-4 py-2 bg-slate-900 text-white text-sm rounded-lg">Salvar</button><button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-slate-500 text-sm rounded-lg">Cancelar</button></div>
           </form>
-        </Card>
+        </CommandCard>
       )}
 
       {subtab === 'properties' && <Table rows={props.properties} empty="Nenhuma propriedade cadastrada." columns={['Nome','Tipo','Plataforma','Status']} render={(x) => <><Cell strong>{x.name}</Cell><Cell>{x.property_type}</Cell><Cell>{x.platform || '—'}</Cell><Cell>{x.status}</Cell></>} actions={(x) => <button onClick={() => props.onDelete('authority_properties', x.id)} className="p-1.5 text-red-400 hover:bg-red-50 rounded"><Trash2 className="w-4 h-4" /></button>} />}
@@ -785,7 +787,7 @@ function CRM(props: {
         const a=props.nodes.find((n)=>n.id===x.origin_id); const b=props.nodes.find((n)=>n.id===x.destination_id);
         return <><Cell strong>{a?.name || '—'}</Cell><Cell>{x.connection_type}</Cell><Cell>{b?.name || '—'}</Cell><Cell>{x.strength}</Cell></>;
       }} actions={(x) => <button onClick={() => props.onDelete('authority_connections', x.id)} className="p-1.5 text-red-400 hover:bg-red-50 rounded"><Trash2 className="w-4 h-4" /></button>} />}
-      {subtab === 'contents' && <Card className="overflow-hidden"><div className="overflow-x-auto"><table className="w-full text-left"><thead><tr className="border-b border-slate-100 bg-slate-50"><th className="px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase">Título</th><th className="px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase">Tipo</th><th className="px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase">Status</th><th className="px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase">Origem</th></tr></thead><tbody className="divide-y divide-slate-100">{props.contents.slice(0,100).map((x)=><tr key={x.id}><Cell strong>{x.title}</Cell><Cell>{x.content_type}</Cell><Cell>{x.status}</Cell><Cell>{x.source_kind||'manual'}</Cell></tr>)}</tbody></table></div></Card>}
+      {subtab === 'contents' && <CommandCard className="overflow-hidden"><div className="overflow-x-auto"><table className="w-full text-left"><thead><tr className="border-b border-slate-100 bg-slate-50"><th className="px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase">Título</th><th className="px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase">Tipo</th><th className="px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase">Status</th><th className="px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase">Origem</th></tr></thead><tbody className="divide-y divide-slate-100">{props.contents.slice(0,100).map((x)=><tr key={x.id}><Cell strong>{x.title}</Cell><Cell>{x.content_type}</Cell><Cell>{x.status}</Cell><Cell>{x.source_kind||'manual'}</Cell></tr>)}</tbody></table></div></CommandCard>}
     </div>
   );
 }
@@ -798,7 +800,7 @@ function ActionPanel(props: {
   const [title,setTitle]=useState(''); const [due,setDue]=useState(props.today); const [priority,setPriority]=useState('Média'); const [taskType,setTaskType]=useState('Analisar'); const [entity,setEntity]=useState('');
   return (
     <div className="space-y-5">
-      <Card className="p-5">
+      <CommandCard className="p-5">
         <div className="flex items-center justify-between mb-3"><h2 className="text-sm font-semibold text-slate-800">Criar tarefa</h2><CheckSquare className="w-4 h-4 text-slate-400" /></div>
         <form onSubmit={(e)=>{e.preventDefault();props.onAddTask({title,due_date:due,priority,task_type:taskType,entity_id:entity||null,entity_type:entity?(props.nodes.find((n)=>n.id===entity)?.type||null):null,status:due===props.today?'Hoje':'Backlog'});setTitle('')}} className="grid sm:grid-cols-2 lg:grid-cols-5 gap-2">
           <input required value={title} onChange={(e)=>setTitle(e.target.value)} placeholder="O que precisa ser feito?" className="px-3 py-2 border rounded-lg text-sm lg:col-span-2" />
@@ -807,8 +809,8 @@ function ActionPanel(props: {
           <Select value={taskType} onChange={setTaskType} options={taskTypes} label="Tipo" />
           <div className="lg:col-span-5"><Select value={entity} onChange={setEntity} options={['',...props.nodes.map((n)=>n.id)]} labels={Object.fromEntries(props.nodes.map((n)=>[n.id,n.name]))} label="Vincular a um nó" /><button className="mt-2 px-4 py-2 bg-slate-900 text-white text-sm rounded-lg">Criar tarefa</button></div>
         </form>
-      </Card>
-      <Card className="p-5">
+      </CommandCard>
+      <CommandCard className="p-5">
         <div className="flex items-center justify-between mb-4"><h2 className="text-sm font-semibold text-slate-800">Hoje e próximos follow-ups</h2><span className="text-xs text-slate-400">{props.tasks.filter((t)=>t.status!=='Feito').length} abertas</span></div>
         <div className="space-y-2">
           {props.tasks.filter((t)=>t.status!=='Feito').slice(0,25).map((task)=><div key={task.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100">
@@ -818,7 +820,7 @@ function ActionPanel(props: {
           </div>)}
         </div>
         {props.isolated.length>0 && <div className="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-100 text-xs text-amber-700"><strong>{props.isolated.length} nós isolados.</strong> Conecte-os a uma propriedade ou contato para incluir no mapa.</div>}
-      </Card>
+      </CommandCard>
     </div>
   );
 }
@@ -835,28 +837,28 @@ function OpportunityPanel(props:{
   const [opportunity,setOpportunity]=useState(''); const [value,setValue]=useState(''); const [status,setStatus]=useState('Identificada');
   return (
     <div className="space-y-5">
-      <Card className="p-5">
+      <CommandCard className="p-5">
         <form className="grid sm:grid-cols-[1fr_160px_180px_auto] gap-2" onSubmit={(e)=>{e.preventDefault();props.onAdd({opportunity,estimated_value:Number(value||0),status});setOpportunity('');setValue('')}}>
           <input required value={opportunity} onChange={(e)=>setOpportunity(e.target.value)} placeholder="Nova oportunidade..." className="px-3 py-2 border rounded-lg text-sm" />
           <input type="number" value={value} onChange={(e)=>setValue(e.target.value)} placeholder="Valor" className="px-3 py-2 border rounded-lg text-sm" />
           <Select value={status} onChange={setStatus} options={opportunityStatuses} label="Etapa" />
           <button className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm"><Plus className="w-4 h-4 inline mr-1" />Adicionar</button>
         </form>
-      </Card>
-      <div className="grid lg:grid-cols-5 gap-3">
+      </CommandCard>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
         {opportunityStatuses.map((stage)=>(
-          <Card key={stage} className="p-3 min-h-[260px]">
-            <div className="flex items-center justify-between mb-3"><h3 className="text-xs font-semibold text-slate-600">{stage}</h3><span className="text-[10px] text-slate-400">{props.opportunities.filter((o)=>o.status===stage).length}</span></div>
+          <CommandCard key={stage} className="p-4 min-h-[280px]">
+            <div className="flex items-center justify-between gap-2 mb-4"><div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-cyan-500" /><h3 className="text-xs font-bold uppercase tracking-wide text-slate-700">{stage}</h3></div><span className="inline-flex min-w-6 justify-center rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-500">{props.opportunities.filter((o)=>o.status===stage).length}</span></div>
             <div className="space-y-2">
-              {props.opportunities.filter((o)=>o.status===stage).map((op)=><div key={op.id} className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+              {props.opportunities.filter((o)=>o.status===stage).map((op)=><div key={op.id} className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-100/90 hover:bg-white hover:shadow-sm transition">
                 <p className="text-sm font-medium text-slate-800">{op.opportunity}</p><p className="text-sm font-semibold text-slate-700 mt-2">{money(op.estimated_value)}</p>
-                <div className="flex items-center gap-2 mt-2"><select value={op.status} onChange={(e)=>props.onUpdate(op.id,e.target.value)} className="flex-1 min-w-0 text-[11px] border border-slate-200 rounded-lg bg-white px-2 py-1.5">{opportunityStatuses.map((s)=><option key={s}>{s}</option>)}</select><button type="button" onClick={()=>{if(window.confirm('Apagar esta oportunidade?')) props.onDelete(op.id)}} aria-label="Apagar oportunidade" title="Apagar oportunidade" className="shrink-0 p-2 text-red-500 border border-red-100 rounded-lg hover:bg-red-50"><Trash2 className="w-4 h-4"/></button></div>
+                <div className="flex items-center gap-2 mt-2"><select value={op.status} onChange={(e)=>props.onUpdate(op.id,e.target.value)} className="flex-1 min-w-0 text-[11px] border border-slate-200/90 rounded-xl bg-white px-2.5 py-2">{opportunityStatuses.map((s)=><option key={s}>{s}</option>)}</select><button type="button" onClick={()=>{if(window.confirm('Apagar esta oportunidade?')) props.onDelete(op.id)}} aria-label="Apagar oportunidade" title="Apagar oportunidade" className="shrink-0 p-2 text-red-500 border border-red-100 rounded-lg hover:bg-red-50"><Trash2 className="w-4 h-4"/></button></div>
               </div>)}
             </div>
-          </Card>
+          </CommandCard>
         ))}
       </div>
-      <Card className="p-5">
+      <CommandCard className="p-5">
         <div className="mb-4"><h2 className="text-sm font-semibold text-slate-800">Mapa de calor de oportunidades</h2><p className="text-xs text-slate-400 mt-1">Potencial relativo estimado a partir do que já existe na sua teia: conexões e sinais de influência cadastrados.</p></div>
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
           {props.nodes.slice(0,24).map((n)=>{
@@ -865,7 +867,7 @@ function OpportunityPanel(props:{
             return <div key={n.id} className="rounded-xl border border-slate-200 p-3" style={{backgroundColor:'rgba(108,99,255,'+(heat/500)+')'}}><p className="text-xs font-medium text-slate-800 truncate">{n.name}</p><p className="text-[11px] text-slate-500 mt-1">{n.label}</p><p className="text-sm font-bold text-slate-900 mt-2">{Math.round(heat)}</p></div>;
           })}
         </div>
-      </Card>
+      </CommandCard>
     </div>
   );
 }
@@ -925,7 +927,7 @@ function IntelligencePanel(props:{
 
   return (
     <div className="space-y-5">
-      <Card className="p-5">
+      <CommandCard className="p-5">
         <div className="flex items-center justify-between mb-4"><div><h2 className="text-sm font-semibold text-slate-800">Dialog Club</h2><p className="text-xs text-slate-400 mt-1">Classificação manual baseada em riqueza, fama e poder de decisão. C representa a faixa mais alta.</p></div><Users className="w-4 h-4 text-slate-400"/></div>
         {props.contacts.length===0?<p className="text-sm text-slate-400">Cadastre contatos para criar perfis dinâmicos.</p>:<div className="grid lg:grid-cols-[240px_1fr] gap-5">
           <div className="space-y-2 max-h-72 overflow-y-auto">{props.contacts.map((c)=>{
@@ -941,9 +943,9 @@ function IntelligencePanel(props:{
             <button onClick={()=>props.onUpdateContact(current.id,{wealth_score:Number(wealth||0),fame_score:Number(fame||0),decision_power_score:Number(decision||0),resources_score:Number(resources||0),intelligence_notes:notes})} className="mt-3 px-4 py-2 bg-slate-900 text-white text-xs rounded-lg">Salvar avaliação</button>
           </div>}
         </div>}
-      </Card>
+      </CommandCard>
 
-      <Card className="p-5">
+      <CommandCard className="p-5">
         <div className="flex items-center justify-between mb-4"><div><h2 className="text-sm font-semibold text-slate-800">Radar: quem deveria conhecer quem?</h2><p className="text-xs text-slate-400 mt-1">Sugestões baseadas em dados que você cadastrou, como tags e contexto. O sistema não inventa relações.</p></div><ArrowRight className="w-4 h-4 text-slate-400"/></div>
         {localSuggestions.length===0?<p className="text-sm text-slate-400">Adicione tags aos contatos e propriedades para gerar sugestões.</p>:<div className="space-y-2">{localSuggestions.map((s,i)=><div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100">
           <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center"><Link2 className="w-4 h-4 text-slate-500"/></div>
@@ -951,9 +953,9 @@ function IntelligencePanel(props:{
           <span className="text-xs font-semibold text-slate-500">{s.score}</span>
           <button onClick={()=>props.onSaveSuggestion(s)} className="px-3 py-1.5 text-xs rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">Salvar</button>
         </div>)}</div>}
-      </Card>
+      </CommandCard>
 
-      {props.suggestions.length>0&&<Card className="p-5"><h2 className="text-sm font-semibold text-slate-800 mb-3">Sugestões salvas</h2><div className="space-y-2">{props.suggestions.slice(0,10).map((s)=><div key={s.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50"><div><p className="text-sm text-slate-700">{suggestionName(s.source_entity_id)} → {suggestionName(s.target_entity_id)}</p><p className="text-xs text-slate-400">{s.reason}</p></div><span className="text-xs font-semibold text-slate-500">{s.score}</span></div>)}</div></Card>}
+      {props.suggestions.length>0&&<CommandCard className="p-5"><h2 className="text-sm font-semibold text-slate-800 mb-3">Sugestões salvas</h2><div className="space-y-2">{props.suggestions.slice(0,10).map((s)=><div key={s.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50"><div><p className="text-sm text-slate-700">{suggestionName(s.source_entity_id)} → {suggestionName(s.target_entity_id)}</p><p className="text-xs text-slate-400">{s.reason}</p></div><span className="text-xs font-semibold text-slate-500">{s.score}</span></div>)}</div></CommandCard>}
     </div>
   );
 }
@@ -974,7 +976,7 @@ function DefensePanel(props:{
   };
   return (
     <div className="space-y-5">
-      <Card className="p-5">
+      <CommandCard className="p-5">
         <div className="flex items-center justify-between mb-4"><div><h2 className="text-sm font-semibold text-slate-800">Radar de defesa</h2><p className="text-xs text-slate-400 mt-1">Monitore riscos de reputação, concorrência e segurança. As ações são sugestões para revisão humana.</p></div><Shield className="w-4 h-4 text-slate-400"/></div>
         <form className="grid sm:grid-cols-2 gap-3" onSubmit={(e)=>{e.preventDefault();props.onAddThreat({title,category,severity,source_url:source,evidence});setTitle('');setSource('');setEvidence('')}}>
           <Input label="Ocorrência" value={title} onChange={setTitle} required placeholder="Ex.: menção negativa, concorrência agressiva..." />
@@ -984,14 +986,14 @@ function DefensePanel(props:{
           <div className="sm:col-span-2"><label className="block text-[11px] font-medium text-slate-500 mb-1">Evidência / contexto</label><textarea value={evidence} onChange={(e)=>setEvidence(e.target.value)} rows={3} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg resize-none" /></div>
           <button className="sm:col-span-2 justify-self-start px-4 py-2 bg-slate-900 text-white text-xs rounded-lg"><Plus className="w-4 h-4 inline mr-1"/>Registrar ocorrência</button>
         </form>
-      </Card>
+      </CommandCard>
       <div className="grid lg:grid-cols-2 gap-4">
-        {props.threats.length===0?<Card className="p-8"><p className="text-sm text-slate-400 text-center">Nenhuma ocorrência registrada. Rode o radar para verificar nós isolados e oportunidades paradas.</p></Card>:props.threats.slice(0,30).map((t)=><Card key={t.id} className="p-5">
+        {props.threats.length===0?<CommandCard className="p-8"><p className="text-sm text-slate-400 text-center">Nenhuma ocorrência registrada. Rode o radar para verificar nós isolados e oportunidades paradas.</p></CommandCard>:props.threats.slice(0,30).map((t)=><CommandCard key={t.id} className="p-5">
           <div className="flex items-start gap-3"><div className="flex-1 min-w-0"><div className="flex items-center gap-2"><h3 className="text-sm font-semibold text-slate-800 truncate">{t.title}</h3><span className="text-xs text-slate-400">{t.severity}</span></div><p className="text-xs text-slate-400 mt-1">{t.category} · {new Date(t.detected_at).toLocaleDateString('pt-BR')}</p>{t.source_url&&<a href={t.source_url} target="_blank" rel="noopener noreferrer" className="text-xs text-cyan-600 mt-2 inline-block">Abrir fonte</a>}<p className="text-sm text-slate-600 mt-3">{t.evidence||'Sem evidência adicional.'}</p></div><select value={t.status} onChange={(e)=>props.onUpdateThreat(t.id,{status:e.target.value})} className="w-28 px-2 py-1.5 text-xs border rounded-lg"><option>Aberta</option><option>Em análise</option><option>Resolvida</option></select></div>
           <div className="mt-4 p-3 rounded-xl bg-slate-50"><p className="text-[11px] font-semibold text-slate-500 mb-2">Próximas ações sugeridas</p><div className="flex flex-wrap gap-2"><button onClick={()=>props.onAddAction(t,'Criar conteúdo',responseTemplate(t))} className="px-3 py-1.5 text-xs border rounded-lg hover:bg-white">Criar conteúdo</button><button onClick={()=>props.onAddAction(t,'Notificar aliado',responseTemplate(t))} className="px-3 py-1.5 text-xs border rounded-lg hover:bg-white">Notificar aliado</button><button onClick={()=>props.onAddAction(t,'Criar tarefa',responseTemplate(t))} className="px-3 py-1.5 text-xs border rounded-lg hover:bg-white">Criar tarefa</button></div></div>
-        </Card>)}
+        </CommandCard>)}
       </div>
-      {props.actions.length>0&&<Card className="p-5"><h2 className="text-sm font-semibold text-slate-800 mb-3">Ações registradas</h2><div className="space-y-2">{props.actions.slice(0,15).map((a)=><div key={a.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50"><span className="flex-1 text-sm text-slate-700">{a.action_title}</span><span className="text-xs text-slate-400">{a.status}</span></div>)}</div></Card>}
+      {props.actions.length>0&&<CommandCard className="p-5"><h2 className="text-sm font-semibold text-slate-800 mb-3">Ações registradas</h2><div className="space-y-2">{props.actions.slice(0,15).map((a)=><div key={a.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50"><span className="flex-1 text-sm text-slate-700">{a.action_title}</span><span className="text-xs text-slate-400">{a.status}</span></div>)}</div></CommandCard>}
     </div>
   );
 }
@@ -1018,42 +1020,42 @@ function FinancePanel(props:{
   return (
     <div className="space-y-5">
       <div className="grid lg:grid-cols-2 gap-5">
-        <Card className="p-5">
+        <CommandCard className="p-5">
           <div className="flex items-center justify-between mb-3"><h2 className="text-sm font-semibold text-slate-800">Pipeline de produtos</h2><Briefcase className="w-4 h-4 text-slate-400"/></div>
           <form className="space-y-2" onSubmit={(e)=>{e.preventDefault();props.onAddProduct({product,status,monthly_revenue:Number(revenue||0),margin:Number(margin||0)});setProduct('');setRevenue('');setMargin('')}}>
             <Input label="Produto" value={product} onChange={setProduct} required/><Select label="Status" value={status} onChange={setStatus} options={['Ideia','Em criação','Pronto','Vendendo']}/><div className="grid grid-cols-2 gap-2"><Input label="Receita mensal" value={revenue} onChange={setRevenue} type="number"/><Input label="Margem %" value={margin} onChange={setMargin} type="number"/></div><button className="px-3 py-2 bg-slate-900 text-white text-xs rounded-lg"><Plus className="w-4 h-4 inline mr-1"/>Adicionar</button>
           </form>
-        </Card>
-        <Card className="p-5">
+        </CommandCard>
+        <CommandCard className="p-5">
           <div className="flex items-center justify-between mb-3"><h2 className="text-sm font-semibold text-slate-800">Calculadora de comissão</h2><Wallet className="w-4 h-4 text-slate-400"/></div>
           <form className="space-y-2" onSubmit={(e)=>{e.preventDefault();props.onAddCommission({business_value:Number(business||0),rate:Number(rate||0),payment_method:method});setBusiness('');setRate('');}}>
             <div className="grid grid-cols-2 gap-2"><Input label="Valor do negócio" value={business} onChange={setBusiness} type="number"/><Input label="Taxa %" value={rate} onChange={setRate} type="number"/></div><Input label="Forma de pagamento" value={method} onChange={setMethod} placeholder="Pix, transferência..."/><button className="px-3 py-2 bg-slate-900 text-white text-xs rounded-lg"><Plus className="w-4 h-4 inline mr-1"/>Adicionar</button>
           </form>
-        </Card>
+        </CommandCard>
       </div>
 
-      <Card className="p-5">
+      <CommandCard className="p-5">
         <div className="mb-4"><h2 className="text-sm font-semibold text-slate-800">Monetização por nó</h2><p className="text-xs text-slate-400 mt-1">Registre receita direta, receita indireta e custo para acompanhar ROI de cada propriedade ou contato.</p></div>
         {props.nodes.length>0?<><Select label="Nó" value={node} onChange={setNode} options={props.nodes.map((n)=>n.id)} labels={Object.fromEntries(props.nodes.map((n)=>[n.id,n.name]))}/><div className="grid sm:grid-cols-3 gap-2 mt-2"><Input label="Receita direta" value={direct} onChange={setDirect} type="number"/><Input label="Receita indireta" value={indirect} onChange={setIndirect} type="number"/><Input label="Custo" value={cost} onChange={setCost} type="number"/></div><div className="flex items-center justify-between mt-3"><span className="text-sm text-slate-500">ROI atual</span><span className="text-xl font-bold text-slate-900">{Number(roi).toFixed(1)}%</span></div><button onClick={saveNodeMoney} className="mt-3 px-3 py-2 bg-cyan-600 text-white text-xs rounded-lg">Salvar ROI</button></>:<p className="text-sm text-slate-400">Crie propriedades ou contatos.</p>}
-      </Card>
+      </CommandCard>
 
-      <Card className="p-5">
+      <CommandCard className="p-5">
         <h2 className="text-sm font-semibold text-slate-800 mb-3">Produtos</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">{['Ideia','Em criação','Pronto','Vendendo'].map((s)=><div key={s} className="p-3 rounded-xl bg-slate-50 min-h-[130px]"><p className="text-xs font-semibold text-slate-500 mb-2">{s}</p>{props.products.filter((p)=>p.status===s).map((p)=><div key={p.id} className="p-2 bg-white rounded-lg border mb-2"><p className="text-xs font-medium text-slate-700">{p.product}</p><p className="text-[11px] text-slate-400">{money(p.monthly_revenue)} / mês · {p.margin}% margem</p></div>)}</div>)}</div>
-      </Card>
-      <Card className="p-5"><h2 className="text-sm font-semibold text-slate-800 mb-3">Comissões</h2><div className="space-y-2">{props.commissions.length===0?<p className="text-sm text-slate-400">Nenhuma comissão.</p>:props.commissions.map((c)=><div key={c.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50"><span className="text-sm text-slate-700">{money(c.business_value)}</span><span className="text-sm font-semibold text-slate-800">{money(c.business_value*c.rate/100)}</span><span className="text-xs text-slate-400">{c.status}</span></div>)}</div></Card>
+      </CommandCard>
+      <CommandCard className="p-5"><h2 className="text-sm font-semibold text-slate-800 mb-3">Comissões</h2><div className="space-y-2">{props.commissions.length===0?<p className="text-sm text-slate-400">Nenhuma comissão.</p>:props.commissions.map((c)=><div key={c.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50"><span className="text-sm text-slate-700">{money(c.business_value)}</span><span className="text-sm font-semibold text-slate-800">{money(c.business_value*c.rate/100)}</span><span className="text-xs text-slate-400">{c.status}</span></div>)}</div></CommandCard>
     </div>
   );
 }
 
 function Input(props:{label?:string;value:string;onChange:(v:string)=>void;placeholder?:string;required?:boolean;type?:string}) {
-  return <label className="block"><span className="block text-[11px] font-medium text-slate-500 mb-1">{props.label}</span><input type={props.type||'text'} required={props.required} value={props.value} onChange={(e)=>props.onChange(e.target.value)} placeholder={props.placeholder} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400"/></label>;
+  return <label className="block"><span className="block text-[11px] font-medium text-slate-500 mb-1">{props.label}</span><input type={props.type||'text'} required={props.required} value={props.value} onChange={(e)=>props.onChange(e.target.value)} placeholder={props.placeholder} className="w-full rounded-xl border border-slate-200/90 bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-400 focus:ring-4 focus:ring-cyan-50"/></label>;
 }
 function Select(props:{label?:string;value:string;onChange:(v:string)=>void;options:string[];labels?:Record<string,string>}) {
-  return <label className="block"><span className="block text-[11px] font-medium text-slate-500 mb-1">{props.label}</span><div className="relative"><select value={props.value} onChange={(e)=>props.onChange(e.target.value)} className="w-full appearance-none px-3 py-2 pr-8 text-sm border border-slate-200 rounded-lg bg-white focus:outline-none focus:border-cyan-400">{props.options.map((o)=><option key={o} value={o}>{props.labels?.[o]||o||'Nenhum'}</option>)}</select><ChevronDown className="absolute right-2 top-2.5 w-4 h-4 text-slate-400 pointer-events-none"/></div></label>;
+  return <label className="block"><span className="block text-[11px] font-medium text-slate-500 mb-1">{props.label}</span><div className="relative"><select value={props.value} onChange={(e)=>props.onChange(e.target.value)} className="w-full appearance-none rounded-xl border border-slate-200/90 bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-800 shadow-sm outline-none transition focus:border-cyan-400 focus:ring-4 focus:ring-cyan-50">{props.options.map((o)=><option key={o} value={o}>{props.labels?.[o]||o||'Nenhum'}</option>)}</select><ChevronDown className="absolute right-2 top-2.5 w-4 h-4 text-slate-400 pointer-events-none"/></div></label>;
 }
 function Table<T extends { id:string }>(props:{rows:T[];columns:string[];empty:string;render:(row:T)=>React.ReactNode;actions:(row:T)=>React.ReactNode}) {
-  return props.rows.length===0?<Card className="p-8"><p className="text-sm text-slate-400 text-center">{props.empty}</p></Card>:<Card className="overflow-hidden"><div className="overflow-x-auto"><table className="w-full text-left"><thead><tr className="border-b border-slate-100 bg-slate-50">{props.columns.map((c)=><th key={c} className="px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase">{c}</th>)}<th className="px-4 py-3"/></tr></thead><tbody className="divide-y divide-slate-100">{props.rows.map((row)=><tr key={row.id} className="hover:bg-slate-50/60">{props.render(row)}<td className="px-4 py-3 text-right">{props.actions(row)}</td></tr>)}</tbody></table></div></Card>;
+  return props.rows.length===0?<CommandCard className="p-8"><p className="text-sm text-slate-400 text-center">{props.empty}</p></CommandCard>:<CommandCard className="overflow-hidden"><div className="overflow-x-auto"><table className="w-full text-left"><thead><tr className="border-b border-slate-100 bg-slate-50">{props.columns.map((c)=><th key={c} className="px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase">{c}</th>)}<th className="px-4 py-3"/></tr></thead><tbody className="divide-y divide-slate-100">{props.rows.map((row)=><tr key={row.id} className="hover:bg-slate-50/60">{props.render(row)}<td className="px-4 py-3 text-right">{props.actions(row)}</td></tr>)}</tbody></table></div></CommandCard>;
 }
 function Cell(props:{children:React.ReactNode;strong?:boolean}) { return <td className={'px-4 py-3 text-sm ' + (props.strong?'font-medium text-slate-800':'text-slate-500')}>{props.children}</td>; }function StrategyPanel(props:{
   userId:string;
@@ -1093,46 +1095,46 @@ function Cell(props:{children:React.ReactNode;strong?:boolean}) { return <td cla
 
   return (
     <div className="space-y-5">
-      <Card className="p-5">
+      <CommandCard className="p-5">
         <SectionHeader title="Mapa de alavancagem" action={()=>{}} />
         <p className="text-xs text-slate-400 mb-3">O score combina conexão, centralidade e os indicadores estratégicos cadastrados.</p>
         {scored.length===0?<p className="text-sm text-slate-400">Crie nós e conexões para começar.</p>:<div className="space-y-2">{scored.map((x,i)=><div key={x.id} className="flex items-center gap-3"><span className="w-6 text-xs text-slate-400">{i+1}</span><div className="flex-1"><p className="text-sm text-slate-700 truncate">{x.name}</p><div className="h-1.5 bg-slate-100 rounded-full mt-1"><div className="h-1.5 bg-cyan-500 rounded-full" style={{width:Math.min(100,x.score)+'%'}}/></div></div><span className="text-sm font-semibold text-slate-800">{x.score.toFixed(0)}</span></div>)}</div>}
-      </Card>
+      </CommandCard>
 
       <div className="grid lg:grid-cols-2 gap-5">
-        <Card className="p-5">
+        <CommandCard className="p-5">
           <SectionHeader title="Ledger de reciprocidade" action={()=>{}} />
           <div className="space-y-2 mb-4">{props.contacts.slice(0,8).map((c)=><div key={c.id} className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50"><span className="text-sm text-slate-700">{c.name}</span><span className={'text-sm font-semibold '+((totals.get(c.id)||0)>=0?'text-emerald-600':'text-red-500')}>{money(totals.get(c.id)||0)}</span></div>)}</div>
           {props.contacts.length>0?<><div className="grid grid-cols-2 gap-2"><Select label="Contato" value={selected} onChange={setSelected} options={props.contacts.map((c)=>c.id)} labels={Object.fromEntries(props.contacts.map((c)=>[c.id,c.name]))}/><Input label="Contexto" value={context} onChange={setContext}/><Input label="Valor dado" value={given} onChange={setGiven} type="number"/><Input label="Valor recebido" value={received} onChange={setReceived} type="number"/></div><button onClick={saveLedger} className="mt-2 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg">Registrar</button></>:<p className="text-sm text-slate-400">Cadastre contatos.</p>}
-        </Card>
-        <Card className="p-5">
+        </CommandCard>
+        <CommandCard className="p-5">
           <SectionHeader title="Dossiê de interesses e dores" action={()=>{}} />
           {props.contacts.length>0?<><div className="grid sm:grid-cols-3 gap-2"><Select label="Contato" value={selected} onChange={setSelected} options={props.contacts.map((c)=>c.id)} labels={Object.fromEntries(props.contacts.map((c)=>[c.id,c.name]))}/><Input label="O que quer" value={wants} onChange={setWants}/><Input label="O que teme" value={fears} onChange={setFears}/></div><button onClick={saveDossier} className="mt-3 px-3 py-2 bg-cyan-600 text-white text-xs rounded-lg">Salvar dossiê</button></>:<p className="text-sm text-slate-400">Cadastre um contato.</p>}
-        </Card>
+        </CommandCard>
       </div>
 
-      <Card className="p-5">
+      <CommandCard className="p-5">
         <SectionHeader title="Dossiê de negociação" action={()=>{}} />
         {props.contacts.length>0?<><div className="grid sm:grid-cols-2 gap-2"><Input label="Histórico" value={history} onChange={setHistory}/><Input label="Estilo" value={style} onChange={setStyle}/><Input label="Limites" value={limits} onChange={setLimits}/><Input label="Gatilhos / pontos sensíveis" value={triggers} onChange={setTriggers}/><Input label="Alternativas" value={alternatives} onChange={setAlternatives}/></div><button onClick={saveNegotiation} className="mt-3 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg">Salvar negociação</button></>:<p className="text-sm text-slate-400">Cadastre um contato.</p>}
-      </Card>
+      </CommandCard>
 
       <div className="grid lg:grid-cols-2 gap-5">
-        <Card className="p-5">
+        <CommandCard className="p-5">
           <SectionHeader title="Conexões ocultas" action={()=>{}} />
           <div className="grid sm:grid-cols-2 gap-2"><Input label="Pessoa A" value={personA} onChange={setPersonA}/><Input label="Pessoa B" value={personB} onChange={setPersonB}/><Input label="Relação" value={relation} onChange={setRelation}/><Input label="Fonte" value={source} onChange={setSource}/><Select label="Força" value={strength} onChange={setStrength} options={['Fraca','Média','Forte']}/></div><button onClick={saveHidden} className="mt-3 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg">Registrar conexão</button>
           <div className="mt-4 space-y-2">{props.hiddenConnections.slice(0,8).map((x)=><div key={x.id} className="p-2.5 rounded-lg bg-slate-50 text-xs"><strong>{x.person_a}</strong> → <strong>{x.person_b}</strong><span className="text-slate-400"> · {x.relation}</span></div>)}</div>
-        </Card>
-        <Card className="p-5">
+        </CommandCard>
+        <CommandCard className="p-5">
           <SectionHeader title="Influência cruzada" action={()=>{}} />
           <div className="grid sm:grid-cols-2 gap-2"><Input label="Influenciador" value={influencer} onChange={setInfluencer}/><Input label="Influenciado" value={influenced} onChange={setInfluenced}/><Input label="Intensidade 1–10" value={intensity} onChange={setIntensity} type="number"/><Input label="Tema" value={topic} onChange={setTopic}/></div><button onClick={saveInfluence} className="mt-3 px-3 py-2 bg-cyan-600 text-white text-xs rounded-lg">Registrar influência</button>
           <div className="mt-4 space-y-2">{props.crossInfluence.slice(0,8).map((x)=><div key={x.id} className="p-2.5 rounded-lg bg-slate-50 text-xs"><strong>{x.influencer}</strong> → {x.influenced} · {x.topic} · {x.intensity}/10</div>)}</div>
-        </Card>
+        </CommandCard>
       </div>
 
-      <Card className="p-5">
+      <CommandCard className="p-5">
         <SectionHeader title="Resumo da teia" action={()=>{}} />
         <div className="grid sm:grid-cols-4 gap-3"><MiniStat label="Conexões" value={String(props.connections.length)}/><MiniStat label="Contatos" value={String(props.contacts.length)}/><MiniStat label="Conexões ocultas" value={String(props.hiddenConnections.length)}/><MiniStat label="Influências" value={String(props.crossInfluence.length)}/></div>
-      </Card>
+      </CommandCard>
     </div>
   );
 }
