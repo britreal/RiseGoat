@@ -22,38 +22,17 @@ ALTER TABLE public.authority_contents
   ADD COLUMN IF NOT EXISTS source_kind text NOT NULL DEFAULT '',
   ADD COLUMN IF NOT EXISTS source_id uuid;
 
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint
-    WHERE conname = 'authority_contacts_source_unique'
-      AND conrelid = 'public.authority_contacts'::regclass
-  ) THEN
-    CREATE UNIQUE INDEX authority_contacts_source_unique
-      ON public.authority_contacts(user_id, source_kind, source_id)
-      WHERE source_kind <> '' AND source_id IS NOT NULL;
-  END IF;
+CREATE UNIQUE INDEX IF NOT EXISTS authority_contacts_source_unique
+  ON public.authority_contacts(user_id, source_kind, source_id)
+  WHERE source_kind <> '' AND source_id IS NOT NULL;
 
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint
-    WHERE conname = 'authority_properties_source_unique'
-      AND conrelid = 'public.authority_properties'::regclass
-  ) THEN
-    CREATE UNIQUE INDEX authority_properties_source_unique
-      ON public.authority_properties(user_id, source_kind, source_id)
-      WHERE source_kind <> '' AND source_id IS NOT NULL;
-  END IF;
+CREATE UNIQUE INDEX IF NOT EXISTS authority_properties_source_unique
+  ON public.authority_properties(user_id, source_kind, source_id)
+  WHERE source_kind <> '' AND source_id IS NOT NULL;
 
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint
-    WHERE conname = 'authority_contents_source_unique'
-      AND conrelid = 'public.authority_contents'::regclass
-  ) THEN
-    CREATE UNIQUE INDEX authority_contents_source_unique
-      ON public.authority_contents(user_id, source_kind, source_id)
-      WHERE source_kind <> '' AND source_id IS NOT NULL;
-  END IF;
-END $$;
+CREATE UNIQUE INDEX IF NOT EXISTS authority_contents_source_unique
+  ON public.authority_contents(user_id, source_kind, source_id)
+  WHERE source_kind <> '' AND source_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS public.authority_threats (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
