@@ -564,7 +564,7 @@ export function CommandCenterPage() {
 
       {tab === 'defense' && <DefensePanel threats={threats} actions={defenseActions} nodes={nodes} onAddThreat={addThreat} onUpdateThreat={updateThreat} onAddAction={addDefenseAction} />}
 
-      {tab === 'finance' && <FinancePanel products={products} commissions={commissions} nodeMonetization={nodeMonetization} nodes={nodes} onAddProduct={addProduct} onAddCommission={addCommission} onRefresh={load} />}
+      {tab === 'finance' && <FinancePanel userId={user.id} products={products} commissions={commissions} nodeMonetization={nodeMonetization} nodes={nodes} onAddProduct={addProduct} onAddCommission={addCommission} onRefresh={load} />}
     </div>
   );
 }
@@ -980,7 +980,7 @@ function DefensePanel(props:{
 }
 
 function FinancePanel(props:{
-  products:ProductPipelineItem[]; commissions:Commission[]; nodeMonetization:NodeMonetization[];
+  userId:string; products:ProductPipelineItem[]; commissions:Commission[]; nodeMonetization:NodeMonetization[];
   nodes:Array<{id:string;type:EntityType;name:string;label:string}>;
   onAddProduct:(d:Partial<ProductPipelineItem>)=>void; onAddCommission:(d:Partial<Commission>)=>void; onRefresh:()=>void;
 }) {
@@ -1120,162 +1120,3 @@ function Cell(props:{children:React.ReactNode;strong?:boolean}) { return <td cla
     </div>
   );
 }
-
-function IntelligencePanel(props:{
-  contacts:AuthorityContact[]; properties:AuthorityProperty[]; dossiers:ContactDossier[];
-  suggestions:AuthoritySuggestion[]; nodes:Array<{id:string;type:EntityType;name:string;label:string}>;
-  connections:AuthorityConnection[];
-  onUpdateContact:(id:string,patch:{wealth_score?:number;fame_score?:number;decision_power_score?:number;resources_score?:number;intelligence_notes?:string})=>void;
-  onSaveSuggestion:(s:{source_entity_id:string;source_entity_type:EntityType;target_entity_id:string;target_entity_type:EntityType;score:number;reason:string})=>void;
-}) {
-  const [selected,setSelected]=useState(props.contacts[0]?.id||'');
-  const [wealth,setWealth]=useState(''); const [fame,setFame]=useState(''); const [decision,setDecision]=useState(''); const [resources,setResources]=useState(''); const [notes,setNotes]=useState('');
-  const current=props.contacts.find((x)=>x.id===selected);
-  useEffect(()=>{
-    if(!current)return;
-    setWealth(String(current.wealth_score||0));setFame(String(current.fame_score||0));setDecision(String(current.decision_power_score||0));setResources(String(current.resources_score||0));setNotes(current.intelligence_notes||'');
-  },[selected,current?.id]);
-  const score=current?((Number(wealth)||0)+(Number(fame)||0)+(Number(decision)||0))/3:0;
-  const grade=dialogGrade(score);
-
-  const existing=new Set(props.connections.map((x)=>[x.origin_id,x.destination_id].sort().join(':')));
-  const localSuggestions=useMemo(()=>{
-    const result:Array<{source_entity_id:string;source_entity_type:EntityType;target_entity_id:string;target_entity_type:EntityType;score:number;reason:string}>=[];
-    const token=(s:string)=>new Set((s||'').toLowerCase().split(/[^a-z0-9à-ÿ]+/).filter((x)=>x.length>=3));
-    for(const a of props.contacts){
-      for(const b of props.contacts){
-        if(a.id===b.id||existing.has([a.id,b.id].sort().join(':')))continue;
-        const overlap=[...token(a.tags)].filter((x)=>token(b.tags).has(x));
-        const aScore=(Number(a.wealth_score||0)+Number(a.fame_score||0)+Number(a.decision_power_score||0))/3;
-        const bScore=(Number(b.wealth_score||0)+Number(b.fame_score||0)+Number(b.decision_power_score||0))/3;
-        const base=Math.min(100,overlap.length*20+Math.abs(aScore-bScore)*0.25+30);
-        if(overlap.length>0||base>=55){
-          result.push({source_entity_id:a.id,source_entity_type:'contact',target_entity_id:b.id,target_entity_type:'contact',score:Math.round(base),reason:overlap.length?'Tags em comum: '+overlap.join(', '):'Potencial complementar pelos perfis estratégicos'});
-        }
-      }
-    }
-    for(const contact of props.contacts){
-      for(const property of props.properties){
-        if(existing.has([contact.id,property.id].sort().join(':')))continue;
-        const overlap=[...token(contact.tags)].filter((x)=>token(property.tags+' '+property.name+' '+property.platform).has(x));
-        if(overlap.length){
-          result.push({source_entity_id:contact.id,source_entity_type:'contact',target_entity_id:property.id,target_entity_type:'property',score:Math.min(100,40+overlap.length*20),reason:'Interseção de contexto: '+overlap.join(', ')});
-        }
-      }
-    }
-    return result.sort((a,b)=>b.score-a.score).slice(0,12);
-  },[props.contacts,props.properties,props.connections]);
-
-  const suggestionName=(id:string)=>props.nodes.find((n)=>n.id===id)?.name||'Nó';
-
-  return (
-    <div className="space-y-5">
-      <Card className="p-5">
-        <div className="flex items-center justify-between mb-4"><div><h2 className="text-sm font-semibold text-slate-800">Dialog Club</h2><p className="text-xs text-slate-400 mt-1">Classificação manual baseada em riqueza, fama e poder de decisão. C representa a faixa mais alta.</p></div><Users className="w-4 h-4 text-slate-400"/></div>
-        {props.contacts.length===0?<p className="text-sm text-slate-400">Cadastre contatos para criar perfis dinâmicos.</p>:<div className="grid lg:grid-cols-[240px_1fr] gap-5">
-          <div className="space-y-2 max-h-72 overflow-y-auto">{props.contacts.map((c)=>{
-            const s=(Number(c.wealth_score||0)+Number(c.fame_score||0)+Number(c.decision_power_score||0))/3;
-            return <button key={c.id} onClick={()=>setSelected(c.id)} className={'w-full text-left p-3 rounded-xl border transition '+(selected===c.id?'border-cyan-300 bg-cyan-50':'border-slate-100 hover:bg-slate-50')}><div className="flex items-center justify-between gap-2"><span className="text-sm font-medium text-slate-800 truncate">{c.name}</span><span className="text-xs font-bold text-slate-600">{dialogGrade(s)}</span></div><span className="text-[11px] text-slate-400">{s.toFixed(0)} / 100</span></button>
-          })}</div>
-          {current&&<div>
-            <div className="flex items-center justify-between mb-3"><div><h3 className="text-lg font-semibold text-slate-900">{current.name}</h3><p className="text-xs text-slate-400">Faixa {grade} · score {score.toFixed(0)}</p></div><div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center text-lg font-bold">{grade}</div></div>
-            <div className="grid sm:grid-cols-4 gap-2">
-              <Input label="Riqueza" value={wealth} onChange={setWealth} type="number"/><Input label="Fama" value={fame} onChange={setFame} type="number"/><Input label="Decisão" value={decision} onChange={setDecision} type="number"/><Input label="Recursos" value={resources} onChange={setResources} type="number"/>
-            </div>
-            <Input label="Notas de inteligência" value={notes} onChange={setNotes} placeholder="Contexto, fontes, observações..."/>
-            <button onClick={()=>props.onUpdateContact(current.id,{wealth_score:Number(wealth||0),fame_score:Number(fame||0),decision_power_score:Number(decision||0),resources_score:Number(resources||0),intelligence_notes:notes})} className="mt-3 px-4 py-2 bg-slate-900 text-white text-xs rounded-lg">Salvar avaliação</button>
-          </div>}
-        </div>}
-      </Card>
-
-      <Card className="p-5">
-        <div className="flex items-center justify-between mb-4"><div><h2 className="text-sm font-semibold text-slate-800">Radar: quem deveria conhecer quem?</h2><p className="text-xs text-slate-400 mt-1">Sugestões baseadas em dados que você cadastrou, como tags e contexto. O sistema não inventa relações.</p></div><ArrowRight className="w-4 h-4 text-slate-400"/></div>
-        {localSuggestions.length===0?<p className="text-sm text-slate-400">Adicione tags aos contatos e propriedades para gerar sugestões.</p>:<div className="space-y-2">{localSuggestions.map((s,i)=><div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100">
-          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center"><Link2 className="w-4 h-4 text-slate-500"/></div>
-          <div className="flex-1 min-w-0"><p className="text-sm text-slate-800"><strong>{suggestionName(s.source_entity_id)}</strong> <span className="text-slate-400">→</span> <strong>{suggestionName(s.target_entity_id)}</strong></p><p className="text-xs text-slate-400 mt-0.5">{s.reason}</p></div>
-          <span className="text-xs font-semibold text-slate-500">{s.score}</span>
-          <button onClick={()=>props.onSaveSuggestion(s)} className="px-3 py-1.5 text-xs rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">Salvar</button>
-        </div>)}</div>}
-      </Card>
-
-      {props.suggestions.length>0&&<Card className="p-5"><h2 className="text-sm font-semibold text-slate-800 mb-3">Sugestões salvas</h2><div className="space-y-2">{props.suggestions.slice(0,10).map((s)=><div key={s.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50"><div><p className="text-sm text-slate-700">{suggestionName(s.source_entity_id)} → {suggestionName(s.target_entity_id)}</p><p className="text-xs text-slate-400">{s.reason}</p></div><span className="text-xs font-semibold text-slate-500">{s.score}</span></div>)}</div></Card>}
-    </div>
-  );
-}
-
-function DefensePanel(props:{
-  threats:AuthorityThreat[]; actions:DefenseAction[];
-  nodes:Array<{id:string;type:EntityType;name:string;label:string}>;
-  onAddThreat:(d:Partial<AuthorityThreat>)=>void;
-  onUpdateThreat:(id:string,patch:Partial<AuthorityThreat>)=>void;
-  onAddAction:(threat:AuthorityThreat,actionType:string,responseText:string)=>void;
-}) {
-  const [title,setTitle]=useState(''); const [category,setCategory]=useState('Reputação'); const [severity,setSeverity]=useState('Média'); const [source,setSource]=useState(''); const [evidence,setEvidence]=useState('');
-  const responseTemplate=(t:AuthorityThreat)=> {
-    if(t.category==='Reputação')return 'Registrar os fatos verificáveis, preservar evidências e preparar uma resposta factual e proporcional.';
-    if(t.category==='Concorrência')return 'Mapear o contexto, comparar ofertas/posicionamento e reforçar comunicação própria baseada em evidências.';
-    if(t.category==='Vazamento')return 'Identificar o alcance, registrar a evidência, revogar acessos quando necessário e comunicar as partes afetadas.';
-    return 'Registrar a ocorrência, validar a evidência e definir a próxima ação antes de responder publicamente.';
-  };
-  return (
-    <div className="space-y-5">
-      <Card className="p-5">
-        <div className="flex items-center justify-between mb-4"><div><h2 className="text-sm font-semibold text-slate-800">Radar de defesa</h2><p className="text-xs text-slate-400 mt-1">Monitore riscos de reputação, concorrência e segurança. As ações são sugestões para revisão humana.</p></div><Shield className="w-4 h-4 text-slate-400"/></div>
-        <form className="grid sm:grid-cols-2 gap-3" onSubmit={(e)=>{e.preventDefault();props.onAddThreat({title,category,severity,source_url:source,evidence});setTitle('');setSource('');setEvidence('')}}>
-          <Input label="Ocorrência" value={title} onChange={setTitle} required placeholder="Ex.: menção negativa, concorrência agressiva..." />
-          <Select label="Categoria" value={category} onChange={setCategory} options={['Reputação','Concorrência','Vazamento','Conta','Operação']} />
-          <Select label="Severidade" value={severity} onChange={setSeverity} options={['Baixa','Média','Alta']} />
-          <Input label="Fonte / URL" value={source} onChange={setSource} placeholder="https://..." />
-          <div className="sm:col-span-2"><label className="block text-[11px] font-medium text-slate-500 mb-1">Evidência / contexto</label><textarea value={evidence} onChange={(e)=>setEvidence(e.target.value)} rows={3} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg resize-none" /></div>
-          <button className="sm:col-span-2 justify-self-start px-4 py-2 bg-slate-900 text-white text-xs rounded-lg"><Plus className="w-4 h-4 inline mr-1"/>Registrar ocorrência</button>
-        </form>
-      </Card>
-      <div className="grid lg:grid-cols-2 gap-4">
-        {props.threats.length===0?<Card className="p-8"><p className="text-sm text-slate-400 text-center">Nenhuma ocorrência registrada. Rode o radar para verificar nós isolados e oportunidades paradas.</p></Card>:props.threats.slice(0,30).map((t)=><Card key={t.id} className="p-5">
-          <div className="flex items-start gap-3"><div className="flex-1 min-w-0"><div className="flex items-center gap-2"><h3 className="text-sm font-semibold text-slate-800 truncate">{t.title}</h3><span className="text-xs text-slate-400">{t.severity}</span></div><p className="text-xs text-slate-400 mt-1">{t.category} · {new Date(t.detected_at).toLocaleDateString('pt-BR')}</p>{t.source_url&&<a href={t.source_url} target="_blank" rel="noopener noreferrer" className="text-xs text-cyan-600 mt-2 inline-block">Abrir fonte</a>}<p className="text-sm text-slate-600 mt-3">{t.evidence||'Sem evidência adicional.'}</p></div><select value={t.status} onChange={(e)=>props.onUpdateThreat(t.id,{status:e.target.value})} className="w-28 px-2 py-1.5 text-xs border rounded-lg"><option>Aberta</option><option>Em análise</option><option>Resolvida</option></select></div>
-          <div className="mt-4 p-3 rounded-xl bg-slate-50"><p className="text-[11px] font-semibold text-slate-500 mb-2">Próximas ações sugeridas</p><div className="flex flex-wrap gap-2"><button onClick={()=>props.onAddAction(t,'Criar conteúdo',responseTemplate(t))} className="px-3 py-1.5 text-xs border rounded-lg hover:bg-white">Criar conteúdo</button><button onClick={()=>props.onAddAction(t,'Notificar aliado',responseTemplate(t))} className="px-3 py-1.5 text-xs border rounded-lg hover:bg-white">Notificar aliado</button><button onClick={()=>props.onAddAction(t,'Criar tarefa',responseTemplate(t))} className="px-3 py-1.5 text-xs border rounded-lg hover:bg-white">Criar tarefa</button></div></div>
-        </Card>)}
-      </div>
-      {props.actions.length>0&&<Card className="p-5"><h2 className="text-sm font-semibold text-slate-800 mb-3">Ações registradas</h2><div className="space-y-2">{props.actions.slice(0,15).map((a)=><div key={a.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50"><span className="flex-1 text-sm text-slate-700">{a.action_title}</span><span className="text-xs text-slate-400">{a.status}</span></div>)}</div></Card>}
-    </div>
-  );
-}
-
-function FinancePanel(props:{products:ProductPipelineItem[];commissions:Commission[];onAddProduct:(d:Partial<ProductPipelineItem>)=>void;onAddCommission:(d:Partial<Commission>)=>void}) {
-  const [product,setProduct]=useState(''); const [status,setStatus]=useState('Ideia'); const [revenue,setRevenue]=useState(''); const [margin,setMargin]=useState('');
-  const [business,setBusiness]=useState(''); const [rate,setRate]=useState(''); const [method,setMethod]=useState('');
-  return (
-    <div className="space-y-5">
-      <div className="grid lg:grid-cols-2 gap-5">
-        <Card className="p-5">
-          <div className="flex items-center justify-between mb-3"><h2 className="text-sm font-semibold text-slate-800">Pipeline de produtos</h2><Briefcase className="w-4 h-4 text-slate-400"/></div>
-          <form className="space-y-2" onSubmit={(e)=>{e.preventDefault();props.onAddProduct({product,status,monthly_revenue:Number(revenue||0),margin:Number(margin||0)});setProduct('');setRevenue('');setMargin('')}}>
-            <Input label="Produto" value={product} onChange={setProduct} required/><Select label="Status" value={status} onChange={setStatus} options={['Ideia','Em criação','Pronto','Vendendo']}/><div className="grid grid-cols-2 gap-2"><Input label="Receita mensal" value={revenue} onChange={setRevenue} type="number"/><Input label="Margem %" value={margin} onChange={setMargin} type="number"/></div><button className="px-3 py-2 bg-slate-900 text-white text-xs rounded-lg"><Plus className="w-4 h-4 inline mr-1"/>Adicionar</button>
-          </form>
-        </Card>
-        <Card className="p-5">
-          <div className="flex items-center justify-between mb-3"><h2 className="text-sm font-semibold text-slate-800">Calculadora de comissão</h2><Wallet className="w-4 h-4 text-slate-400"/></div>
-          <form className="space-y-2" onSubmit={(e)=>{e.preventDefault();props.onAddCommission({business_value:Number(business||0),rate:Number(rate||0),payment_method:method});setBusiness('');setRate('');}}>
-            <div className="grid grid-cols-2 gap-2"><Input label="Valor do negócio" value={business} onChange={setBusiness} type="number"/><Input label="Taxa %" value={rate} onChange={setRate} type="number"/></div><Input label="Forma de pagamento" value={method} onChange={setMethod} placeholder="Pix, transferência..."/><button className="px-3 py-2 bg-slate-900 text-white text-xs rounded-lg"><Plus className="w-4 h-4 inline mr-1"/>Adicionar</button>
-          </form>
-        </Card>
-      </div>
-      <Card className="p-5">
-        <h2 className="text-sm font-semibold text-slate-800 mb-3">Produtos</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">{['Ideia','Em criação','Pronto','Vendendo'].map((s)=><div key={s} className="p-3 rounded-xl bg-slate-50 min-h-[130px]"><p className="text-xs font-semibold text-slate-500 mb-2">{s}</p>{props.products.filter((p)=>p.status===s).map((p)=><div key={p.id} className="p-2 bg-white rounded-lg border mb-2"><p className="text-xs font-medium text-slate-700">{p.product}</p><p className="text-[11px] text-slate-400">{money(p.monthly_revenue)} / mês · {p.margin}% margem</p></div>)}</div>)}</div>
-      </Card>
-      <Card className="p-5"><h2 className="text-sm font-semibold text-slate-800 mb-3">Comissões</h2><div className="space-y-2">{props.commissions.length===0?<p className="text-sm text-slate-400">Nenhuma comissão.</p>:props.commissions.map((c)=><div key={c.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50"><span className="text-sm text-slate-700">{money(c.business_value)}</span><span className="text-sm font-semibold text-slate-800">{money(c.business_value*c.rate/100)}</span><span className="text-xs text-slate-400">{c.status}</span></div>)}</div></Card>
-    </div>
-  );
-}
-
-function Input(props:{label?:string;value:string;onChange:(v:string)=>void;placeholder?:string;required?:boolean;type?:string}) {
-  return <label className="block"><span className="block text-[11px] font-medium text-slate-500 mb-1">{props.label}</span><input type={props.type||'text'} required={props.required} value={props.value} onChange={(e)=>props.onChange(e.target.value)} placeholder={props.placeholder} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400"/></label>;
-}
-function Select(props:{label?:string;value:string;onChange:(v:string)=>void;options:string[];labels?:Record<string,string>}) {
-  return <label className="block"><span className="block text-[11px] font-medium text-slate-500 mb-1">{props.label}</span><div className="relative"><select value={props.value} onChange={(e)=>props.onChange(e.target.value)} className="w-full appearance-none px-3 py-2 pr-8 text-sm border border-slate-200 rounded-lg bg-white focus:outline-none focus:border-cyan-400">{props.options.map((o)=><option key={o} value={o}>{props.labels?.[o]||o||'Nenhum'}</option>)}</select><ChevronDown className="absolute right-2 top-2.5 w-4 h-4 text-slate-400 pointer-events-none"/></div></label>;
-}
-function Table<T extends { id:string }>(props:{rows:T[];columns:string[];empty:string;render:(row:T)=>React.ReactNode;actions:(row:T)=>React.ReactNode}) {
-  return props.rows.length===0?<Card className="p-8"><p className="text-sm text-slate-400 text-center">{props.empty}</p></Card>:<Card className="overflow-hidden"><div className="overflow-x-auto"><table className="w-full text-left"><thead><tr className="border-b border-slate-100 bg-slate-50">{props.columns.map((c)=><th key={c} className="px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase">{c}</th>)}<th className="px-4 py-3"/></tr></thead><tbody className="divide-y divide-slate-100">{props.rows.map((row)=><tr key={row.id} className="hover:bg-slate-50/60">{props.render(row)}<td className="px-4 py-3 text-right">{props.actions(row)}</td></tr>)}</tbody></table></div></Card>;
-}
-function Cell(props:{children:React.ReactNode;strong?:boolean}) { return <td className={'px-4 py-3 text-sm ' + (props.strong?'font-medium text-slate-800':'text-slate-500')}>{props.children}</td>; }
