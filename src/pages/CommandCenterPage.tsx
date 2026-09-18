@@ -414,6 +414,13 @@ export function CommandCenterPage() {
     setOpportunities((v) => v.map((x) => x.id === id ? { ...x, status } : x));
   }
 
+  async function deleteOpportunity(id: string) {
+    if (!user) return;
+    const { error } = await supabase.from('authority_opportunities').delete().eq('id', id).eq('user_id', user.id);
+    if (error) return setNotice(error.message);
+    setOpportunities((v) => v.filter((x) => x.id !== id));
+  }
+
   async function addProduct(data: Partial<ProductPipelineItem>) {
     if (!user || !data.product?.trim()) return;
     const { data: row, error } = await supabase.from('product_pipeline').insert({
@@ -567,7 +574,7 @@ export function CommandCenterPage() {
 
       {tab === 'action' && <ActionPanel tasks={tasks} contents={contents} isolated={isolated} today={today} onAddTask={addTask} onUpdateTask={updateTask} nodes={nodes} />}
 
-      {tab === 'opportunities' && <OpportunityPanel opportunities={opportunities} onAdd={addOpportunity} onUpdate={updateOpportunity} nodes={nodes} contacts={contacts} properties={properties} />}
+      {tab === 'opportunities' && <OpportunityPanel opportunities={opportunities} onAdd={addOpportunity} onUpdate={updateOpportunity} onDelete={deleteOpportunity} nodes={nodes} contacts={contacts} properties={properties} />}
 
       {tab === 'intelligence' && <IntelligencePanel contacts={contacts} properties={properties} dossiers={dossiers} suggestions={suggestions} nodes={nodes} connections={connections} onUpdateContact={updateContactIntelligence} onSaveSuggestion={createSuggestion} />}
 
@@ -820,6 +827,7 @@ function OpportunityPanel(props:{
   opportunities:AuthorityOpportunity[];
   onAdd:(d:Partial<AuthorityOpportunity>)=>void;
   onUpdate:(id:string,status:string)=>void;
+  onDelete:(id:string)=>void;
   nodes:Array<{id:string;type:EntityType;name:string;label:string}>;
   contacts:AuthorityContact[];
   properties:AuthorityProperty[];
@@ -842,7 +850,7 @@ function OpportunityPanel(props:{
             <div className="space-y-2">
               {props.opportunities.filter((o)=>o.status===stage).map((op)=><div key={op.id} className="p-3 rounded-xl bg-slate-50 border border-slate-100">
                 <p className="text-sm font-medium text-slate-800">{op.opportunity}</p><p className="text-sm font-semibold text-slate-700 mt-2">{money(op.estimated_value)}</p>
-                <select value={op.status} onChange={(e)=>props.onUpdate(op.id,e.target.value)} className="w-full mt-2 text-[11px] border border-slate-200 rounded-lg bg-white px-2 py-1.5">{opportunityStatuses.map((s)=><option key={s}>{s}</option>)}</select>
+                <div className="flex items-center gap-2 mt-2"><select value={op.status} onChange={(e)=>props.onUpdate(op.id,e.target.value)} className="flex-1 min-w-0 text-[11px] border border-slate-200 rounded-lg bg-white px-2 py-1.5">{opportunityStatuses.map((s)=><option key={s}>{s}</option>)}</select><button type="button" onClick={()=>{if(window.confirm('Apagar esta oportunidade?')) props.onDelete(op.id)}} aria-label="Apagar oportunidade" title="Apagar oportunidade" className="shrink-0 p-2 text-red-500 border border-red-100 rounded-lg hover:bg-red-50"><Trash2 className="w-4 h-4"/></button></div>
               </div>)}
             </div>
           </Card>
