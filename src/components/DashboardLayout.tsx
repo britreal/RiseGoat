@@ -30,7 +30,7 @@ const navItems: NavItem[] = [
   { label: 'Fluxos de Ação', path: '/action-flows', icon: Workflow, group: 'Execução', mode: 'shared' },
   { label: 'GOAT', path: '/goat', icon: Activity, group: 'Pessoal', mode: 'pessoal' },
   { label: 'Configurações', path: '/settings', icon: Settings, group: 'Conta', mode: 'shared' },
-
+];
 
 interface DashboardLayoutProps { children: ReactNode; currentPath: string; navigate: (path: string) => void; }
 
