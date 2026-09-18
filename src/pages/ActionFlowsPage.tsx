@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Card, PageHeader, Spinner } from '@/components/ui';
 import {
   ArrowLeft, ArrowRight, BarChart3, BriefcaseBusiness, Check, ChevronDown, CircleDollarSign,
-  Clock3, Copy, GripVertical, Layers3, Link2, ListChecks, Map, MessageSquare,
+  Clock3, Copy, GripVertical, Layers3, Link2, ListChecks, Map as MapIcon, MessageSquare,
   Network, Pause, Play, Plus, Radar, Rocket, Save, Settings2, ShoppingBag, Sparkles,
   Target, Trash2, UserRound, X, Zap,
 } from 'lucide-react';
@@ -953,7 +953,7 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
       {flows.length > 0 && (
         <div className="mb-7">
           <div className="flex items-end justify-between mb-4"><div><p className="text-[10px] uppercase tracking-[0.16em] font-bold text-slate-400">Seus fluxos</p><h3 className="text-lg font-black text-slate-950 mt-1">Processos salvos</h3></div></div>
-          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3">{flows.map(f => <Card key={f.id} className="p-5 hover:shadow-md transition group"><div className="flex items-start gap-3"><div className="w-10 h-10 rounded-xl bg-slate-950 text-white flex items-center justify-center"><Map className="w-4 h-4"/></div><div className="min-w-0 flex-1"><p className="font-bold text-slate-800 truncate">{f.name}</p><p className="text-[11px] text-slate-400 mt-1">{f.category} · {f.goal || 'Sem meta'}</p></div><div className="flex items-center gap-1"><button onClick={()=>void cloneFlow(f)} title="Duplicar fluxo" className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-lg"><Copy className="w-4 h-4"/></button><button onClick={()=>void deleteFlow(f.id)} title="Excluir fluxo" className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4"/></button></div></div><p className="text-xs text-slate-500 line-clamp-2 mt-4">{f.objective || 'Sem objetivo definido.'}</p><div className="flex items-center justify-between mt-5"><span className="text-[10px] font-semibold px-2 py-1 rounded-lg bg-slate-100 text-slate-500">{f.status}</span><button onClick={()=>void openFlow(f)} className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 hover:text-slate-950">Abrir <ArrowRight className="w-3.5 h-3.5"/></button></div></Card>)}</div>
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3">{flows.map(f => <Card key={f.id} className="p-5 hover:shadow-md transition group"><div className="flex items-start gap-3"><div className="w-10 h-10 rounded-xl bg-slate-950 text-white flex items-center justify-center"><MapIcon className="w-4 h-4"/></div><div className="min-w-0 flex-1"><p className="font-bold text-slate-800 truncate">{f.name}</p><p className="text-[11px] text-slate-400 mt-1">{f.category} · {f.goal || 'Sem meta'}</p></div><div className="flex items-center gap-1"><button onClick={()=>void cloneFlow(f)} title="Duplicar fluxo" className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-lg"><Copy className="w-4 h-4"/></button><button onClick={()=>void deleteFlow(f.id)} title="Excluir fluxo" className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4"/></button></div></div><p className="text-xs text-slate-500 line-clamp-2 mt-4">{f.objective || 'Sem objetivo definido.'}</p><div className="flex items-center justify-between mt-5"><span className="text-[10px] font-semibold px-2 py-1 rounded-lg bg-slate-100 text-slate-500">{f.status}</span><button onClick={()=>void openFlow(f)} className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 hover:text-slate-950">Abrir <ArrowRight className="w-3.5 h-3.5"/></button></div></Card>)}</div>
         </div>
       )}
 
@@ -1002,7 +1002,7 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
               {edges.map(edge=>{const p=edgePath(edge);return p?<g key={edge.id}><path d={p.d} fill="none" stroke="#94a3b8" strokeWidth="2.2" markerEnd="url(#flow-arrow)"/>{edge.edge_label&&<text x={p.labelX} y={p.labelY-6} fontSize="10" fill="#64748b" textAnchor="middle">{edge.edge_label}</text>}</g>:null})}
             </svg>
             {nodes.map(n=><CanvasNode key={n.id} node={n} selected={selectedNodeId===n.id} connectFrom={connectFrom===n.id} onSelect={()=>connectFrom?connectNodes(n.id):setSelectedNodeId(n.id)} onStartConnect={()=>setConnectFrom(n.id)} onDrag={e=>dragNode(n.id,e)} />)}
-            {nodes.length===0 && <div className="absolute inset-0 flex items-center justify-center"><div className="text-center"><Map className="w-8 h-8 text-slate-300 mx-auto"/><p className="text-sm font-semibold text-slate-500 mt-3">Canvas vazio</p><p className="text-xs text-slate-400 mt-1">Adicione o primeiro bloco na lateral.</p></div></div>}
+            {nodes.length===0 && <div className="absolute inset-0 flex items-center justify-center"><div className="text-center"><MapIcon className="w-8 h-8 text-slate-300 mx-auto"/><p className="text-sm font-semibold text-slate-500 mt-3">Canvas vazio</p><p className="text-xs text-slate-400 mt-1">Adicione o primeiro bloco na lateral.</p></div></div>}
           </div>
         </main>
 
