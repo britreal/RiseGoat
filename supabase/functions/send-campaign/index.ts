@@ -20,9 +20,10 @@ Deno.serve(async (req) => {
     if (campaignError) throw campaignError;
     if (!campaign) throw new Error("Campanha não encontrada");
 
+    const appOrigin = String(input.app_origin || "").replace(/\/$/, "");
     const { data: recipients, error: recipientsError } = await admin
       .from("newsletter_leads")
-      .select("id,name,email")
+      .select("id,name,email,unsubscribe_token")
       .eq("user_id", user.id)
       .eq("marketing_consent", true)
       .is("unsubscribed_at", null);
@@ -47,8 +48,12 @@ Deno.serve(async (req) => {
           from: { name: connection.from_name || "RiseGoat", address: connection.from_email },
           to: recipient.email,
           subject: campaign.subject,
-          text: campaign.body,
-          html: campaign.body.replace(/\n/g, "<br>"),
+          text: campaign.body + (appOrigin && recipient.unsubscribe_token
+            ? "\n\nCancelar inscrição: " + appOrigin + "/#/unsubscribe/" + recipient.unsubscribe_token
+            : ""),
+          html: campaign.body.replace(/\n/g, "<br>") + (appOrigin && recipient.unsubscribe_token
+            ? '<br><br><hr><p style="font-size:12px;color:#777">Para cancelar sua inscrição: <a href="' + appOrigin + '/#/unsubscribe/' + recipient.unsubscribe_token + '">descadastrar</a>.</p>'
+            : ""),
         });
         sent++;
         await admin.from("campaign_sends").upsert({
