@@ -100,6 +100,18 @@ export function CommandCenterPage() {
 
   useEffect(() => { load(); }, [user]);
 
+  useEffect(() => {
+    if (loading) return;
+    const snapshot = {
+      saved_at: new Date().toISOString(),
+      properties, contacts, connections, tasks, contents,
+      opportunities, ledger, leverage, products, commissions,
+    };
+    try {
+      localStorage.setItem('risegoat_command_center_backup', JSON.stringify(snapshot));
+    } catch {}
+  }, [loading, properties, contacts, connections, tasks, contents, opportunities, ledger, leverage, products, commissions]);
+
   const nodes = useMemo(() => {
     const p = properties.map((x) => ({ id: x.id, type: 'property' as EntityType, name: x.name, label: x.property_type }));
     const c = contacts.map((x) => ({ id: x.id, type: 'contact' as EntityType, name: x.name, label: x.status }));
