@@ -98,3 +98,19 @@ export interface Goal {
 export interface GoalLink {
   id:string; user_id:string; goal_id:string; module_name:string; record_id:string|null; label:string; created_at:string;
 }
+
+export interface ActionFlow {
+  id:string; user_id:string; name:string; category:string; template_key:string|null; objective:string; goal:string; status:string; created_at:string; updated_at:string;
+}
+export interface ActionFlowNode {
+  id:string; flow_id:string; user_id:string; node_type:string; label:string; description:string; module_name:string|null; module_path:string|null; position_x:number; position_y:number; metadata:Record<string,unknown>; sort_order:number;
+}
+export interface ActionFlowEdge {
+  id:string; flow_id:string; user_id:string; source_node_id:string; target_node_id:string; edge_label:string; branch_key:string;
+}
+export interface ActionFlowRun {
+  id:string; flow_id:string; user_id:string; name:string; status:string; current_node_id:string|null; started_at:string; completed_at:string|null; updated_at:string;
+}
+export interface ActionFlowRunNode {
+  id:string; run_id:string; user_id:string; node_id:string; status:string; note:string; started_at:string|null; completed_at:string|null;
+}
