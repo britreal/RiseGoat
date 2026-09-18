@@ -14,6 +14,8 @@ export function DashboardPage({ navigate }: { navigate: (path: string) => void }
   const [leads, setLeads] = useState<NewsletterLead[]>([]);
   const [links, setLinks] = useState<Link[]>([]);
   const [posts, setPosts] = useState<MicroblogPost[]>([]);
+  const [goals, setGoals] = useState<any[]>([]);
+  const [revenues, setRevenues] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -23,12 +25,16 @@ export function DashboardPage({ navigate }: { navigate: (path: string) => void }
       supabase.from('newsletter_leads').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
       supabase.from('links').select('*').eq('user_id', user.id).order('sort_order'),
       supabase.from('microblog_posts').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
-    ]).then(([v, c, l, ln, p]) => {
+      supabase.from('goals').select('*').eq('user_id', user.id).order('updated_at', { ascending: false }).limit(3),
+      supabase.from('revenues').select('value,status').eq('user_id', user.id),
+    ]).then(([v, c, l, ln, p, g, r]) => {
       setVisits((v.data as PageVisit[]) ?? []);
       setClicks((c.data as LinkClick[]) ?? []);
       setLeads((l.data as NewsletterLead[]) ?? []);
       setLinks((ln.data as Link[]) ?? []);
       setPosts((p.data as MicroblogPost[]) ?? []);
+      setGoals((g.data as any[]) ?? []);
+      setRevenues((r.data as any[]) ?? []);
       setLoading(false);
     });
   }, [user]);
@@ -110,6 +116,22 @@ export function DashboardPage({ navigate }: { navigate: (path: string) => void }
       </div>
 
       {/* Public page banner */}
+      <div className="grid md:grid-cols-2 gap-3 mb-6">
+        <Card className="p-5">
+          <p className="text-[10px] uppercase tracking-[.16em] font-bold text-slate-400">Direção</p>
+          <h2 className="text-lg font-black text-slate-900 mt-1">{goals[0]?.objective_macro || 'Defina sua primeira meta'}</h2>
+          <p className="text-xs text-slate-500 mt-1">{goals[0]?.deadline ? 'Prazo: ' + new Date(goals[0].deadline).toLocaleDateString('pt-BR') : 'Use Metas para definir o resultado que orienta os próximos 90 dias.'}</p>
+          <button onClick={() => navigate('/goals')} className="mt-3 text-xs font-semibold text-cyan-600 hover:text-cyan-500">Abrir metas →</button>
+        </Card>
+        <Card className="p-5">
+          <p className="text-[10px] uppercase tracking-[.16em] font-bold text-slate-400">Negócio</p>
+          <div className="flex items-end justify-between gap-3">
+            <div><p className="text-2xl font-black text-slate-900">{formatNumber(revenues.filter((r)=>r.status==='received').reduce((s,r)=>s+Number(r.value||0),0))}</p><p className="text-xs text-slate-500 mt-1">receita recebida registrada</p></div>
+            <button onClick={() => navigate('/command-center')} className="text-xs font-semibold text-cyan-600 hover:text-cyan-500">Cruzar dados →</button>
+          </div>
+        </Card>
+      </div>
+
       <Card className="p-4 mb-6 bg-gradient-to-r from-slate-900 to-slate-800 border-0">
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
