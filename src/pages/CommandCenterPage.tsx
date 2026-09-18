@@ -116,7 +116,10 @@ export function CommandCenterPage() {
     setRefreshing(false);
   };
 
-  useEffect(() => { load().then(() => runRadar()); }, [user]);
+  useEffect(() => {
+    if (!user) return;
+    load().then(() => syncRiseGoatData());
+  }, [user]);
 
   async function runRadar() {
     if (!user) return;
@@ -125,6 +128,7 @@ export function CommandCenterPage() {
       setNotice(error.message);
       return;
     }
+    await load();
     const [t, a] = await Promise.all([
       supabase.from('authority_threats').select('*').eq('user_id', user.id).order('updated_at', { ascending: false }),
       supabase.from('authority_defense_actions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
@@ -137,7 +141,7 @@ export function CommandCenterPage() {
     if (!user) return;
     setNotice('');
     try {
-      const [profileRes, linksRes, salesRes, microblogRes, draftsRes, leadsRes, campaignsRes] = await Promise.all([
+      const [profileRes, linksRes, salesRes, microblogRes, draftsRes, leadsRes, campaignsRes, visitsRes, clicksRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
         supabase.from('links').select('*').eq('user_id', user.id).order('sort_order'),
         supabase.from('sales_pages').select('*').eq('user_id', user.id),
@@ -145,6 +149,8 @@ export function CommandCenterPage() {
         supabase.from('drafts').select('*').eq('user_id', user.id),
         supabase.from('newsletter_leads').select('*').eq('user_id', user.id),
         supabase.from('campaigns').select('*').eq('user_id', user.id),
+        supabase.from('page_visits').select('id').eq('user_id', user.id),
+        supabase.from('link_clicks').select('id').eq('user_id', user.id),
       ]);
 
       const profile = profileRes.data;
@@ -238,6 +244,20 @@ export function CommandCenterPage() {
         }, { onConflict: 'user_id,source_kind,source_id' });
       }
 
+      for (const item of (linksRes.data ?? []) as Array<Record<string, unknown>>) {
+        if (String(item.link_type || '') === 'affiliate') {
+          await supabase.from('product_pipeline').upsert({
+            user_id: user.id,
+            product: String(item.label || 'Produto afiliado'),
+            product_type: 'Afiliado',
+            status: item.is_active === false ? 'Pronto' : 'Vendendo',
+            channel: 'Links',
+            monthly_revenue: 0,
+            margin: 0,
+          }, { onConflict: 'user_id,product' });
+        }
+      }
+
       for (const item of (campaignsRes.data ?? []) as Array<Record<string, unknown>>) {
         await supabase.from('authority_contents').upsert({
           user_id: user.id,
@@ -256,6 +276,7 @@ export function CommandCenterPage() {
         supabase.from('authority_sources').upsert({ user_id: user.id, source_type: 'RiseGoat', name: 'Links', url: '/links' }, { onConflict: 'user_id,source_type,name' }),
         supabase.from('authority_sources').upsert({ user_id: user.id, source_type: 'RiseGoat', name: 'Newsletter e campanhas', url: '/newsletter' }, { onConflict: 'user_id,source_type,name' }),
         supabase.from('authority_sources').upsert({ user_id: user.id, source_type: 'RiseGoat', name: 'Páginas de venda', url: '/sales' }, { onConflict: 'user_id,source_type,name' }),
+        supabase.from('authority_sources').upsert({ user_id: user.id, source_type: 'RiseGoat', name: 'Analytics', url: '/analytics', metadata: { visits: visitsRes.data?.length || 0, clicks: clicksRes.data?.length || 0 } }, { onConflict: 'user_id,source_type,name' }),
       ]);
 
       setNotice('Dados do RiseGoat sincronizados com o Centro de Comando.');
@@ -959,7 +980,7 @@ function FinancePanel(props:{
   async function saveNodeMoney(){
     if(!node||!selectedNode)return;
     const {error}=await supabase.from('node_monetization').upsert({
-      user_id:props.nodeMonetization[0]?.user_id,entity_id:node,entity_type:selectedNode.type,
+      user_id:props.userId,entity_id:node,entity_type:selectedNode.type,
       direct_revenue:Number(direct||0),indirect_revenue:Number(indirect||0),cost:Number(cost||0)
     },{onConflict:'user_id,entity_id,entity_type'});
     if(!error){setDirect('');setIndirect('');setCost('');props.onRefresh();}
