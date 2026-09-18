@@ -101,8 +101,8 @@ export function DraftsPage() {
         <Card className="p-5 mb-6">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-slate-800">Editando rascunho</h2>
-            <button onClick={() => { setEditing(null); setTitle(''); setContent(''); }} className="p-1 rounded-lg hover:bg-slate-100">
-              <X className="w-4 h-4 text-slate-400" />
+            <button type="button" aria-label="Fechar popup" title="Fechar" onClick={() => { setEditing(null); setTitle(''); setContent(''); }} className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-100 hover:text-slate-900">
+              <X className="w-5 h-5" strokeWidth={2.5} />
             </button>
           </div>
           <input
