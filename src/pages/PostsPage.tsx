@@ -179,6 +179,7 @@ export function PostsPage() {
             {posting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             Publicar
           </button>
+          </div>
         </div>
       </Card>
 
