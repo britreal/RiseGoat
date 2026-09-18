@@ -4,29 +4,30 @@ import { cn } from '@/lib/utils';
 import {
   Sparkles, LayoutDashboard, Link2, MessageSquare, Mail, FileText, Users,
   BarChart3, Settings, LogOut, ExternalLink, Menu, X, ShoppingBag, Network, Activity,
-  CircleDollarSign, Handshake, CalendarDays, Radar as RadarIcon, Target,
+  CircleDollarSign, Handshake, CalendarDays, Radar as RadarIcon, Target, Workflow,
 } from 'lucide-react';
 
 interface NavItem { label: string; path: string; icon: typeof LayoutDashboard; group: string; }
 
 const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, group: 'Início' },
+  { label: 'Fluxos de Ação', path: '/action-flows', icon: Workflow, group: 'Início' },
   { label: 'Perfil', path: '/profile', icon: Users, group: 'Minha Página' },
   { label: 'Links', path: '/links', icon: Link2, group: 'Minha Página' },
   { label: 'Microblog', path: '/microblog', icon: MessageSquare, group: 'Minha Página' },
   { label: 'Newsletter', path: '/newsletter', icon: Mail, group: 'Crescimento' },
+  { label: 'Leads', path: '/leads', icon: Users, group: 'Crescimento' },
+  { label: 'Analytics', path: '/analytics', icon: BarChart3, group: 'Crescimento' },
   { label: 'Posts', path: '/posts', icon: FileText, group: 'Conteúdo' },
   { label: 'Rascunhos', path: '/drafts', icon: FileText, group: 'Conteúdo' },
   { label: 'Páginas de Venda', path: '/sales', icon: ShoppingBag, group: 'Monetização' },
   { label: 'Ofertas', path: '/offers', icon: ShoppingBag, group: 'Monetização' },
   { label: 'Receita', path: '/revenue', icon: CircleDollarSign, group: 'Monetização' },
   { label: 'Centro de Comando', path: '/command-center', icon: Network, group: 'Estratégia' },
-  { label: 'GOAT', path: '/goat', icon: Activity, group: 'Personal' },
   { label: 'Parcerias', path: '/partnerships', icon: Handshake, group: 'Estratégia' },
   { label: 'Lançamentos', path: '/launches', icon: CalendarDays, group: 'Estratégia' },
   { label: 'Radar', path: '/radar', icon: RadarIcon, group: 'Estratégia' },
-  { label: 'Leads', path: '/leads', icon: Users, group: 'Crescimento' },
-  { label: 'Analytics', path: '/analytics', icon: BarChart3, group: 'Crescimento' },
+  { label: 'GOAT', path: '/goat', icon: Activity, group: 'Personal' },
   { label: 'Configurações', path: '/settings', icon: Settings, group: 'Conta' },
   { label: 'Metas', path: '/goals', icon: Target, group: 'Conta' },
 ];
