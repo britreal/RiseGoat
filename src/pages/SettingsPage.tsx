@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { PageHeader, Card } from '@/components/ui';
-import { Check, AlertTriangle, Mail, Loader2, ShieldCheck } from 'lucide-react';
+import { Check, AlertTriangle, Mail, Loader2, ShieldCheck, Database } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export function SettingsPage() {
@@ -92,6 +92,23 @@ export function SettingsPage() {
     <div className="p-6 lg:p-8 max-w-2xl mx-auto">
       <PageHeader title="Configurações" subtitle="Gerencie sua conta" />
       <div className="space-y-6">
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-1"><Database className="w-4 h-4 text-cyan-500" /><h2 className="text-sm font-semibold text-slate-800">Supabase</h2></div>
+          <p className="text-xs text-slate-500 mb-4">Banco de dados e autenticação do RiseGoat.</p>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="text-[11px] uppercase tracking-wide text-slate-400">Projeto</div>
+              <div className="text-sm font-semibold text-slate-800 mt-1">Fluently</div>
+              <div className="text-[11px] text-slate-500 mt-1">xofrlyblnsvcjsywynzu</div>
+            </div>
+            <div className="rounded-lg border border-green-200 bg-green-50 p-3">
+              <div className="text-[11px] uppercase tracking-wide text-green-600">Conexão</div>
+              <div className="text-sm font-semibold text-green-700 mt-1">Configurada</div>
+              <div className="text-[11px] text-green-600 mt-1">Supabase Auth + Database</div>
+            </div>
+          </div>
+        </Card>
+
         <Card className="p-6">
           <h2 className="text-sm font-semibold text-slate-800 mb-4">Conta</h2>
           <div className="space-y-3">
