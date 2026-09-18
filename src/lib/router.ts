@@ -14,6 +14,7 @@ export type Route =
   | { name: 'settings' }
   | { name: 'sales' }
   | { name: 'command-center' }
+  | { name: 'goat' }
   | { name: 'sales-editor'; pageId: string }
   | { name: 'public'; username: string }
   | { name: 'public-microblog'; username: string; postId: string }
@@ -51,6 +52,7 @@ function parseHash(): Route {
   if (parts[0] === 'settings') return { name: 'settings' };
   if (parts[0] === 'sales' && parts[1] === 'editor' && parts[2]) return { name: 'sales-editor', pageId: parts[2] };
   if (parts[0] === 'command-center') return { name: 'command-center' };
+  if (parts[0] === 'goat') return { name: 'goat' };
   // Backward-compatible support for the previous editor URL.
   if (parts[0] === 'sales-editor' && parts[1]) return { name: 'sales-editor', pageId: parts[1] };
   if (parts[0] === 'sales') return { name: 'sales' };
