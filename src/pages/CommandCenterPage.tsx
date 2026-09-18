@@ -72,7 +72,7 @@ export function CommandCenterPage() {
   const [threats, setThreats] = useState<AuthorityThreat[]>([]);
   const [defenseActions, setDefenseActions] = useState<DefenseAction[]>([]);
   const [suggestions, setSuggestions] = useState<AuthoritySuggestion[]>([]);
-  const [sources, setSources] = useState<AuthoritySource[]>([]);
+  const [sources, setSources] = useState<AuthoritySource[]>([]);\n  const [negotiations, setNegotiations] = useState<NegotiationDossier[]>([]);\n  const [hiddenConnections, setHiddenConnections] = useState<HiddenConnection[]>([]);\n  const [crossInfluence, setCrossInfluence] = useState<CrossInfluence[]>([]);\n  const [nodeMonetization, setNodeMonetization] = useState<NodeMonetization[]>([]);
   const [notice, setNotice] = useState('');
 
   const load = async () => {
@@ -109,7 +109,7 @@ export function CommandCenterPage() {
     setThreats((results[11].data as AuthorityThreat[]) ?? []);
     setDefenseActions((results[12].data as DefenseAction[]) ?? []);
     setSuggestions((results[13].data as AuthoritySuggestion[]) ?? []);
-    setSources((results[14].data as AuthoritySource[]) ?? []);
+    setSources((results[14].data as AuthoritySource[]) ?? []);\n    setNegotiations((results[15].data as NegotiationDossier[]) ?? []);\n    setHiddenConnections((results[16].data as HiddenConnection[]) ?? []);\n    setCrossInfluence((results[17].data as CrossInfluence[]) ?? []);\n    setNodeMonetization((results[18].data as NodeMonetization[]) ?? []);
     const failed = results.find((x) => x.error);
     if (failed?.error) setNotice(failed.error.message);
     setLoading(false);
@@ -525,11 +525,11 @@ export function CommandCenterPage() {
 
       {tab === 'intelligence' && <IntelligencePanel contacts={contacts} properties={properties} dossiers={dossiers} suggestions={suggestions} nodes={nodes} connections={connections} onUpdateContact={updateContactIntelligence} onSaveSuggestion={createSuggestion} />}
 
-      {tab === 'strategy' && <StrategyPanel contacts={contacts} leverage={leverage} ledger={ledger} connections={connections} nodes={nodes} onRefresh={load} />}
+      {tab === 'strategy' && <StrategyPanel contacts={contacts} leverage={leverage} ledger={ledger} connections={connections} nodes={nodes} negotiations={negotiations} hiddenConnections={hiddenConnections} crossInfluence={crossInfluence} onRefresh={load} />}
 
       {tab === 'defense' && <DefensePanel threats={threats} actions={defenseActions} nodes={nodes} onAddThreat={addThreat} onUpdateThreat={updateThreat} onAddAction={addDefenseAction} />}
 
-      {tab === 'finance' && <FinancePanel products={products} commissions={commissions} onAddProduct={addProduct} onAddCommission={addCommission} />}
+      {tab === 'finance' && <FinancePanel products={products} commissions={commissions} nodeMonetization={nodeMonetization} nodes={nodes} onAddProduct={addProduct} onAddCommission={addCommission} onRefresh={load} />}
     </div>
   );
 }
