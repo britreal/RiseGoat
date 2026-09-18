@@ -148,84 +148,25 @@ export function SettingsPage() {
 
               <div className="space-y-3">
                 {[
-                  {
-                    n: '01', name: 'Dashboard', group: 'Início', icon: BarChart3,
-                    function: 'Visão inicial do que está acontecendo no sistema.',
-                    how: 'Use como ponto de entrada para enxergar seus indicadores e acessar rapidamente as áreas principais.',
-                    pain: 'Evita começar o trabalho sem saber o que precisa de atenção.'
-                  },
-                  {
-                    n: '02', name: 'Perfil', group: 'Minha Página', icon: Settings2,
-                    function: 'Constrói a identidade e a página pública da sua marca.',
-                    how: 'Cadastre nome, bio, foto, capa, SEO e informações que serão exibidas na sua presença pública.',
-                    pain: 'Resolve a falta de uma identidade central e de um lugar próprio para concentrar sua audiência.'
-                  },
-                  {
-                    n: '03', name: 'Links', group: 'Minha Página', icon: ArrowRight,
-                    function: 'Organiza links, ofertas, afiliados e destinos importantes.',
-                    how: 'Crie, ordene e ative seus links; use imagens quando necessário e direcione visitantes para cada próxima ação.',
-                    pain: 'Evita espalhar seus links em várias ferramentas e perder oportunidades de clique ou venda.'
-                  },
-                  {
-                    n: '04', name: 'Microblog', group: 'Minha Página', icon: Sparkles,
-                    function: 'Transforma ideias curtas em conteúdo publicado na sua página.',
-                    how: 'Crie posts rápidos, use imagens e mantenha uma camada de conteúdo contínuo ligada ao seu perfil.',
-                    pain: 'Resolve o problema de ter ideias, mas não ter um lugar simples para registrá-las e publicá-las.'
-                  },
-                  {
-                    n: '05', name: 'Newsletter', group: 'Crescimento', icon: Mail,
-                    function: 'Cria e organiza campanhas de e-mail e a operação de comunicação direta.',
-                    how: 'Conecte seu SMTP, gerencie campanhas e use seus leads para distribuir conteúdo e ofertas.',
-                    pain: 'Reduz a dependência exclusiva das redes sociais para falar com a audiência.'
-                  },
-                  {
-                    n: '06', name: 'Posts', group: 'Conteúdo', icon: BookOpen,
-                    function: 'Organiza a criação e publicação de conteúdo de forma estruturada.',
-                    how: 'Crie posts, adicione mídia e mantenha o conteúdo dentro do ecossistema do RiseGoat.',
-                    pain: 'Resolve a dispersão da produção de conteúdo e facilita manter uma rotina de publicação.'
-                  },
-                  {
-                    n: '07', name: 'Rascunhos', group: 'Conteúdo', icon: BookOpen,
-                    function: 'Guarda ideias e conteúdos antes da publicação.',
-                    how: 'Salve materiais incompletos para continuar depois sem depender de notas externas.',
-                    pain: 'Evita perder ideias e reduz o atrito entre ter uma ideia e transformá-la em publicação.'
-                  },
-                  {
-                    n: '08', name: 'Páginas de venda', group: 'Monetização', icon: Target,
-                    function: 'Cria páginas de venda com blocos visuais e conteúdo editável.',
-                    how: 'Monte uma página com texto, imagem, espaço, botão, cores, fontes e tamanhos; publique quando estiver pronta.',
-                    pain: 'Resolve a necessidade de criar uma página comercial sem montar cada estrutura manualmente fora do sistema.'
-                  },
-                  {
-                    n: '09', name: 'Centro de Comando', group: 'Estratégia', icon: Network,
-                    function: 'Organiza ativos, contatos, conexões, oportunidades, estratégia, defesa e finanças.',
-                    how: 'Use a Teia de Autoridade para mapear relações; registre oportunidades, tarefas, conteúdos, produtos e sinais estratégicos.',
-                    pain: 'Resolve a falta de visão integrada sobre quem, o quê e quais oportunidades estão conectados ao negócio.'
-                  },
-                  {
-                    n: '10', name: 'GOAT', group: 'Estratégia', icon: Sparkles,
-                    function: 'Acompanha desenvolvimento pessoal: hábitos, consistência, leitura, audiobooks e evolução corporal.',
-                    how: 'Marque hábitos diariamente, acompanhe o heatmap, registre Body Analytics e organize sua biblioteca por status.',
-                    pain: 'Resolve a dificuldade de manter consistência e medir evolução pessoal junto da execução profissional.'
-                  },
-                  {
-                    n: '11', name: 'Leads', group: 'Crescimento', icon: Target,
-                    function: 'Centraliza os contatos captados pela operação.',
-                    how: 'Acompanhe quem entrou na sua base e use esses dados para nutrir, analisar e transformar audiência em relacionamento.',
-                    pain: 'Evita que potenciais clientes fiquem espalhados ou sejam esquecidos.'
-                  },
-                  {
-                    n: '12', name: 'Analytics', group: 'Crescimento', icon: BarChart3,
-                    function: 'Mostra o comportamento e os resultados da sua presença digital.',
-                    how: 'Use as métricas para observar visitas, cliques e sinais de desempenho das páginas e links.',
-                    pain: 'Resolve decisões baseadas apenas em sensação, sem saber o que realmente está gerando atenção e ação.'
-                  },
-                  {
-                    n: '13', name: 'Configurações', group: 'Conta', icon: Settings2,
-                    function: 'Administra conta, segurança, conexão de e-mail e documentação do sistema.',
-                    how: 'Gerencie senha, SMTP, conexão do banco e consulte este documento para entender a arquitetura do RiseGoat.',
-                    pain: 'Evita que configurações importantes e informações sobre o funcionamento fiquem sem um lugar central.'
-                  },
+                  { n: '01', name: 'Dashboard', group: 'Início', icon: BarChart3, function: 'Centraliza a visão inicial da operação.', how: 'Use como ponto de entrada para conferir indicadores e acessar rapidamente as áreas principais.', pain: 'Evita trabalhar sem visão do que precisa de atenção.' },
+                  { n: '02', name: 'Perfil', group: 'Minha Página', icon: Settings2, function: 'Constrói a identidade e a página pública.', how: 'Cadastre nome, bio, imagens, SEO e informações exibidas publicamente.', pain: 'Resolve a falta de uma presença central para sua marca.' },
+                  { n: '03', name: 'Links', group: 'Minha Página', icon: ArrowRight, function: 'Organiza links, ofertas, afiliados e destinos.', how: 'Crie, ordene, ative e acompanhe links usados na sua página.', pain: 'Evita espalhar destinos e perder cliques ou oportunidades.' },
+                  { n: '04', name: 'Microblog', group: 'Minha Página', icon: Sparkles, function: 'Publica conteúdo curto ligado ao seu perfil.', how: 'Crie posts rápidos, imagens, CTA e mantenha uma camada contínua de conteúdo.', pain: 'Resolve o problema de ter ideias sem um fluxo simples de publicação.' },
+                  { n: '05', name: 'Newsletter', group: 'Crescimento', icon: Mail, function: 'Opera comunicação direta por e-mail.', how: 'Conecte SMTP, crie campanhas e envie conteúdo e ofertas aos seus leads.', pain: 'Reduz dependência exclusiva das redes sociais.' },
+                  { n: '06', name: 'Leads', group: 'Crescimento', icon: Target, function: 'Centraliza pessoas captadas pela operação.', how: 'Acompanhe nomes, e-mails e origens para transformar audiência em relacionamento.', pain: 'Evita perder potenciais clientes em ferramentas separadas.' },
+                  { n: '07', name: 'Analytics', group: 'Crescimento', icon: BarChart3, function: 'Mostra comportamento e resultados.', how: 'Acompanhe visitas, cliques e sinais de desempenho das propriedades digitais.', pain: 'Substitui decisões baseadas apenas em sensação por dados observáveis.' },
+                  { n: '08', name: 'Posts', group: 'Conteúdo', icon: BookOpen, function: 'Organiza a produção e publicação de conteúdo.', how: 'Crie posts, adicione mídia e mantenha a produção dentro do ecossistema.', pain: 'Reduz dispersão e facilita manter consistência.' },
+                  { n: '09', name: 'Rascunhos', group: 'Conteúdo', icon: BookOpen, function: 'Guarda ideias e conteúdos antes da publicação.', how: 'Salve materiais incompletos e retome depois.', pain: 'Evita perder ideias e reduz o atrito da criação.' },
+                  { n: '10', name: 'Páginas de Venda', group: 'Monetização', icon: Target, function: 'Cria páginas de venda com blocos editáveis.', how: 'Monte texto, imagem, espaço, botão, cores, fontes e tamanho; publique quando estiver pronto.', pain: 'Evita depender de outra ferramenta para montar a estrutura comercial.' },
+                  { n: '11', name: 'Ofertas', group: 'Monetização', icon: CircleDollarSign, function: 'Organiza tudo que pode ser vendido.', how: 'Cadastre tipo, status, preço, margem, comissão, canal, receita e vincule uma página de venda.', pain: 'Resolve a falta de uma visão central do catálogo e da rentabilidade das ofertas.' },
+                  { n: '12', name: 'Receita', group: 'Monetização', icon: CircleDollarSign, function: 'Controla dinheiro recebido e pendente.', how: 'Registre fonte, valor e data e conecte cada receita a oferta, parceria, lead e lançamento.', pain: 'Evita perder o histórico financeiro e mostra distância até a meta mensal.' },
+                  { n: '13', name: 'Centro de Comando', group: 'Estratégia', icon: Network, function: 'Integra propriedades, contatos, conexões, oportunidades, estratégia, defesa e finanças.', how: 'Use a Teia de Autoridade e seus painéis para organizar a estrutura estratégica.', pain: 'Resolve a falta de visão integrada sobre ativos, pessoas e oportunidades.' },
+                  { n: '14', name: 'GOAT', group: 'Estratégia', icon: Sparkles, function: 'Acompanha desenvolvimento pessoal e consistência.', how: 'Gerencie hábitos, heatmap, Body Analytics, livros e audiobooks.', pain: 'Ajuda a transformar intenção pessoal em rotina acompanhável.' },
+                  { n: '15', name: 'Parcerias', group: 'Estratégia', icon: Handshake, function: 'Organiza afiliados, parceiros e colaboradores.', how: 'Cadastre comissão, vendas, valor a pagar e conecte parceiros a leads e receitas.', pain: 'Evita controlar relacionamentos comerciais de forma espalhada.' },
+                  { n: '16', name: 'Lançamentos', group: 'Estratégia', icon: CalendarDays, function: 'Planeja campanhas por período e fase.', how: 'Monte kanban, calendário, metas e resultados e vincule posts e newsletters.', pain: 'Evita executar campanhas sem cronograma ou conexão entre conteúdo e resultado.' },
+                  { n: '17', name: 'Radar', group: 'Estratégia', icon: RadarIcon, function: 'Cruza dados automaticamente para encontrar oportunidades.', how: 'Compara interesses, ofertas e sinais de audiência, atualiza o score de alavancagem e permite criar tarefas.', pain: 'Reduz oportunidades escondidas em dados que estão isolados.' },
+                  { n: '18', name: 'Configurações', group: 'Conta', icon: Settings2, function: 'Administra conta, segurança e integrações.', how: 'Gerencie senha, SMTP, conexão do banco e documentação do sistema.', pain: 'Mantém configurações críticas centralizadas.' },
+                  { n: '19', name: 'Metas', group: 'Conta', icon: Target, function: 'Transforma objetivos macro em resultados-chave.', how: 'Cadastre três resultados-chave, progresso, prazo, revisão semanal e módulos vinculados.', pain: 'Evita trabalhar muito sem uma direção mensurável.' },
                 ].map((item, index, all) => {
                   const Icon = item.icon;
                   return (
