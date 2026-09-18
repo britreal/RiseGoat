@@ -177,7 +177,7 @@ export function GoatPage() {
 
     {modal && <div className='fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4' onMouseDown={e => { if (e.target === e.currentTarget) resetModal(); }}>
       <Card className='relative p-6 w-full max-w-md max-h-[90vh] overflow-y-auto'>
-        <button type='button' aria-label='Fechar' onClick={resetModal} className='absolute right-4 top-4 p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700'><X className='w-5 h-5' /></button>
+        <button type='button' aria-label='Fechar popup' title='Fechar' onClick={resetModal} className='absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-100 hover:text-slate-900' ><X className='w-5 h-5' strokeWidth={2.5} /></button>
         <h2 className='font-bold mb-4 pr-8'>{modal === 'metric' ? 'Registrar evolução' : modal === 'habit' ? 'Novo hábito' : modal === 'book' ? 'Adicionar livros' : 'Adicionar audiobooks'}</h2>
         {modal === 'metric' ? <>
           <input type='date' className='w-full border p-2 rounded mb-2' value={form.recorded_on || today} onChange={e => setForm({ ...form, recorded_on: e.target.value })} />
