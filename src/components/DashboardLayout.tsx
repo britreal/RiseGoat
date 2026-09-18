@@ -3,7 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import {
   Sparkles, LayoutDashboard, Link2, MessageSquare, Mail, FileText, Users,
-  BarChart3, Settings, LogOut, ExternalLink, Menu, X, ShoppingBag, Network,
+  BarChart3, Settings, LogOut, ExternalLink, Menu, X, ShoppingBag, Network, Activity,
 } from 'lucide-react';
 
 interface NavItem { label: string; path: string; icon: typeof LayoutDashboard; group: string; }
