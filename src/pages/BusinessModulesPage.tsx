@@ -251,6 +251,7 @@ export function RevenuePage() {
         <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Comece registrando uma entrada. Depois você poderá vinculá-la a uma oferta, parceria, lead ou lançamento.</p>
         <button onClick={()=>setModal(true)} className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold"><Plus className="w-4 h-4"/> Registrar primeira receita</button>
       </div>
+      </div>
     </Card>
     {modal&&<Modal title="Registrar receita" subtitle="Conecte o recebimento às peças que geraram o dinheiro." onClose={()=>setModal(false)}><div className="grid sm:grid-cols-2 gap-3">
       <Field label="Fonte" value={form.source||''} onChange={v=>setForm({...form,source:v})} placeholder="Venda direta, checkout, afiliado..." />
