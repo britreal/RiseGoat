@@ -5,6 +5,7 @@ import { PageHeader, Card, Spinner, EmptyState } from '@/components/ui';
 import { Plus, Trash2, Pin, MessageSquare, Loader2, Send, X, Image as ImageIcon, Search } from 'lucide-react';
 import type { MicroblogPost } from '@/types';
 import { timeAgo } from '@/lib/utils';
+import { uploadUserImage } from '@/lib/storage';
 
 export function MicroblogPage() {
   const { user } = useAuth();
@@ -13,6 +14,7 @@ export function MicroblogPage() {
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [buttonText, setButtonText] = useState('');
   const [buttonUrl, setButtonUrl] = useState('');
   const [posting, setPosting] = useState(false);
@@ -41,6 +43,7 @@ export function MicroblogPage() {
     setContent('');
     setTitle('');
     setImageUrl('');
+    setImageFile(null);
     setButtonText('');
     setButtonUrl('');
     setSeoTitle('');
@@ -52,6 +55,13 @@ export function MicroblogPage() {
   async function post() {
     if (!user || !content.trim()) return;
     setPosting(true);
+    try {
+      if (imageFile && user) imageUrl = await uploadUserImage(user.id, imageFile, 'microblog');
+    } catch (error: any) {
+      window.alert(error?.message || 'Não foi possível enviar a imagem.');
+      setPosting(false);
+      return;
+    }
     const payload = {
       user_id: user.id,
       content: content.trim(),
@@ -155,15 +165,12 @@ export function MicroblogPage() {
           <div className="space-y-3 mb-3 pb-3 border-b border-slate-100">
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1 flex items-center gap-1">
-                <ImageIcon className="w-3 h-3" /> URL da imagem
+                <ImageIcon className="w-3 h-3" /> Imagem
               </label>
-              <input
-                type="url"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="https://..."
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
-              />
+              <label className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-sm text-slate-600">
+                <ImageIcon className="w-4 h-4" /> {imageFile?.name || 'Escolher imagem do PC ou celular'}
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
+              </label>
             </div>
             <div className="border-t border-slate-100 pt-3">
               <p className="text-xs font-semibold text-slate-600 mb-2">Botão no final do artigo (opcional)</p>
