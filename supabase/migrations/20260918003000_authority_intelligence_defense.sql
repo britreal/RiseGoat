@@ -238,7 +238,7 @@ RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
-AS $
+AS $$
 DECLARE
   max_degree numeric := 1;
 BEGIN
@@ -304,7 +304,7 @@ WHERE l.user_id = p_user_id
     resources=EXCLUDED.resources,
     updated_at=now();
 END;
-$;
+$$;
 
 GRANT EXECUTE ON FUNCTION public.authority_refresh_leverage(uuid) TO authenticated;
 
@@ -313,12 +313,12 @@ RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
-AS $
+AS $$
 BEGIN
   PERFORM public.authority_refresh_leverage(COALESCE(NEW.user_id, OLD.user_id));
   RETURN COALESCE(NEW, OLD);
 END;
-$;
+$$;
 
 DROP TRIGGER IF EXISTS trg_authority_connections_refresh_leverage ON public.authority_connections;
 CREATE TRIGGER trg_authority_connections_refresh_leverage
@@ -330,12 +330,12 @@ RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
-AS $
+AS $$
 BEGIN
   PERFORM public.authority_refresh_leverage(COALESCE(NEW.user_id, OLD.user_id));
   RETURN COALESCE(NEW, OLD);
 END;
-$;
+$$;
 
 DROP TRIGGER IF EXISTS trg_authority_properties_refresh_leverage ON public.authority_properties;
 CREATE TRIGGER trg_authority_properties_refresh_leverage
@@ -347,12 +347,12 @@ RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
-AS $
+AS $$
 BEGIN
   PERFORM public.authority_refresh_leverage(NEW.user_id);
   RETURN NEW;
 END;
-$;
+$$;
 
 DROP TRIGGER IF EXISTS trg_authority_contacts_refresh_leverage ON public.authority_contacts;
 CREATE TRIGGER trg_authority_contacts_refresh_leverage
