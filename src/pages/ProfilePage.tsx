@@ -52,21 +52,27 @@ export function ProfilePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (profile) {
-      setDisplayName(profile.display_name);
-      setBio(profile.bio);
-      setAvatarUrl(profile.avatar_url);
-      setCoverUrl(profile.cover_url);
-      setThemeColor(profile.theme_color);
-      setAccentColor(profile.accent_color || '#06b6d4');
-      setThemeFont(profile.theme_font || 'inter');
-      setLinkStyle(profile.link_style || 'rounded');
-      setSeoTitle(profile.seo_title || '');
-      setSeoDescription(profile.seo_description || '');
-      setSeoImageUrl(profile.seo_image_url || '');
+    if (!profile) {
+      if (!user) return;
+      // Auth can finish before a profile row exists. Do not leave this page
+      // in an infinite spinner; show an actionable recovery state instead.
       setLoading(false);
+      return;
     }
-  }, [profile]);
+
+    setDisplayName(profile.display_name || '');
+    setBio(profile.bio || '');
+    setAvatarUrl(profile.avatar_url || '');
+    setCoverUrl(profile.cover_url || '');
+    setThemeColor(profile.theme_color || '#0f172a');
+    setAccentColor(profile.accent_color || '#06b6d4');
+    setThemeFont(profile.theme_font || 'inter');
+    setLinkStyle(profile.link_style || 'rounded');
+    setSeoTitle(profile.seo_title || '');
+    setSeoDescription(profile.seo_description || '');
+    setSeoImageUrl(profile.seo_image_url || '');
+    setLoading(false);
+  }, [profile, user]);
 
   async function handleSave() {
     setSaving(true);
@@ -96,6 +102,36 @@ export function ProfilePage() {
   }
 
   if (loading) return <Spinner />;
+
+  if (!profile) {
+    return (
+      <div className="p-6 lg:p-8 max-w-3xl mx-auto">
+        <PageHeader title="Perfil" subtitle="Configure como você aparece na sua página pública" />
+        <Card className="p-6">
+          <h2 className="text-sm font-semibold text-slate-800">Perfil ainda não criado</h2>
+          <p className="text-sm text-slate-500 mt-2">
+            Sua conta está autenticada, mas o registro em <code>profiles</code> não foi encontrado.
+          </p>
+          <button
+            onClick={async () => {
+              if (!user) return;
+              setLoading(true);
+              const { error } = await supabase.from('profiles').upsert({
+                id: user.id,
+                username: (user.email?.split('@')[0] || 'usuario').toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30) || 'usuario',
+                display_name: user.user_metadata?.display_name || user.email?.split('@')[0] || 'Usuário',
+              }, { onConflict: 'id' });
+              if (!error) await refreshProfile();
+              setLoading(false);
+            }}
+            className="mt-4 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium"
+          >
+            Criar meu perfil
+          </button>
+        </Card>
+      </div>
+    );
+  }
 
   const publicUrl = `${window.location.origin}/u/${profile?.username}`;
 
