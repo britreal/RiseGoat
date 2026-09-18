@@ -25,7 +25,8 @@ export type Route =
   | { name: 'sales-editor'; pageId: string }
   | { name: 'public'; username: string }
   | { name: 'public-microblog'; username: string; postId: string }
-  | { name: 'public-sales'; slug: string };
+  | { name: 'public-sales'; slug: string }
+  | { name: 'unsubscribe'; token: string };
 
 function parseHash(): Route {
   const pathParts = window.location.pathname.split('/').filter(Boolean);
@@ -38,6 +39,7 @@ function parseHash(): Route {
   if (pathParts[0] === 'p' && pathParts[1]) {
     return { name: 'public-sales', slug: pathParts.slice(1).map(decodeURIComponent).join('/') };
   }
+  if (pathParts[0] === 'unsubscribe' && pathParts[1]) return { name: 'unsubscribe', token: decodeURIComponent(pathParts[1]) };
 
   const hash = window.location.hash.replace(/^#/, '') || '/';
   const parts = hash.split('/').filter(Boolean);
@@ -47,6 +49,7 @@ function parseHash(): Route {
   if (parts[0] === 'u' && parts[1] && parts[2] === 'microblog' && parts[3]) return { name: 'public-microblog', username: decodeURIComponent(parts[1]), postId: decodeURIComponent(parts[3]) };
   if (parts[0] === 'u' && parts[1]) return { name: 'public', username: decodeURIComponent(parts[1]) };
   if (parts[0] === 'p' && parts[1]) return { name: 'public-sales', slug: parts.slice(1).map(decodeURIComponent).join('/') };
+  if (parts[0] === 'unsubscribe' && parts[1]) return { name: 'unsubscribe', token: decodeURIComponent(parts[1]) };
   if (parts[0] === 'dashboard') return { name: 'dashboard' };
   if (parts[0] === 'action-flows') return { name: 'action-flows' };
   if (parts[0] === 'profile') return { name: 'profile' };
