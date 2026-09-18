@@ -193,7 +193,7 @@ export function OffersPage() {
 }
 
 export function RevenuePage() {
-  const { user } = useAuth();
+  const { user, workspaceMode } = useAuth();
   const [rows,setRows]=useState<any[]>([]); const [offers,setOffers]=useState<any[]>([]); const [partners,setPartners]=useState<any[]>([]); const [leads,setLeads]=useState<any[]>([]); const [launches,setLaunches]=useState<any[]>([]);
   const [loading,setLoading]=useState(true); const [error,setError]=useState(''); const [modal,setModal]=useState(false);
   const [form,setForm]=useState<any>({date:dateKey(),status:'received'});
