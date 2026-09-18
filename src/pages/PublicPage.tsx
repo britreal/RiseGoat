@@ -59,6 +59,24 @@ function youtubeId(url: string): string | null {
   return null;
 }
 
+function getAttribution(profileId: string) {
+  const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'] as const;
+  const params = new URLSearchParams(window.location.search);
+  const current = Object.fromEntries(keys.map((key) => [key, params.get(key) || '']));
+  const key = 'risegoat_attribution_' + profileId;
+  if (keys.some((field) => current[field])) {
+    sessionStorage.setItem(key, JSON.stringify(current));
+    return current;
+  }
+  try {
+    const stored = JSON.parse(sessionStorage.getItem(key) || '{}');
+    return Object.fromEntries(keys.map((field) => [field, String(stored?.[field] || '')]));
+  } catch (error) {
+    void error;
+    return current;
+  }
+}
+
 function setMeta(name: string, content: string) {
   let tag = document.head.querySelector('meta[name="' + name + '"]') as HTMLMetaElement | null;
   if (!tag) {
@@ -90,6 +108,8 @@ export function PublicPage({ username }: { username: string }) {
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [consent, setConsent] = useState(false);
+  const [subscribeError, setSubscribeError] = useState('');
   const [ageGateLink, setAgeGateLink] = useState<Link | null>(null);
 
   useEffect(() => {
@@ -150,9 +170,16 @@ export function PublicPage({ username }: { username: string }) {
         });
         document.head.appendChild(schema);
 
+        const attribution = getAttribution(p.id);
         supabase.from('page_visits').insert({
           user_id: p.id,
           visitor_referrer: document.referrer || '',
+          page_url: window.location.href,
+          utm_source: attribution.utm_source,
+          utm_medium: attribution.utm_medium,
+          utm_campaign: attribution.utm_campaign,
+          utm_content: attribution.utm_content,
+          utm_term: attribution.utm_term,
         }).then();
 
         Promise.all([
@@ -169,17 +196,38 @@ export function PublicPage({ username }: { username: string }) {
   async function handleSubscribe(e: React.FormEvent) {
     e.preventDefault();
     if (!profile || !email.trim()) return;
+    if (!consent) {
+      setSubscribeError('Marque o consentimento para entrar na lista.');
+      return;
+    }
     setSubmitting(true);
-    await supabase.from('newsletter_leads').insert({
+    setSubscribeError('');
+    const attribution = getAttribution(profile.id);
+    const { error } = await supabase.from('newsletter_leads').insert({
       user_id: profile.id,
       name: name.trim(),
       email: email.trim(),
       source: 'public_page',
+      marketing_consent: true,
+      consented_at: new Date().toISOString(),
+      unsubscribed_at: null,
+      utm_source: attribution.utm_source,
+      utm_medium: attribution.utm_medium,
+      utm_campaign: attribution.utm_campaign,
+      utm_content: attribution.utm_content,
+      utm_term: attribution.utm_term,
+      landing_page: window.location.href,
+      first_referrer: document.referrer || '',
     });
     setSubmitting(false);
+    if (error) {
+      setSubscribeError(error.message);
+      return;
+    }
     setSubmitted(true);
     setName('');
     setEmail('');
+    setConsent(false);
   }
 
   function openLink(link: Link, event?: React.MouseEvent<HTMLAnchorElement>) {
@@ -192,9 +240,19 @@ export function PublicPage({ username }: { username: string }) {
   }
 
   async function trackClick(link: Link) {
+    const attribution = profile ? getAttribution(profile.id) : {
+      utm_source: '', utm_medium: '', utm_campaign: '', utm_content: '', utm_term: '',
+    };
     await supabase.from('link_clicks').insert({
       link_id: link.id,
       user_id: link.user_id,
+      page_url: window.location.href,
+      referrer: document.referrer || '',
+      utm_source: attribution.utm_source,
+      utm_medium: attribution.utm_medium,
+      utm_campaign: attribution.utm_campaign,
+      utm_content: attribution.utm_content,
+      utm_term: attribution.utm_term,
     });
     await supabase.from('links').update({ clicks: link.clicks + 1 }).eq('id', link.id);
   }
@@ -403,6 +461,11 @@ export function PublicPage({ username }: { username: string }) {
                 required
                 className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl text-white placeholder-white/40 text-sm focus:outline-none focus:border-white/30 transition"
               />
+              <label className="flex items-start gap-2 text-[11px] text-white/50 leading-relaxed cursor-pointer">
+                <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 accent-cyan-400" />
+                <span>Concordo em receber emails desta página e posso cancelar minha inscrição depois.</span>
+              </label>
+              {subscribeError && <p className="text-xs text-red-300">{subscribeError}</p>}
               <button
                 type="submit"
                 disabled={submitting}
