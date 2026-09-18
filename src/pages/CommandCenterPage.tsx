@@ -322,7 +322,8 @@ export function CommandCenterPage() {
       telegram: data.telegram?.trim() || '', occupation: data.occupation?.trim() || '',
       status: data.status || 'Frio', strategic_value: data.strategic_value?.trim() || '',
       next_action: data.next_action?.trim() || '', next_action_at: data.next_action_at || null,
-      tags: data.tags?.trim() || '',
+      tags: data.tags?.trim() || '', wealth_score: Number(data.wealth_score || 0), fame_score: Number(data.fame_score || 0),
+      decision_power_score: Number(data.decision_power_score || 0), resources_score: Number(data.resources_score || 0),
     }).select().single();
     if (error) return setNotice(error.message);
     if (row) setContacts((v) => [row as AuthorityContact, ...v]);
