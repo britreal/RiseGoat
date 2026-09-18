@@ -294,6 +294,8 @@ export function CommandCenterPage() {
       setNotice('Dados do RiseGoat sincronizados com o Centro de Comando.');
       await runRadar();
     } catch (error) {
+      setLoading(false);
+      setRefreshing(false);
       setNotice(error instanceof Error ? error.message : 'Falha ao sincronizar os dados.');
     }
   }
@@ -306,7 +308,7 @@ export function CommandCenterPage() {
       opportunities, ledger, leverage, products, commissions,
     };
     try {
-      localStorage.setItem('risegoat_command_center_backup', JSON.stringify(snapshot));
+      localStorage.setItem('risegoat_command_center_backup_' + user?.id, JSON.stringify(snapshot));
     } catch {}
   }, [loading, properties, contacts, connections, tasks, contents, opportunities, ledger, leverage, products, commissions]);
 
