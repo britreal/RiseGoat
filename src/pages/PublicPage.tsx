@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Sparkles, Loader2, Gift, Check, Youtube, GraduationCap, ShoppingBag, ShieldAlert, X } from 'lucide-react';
+import { Sparkles, Loader2, Gift, Check, Youtube, GraduationCap, ShieldAlert, X } from 'lucide-react';
 import type { Profile, Link, MicroblogPost } from '@/types';
 import { timeAgo } from '@/lib/utils';
 
@@ -53,7 +53,9 @@ function youtubeId(url: string): string | null {
       const shortsIndex = parts.indexOf('shorts');
       if (shortsIndex >= 0 && parts[shortsIndex + 1]) return parts[shortsIndex + 1];
     }
-  } catch {}
+  } catch (error) {
+    void error;
+  }
   return null;
 }
 
