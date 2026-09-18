@@ -6,7 +6,7 @@ import type {
   AuthorityProperty, AuthorityContact, AuthorityConnection, AuthorityTask,
   AuthorityContent, AuthorityOpportunity, ReciprocityEntry, LeverageNode,
   ProductPipelineItem, Commission, ContactDossier, AuthorityThreat, DefenseAction,
-  AuthoritySuggestion, AuthoritySource, NegotiationDossier, HiddenConnection, CrossInfluence, NodeMonetization,
+  AuthoritySuggestion, NegotiationDossier, HiddenConnection, CrossInfluence, NodeMonetization,
 } from '@/types';
 import {
   Network, Search, Plus, Trash2, Target, CheckSquare, Users,
@@ -122,8 +122,10 @@ export function CommandCenterPage() {
 
   useEffect(() => {
     if (!user) return;
-    syncRiseGoatData();
-  }, [user]);
+    void syncRiseGoatData();
+    // syncRiseGoatData is intentionally invoked only when the authenticated user changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   async function runRadar() {
     if (!user) return;
@@ -639,7 +641,7 @@ function NetworkMap(props: {
   const positions = useMemo(() => visible.map((node,i) => {
     const angle=(i/Math.max(1,visible.length))*Math.PI*2;
     return {...node,x:50+Math.cos(angle)*37,y:50+Math.sin(angle)*34};
-  }),[visible.map((x)=>x.id).join('|')]);
+  }),[visible]);
   const lookup=new Map(positions.map((n)=>[n.id,n]));
   const lineData=props.connections.filter((c)=>lookup.has(c.origin_id)&&lookup.has(c.destination_id));
   const selected=props.allNodes.find((n)=>n.id===selectedId);
@@ -864,12 +866,12 @@ function IntelligencePanel(props:{
   useEffect(()=>{
     if(!current)return;
     setWealth(String(current.wealth_score||0));setFame(String(current.fame_score||0));setDecision(String(current.decision_power_score||0));setResources(String(current.resources_score||0));setNotes(current.intelligence_notes||'');
-  },[selected,current?.id]);
+  },[current]);
   const score=current?((Number(wealth)||0)+(Number(fame)||0)+(Number(decision)||0))/3:0;
   const grade=dialogGrade(score);
 
-  const existing=new Set(props.connections.map((x)=>[x.origin_id,x.destination_id].sort().join(':')));
   const localSuggestions=useMemo(()=>{
+    const existing=new Set(props.connections.map((x)=>[x.origin_id,x.destination_id].sort().join(':')));
     const result:Array<{source_entity_id:string;source_entity_type:EntityType;target_entity_id:string;target_entity_type:EntityType;score:number;reason:string}>=[];
     const token=(s:string)=>new Set((s||'').toLowerCase().split(/[^a-z0-9à-ÿ]+/).filter((x)=>x.length>=3));
     for(const a of props.contacts){
