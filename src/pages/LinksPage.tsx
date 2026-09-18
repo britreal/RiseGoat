@@ -202,7 +202,7 @@ export function LinksPage() {
                 <p className="text-sm font-medium text-slate-800 truncate">{link.label}</p>
                 <p className="text-xs text-slate-400 truncate">{link.link_type === 'affiliate' ? (link.description || 'Produto') + (link.product_price ? ' · ' + link.product_price : '') : link.url}</p>
               </div>
-              {link.sensitive && <ShieldAlert className="w-4 h-4 text-slate-400 shrink-0" title="18+" />}
+              {link.sensitive && <ShieldAlert className="w-4 h-4 text-slate-400 shrink-0" aria-label="18+" />}
               <span className="text-xs text-slate-400 hidden sm:block">{link.clicks} cliques</span>
               <div className="flex items-center gap-1">
                 <button onClick={() => toggleActive(link)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 transition" title={link.is_active ? 'Ocultar' : 'Mostrar'}>{link.is_active ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}</button>
