@@ -9,8 +9,8 @@ import type {
   AuthoritySuggestion, AuthoritySource, NegotiationDossier, HiddenConnection, CrossInfluence, NodeMonetization,
 } from '@/types';
 import {
-  Network, Search, Plus, Trash2, ExternalLink, Target, CheckSquare, Users,
-  Briefcase, FileText, Wallet, Handshake, AlertTriangle, ArrowRight,
+  Network, Search, Plus, Trash2, Target, CheckSquare, Users,
+  Briefcase, Wallet, Handshake, AlertTriangle, ArrowRight,
   Download, Upload, RefreshCw, Link2, X, ChevronDown, Shield,
 } from 'lucide-react';
 
@@ -35,18 +35,12 @@ const objectives = ['Vender', 'Atrair', 'Nutrir', 'Redirecionar'];
 const contactStatuses = ['Frio', 'Morno', 'Quente', 'Aliado', 'Inativo'];
 const taskTypes = ['Criar conteúdo', 'Publicar', 'Contatar', 'Analisar', 'Negociar'];
 const priorities = ['Alta', 'Média', 'Baixa'];
-const taskStatuses = ['Backlog', 'Hoje', 'Em andamento', 'Feito'];
 const opportunityStatuses = ['Identificada', 'Contatada', 'Negociando', 'Fechada', 'Perdida'];
-const contentTypes = ['Artigo', 'Vídeo', 'Post', 'E-mail', 'Newsletter'];
-const contentStatuses = ['Ideia', 'Rascunho', 'Publicado', 'Arquivado'];
 
 function money(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value || 0));
 }
 
-function cleanTags(value: string) {
-  return value.split(',').map((x) => x.trim().toLowerCase()).filter(Boolean);
-}
 
 function daysAgo(date: string) {
   return Math.floor((Date.now() - new Date(date).getTime()) / 86400000);
@@ -72,7 +66,6 @@ export function CommandCenterPage() {
   const [threats, setThreats] = useState<AuthorityThreat[]>([]);
   const [defenseActions, setDefenseActions] = useState<DefenseAction[]>([]);
   const [suggestions, setSuggestions] = useState<AuthoritySuggestion[]>([]);
-  const [sources, setSources] = useState<AuthoritySource[]>([]);
   const [negotiations, setNegotiations] = useState<NegotiationDossier[]>([]);
   const [hiddenConnections, setHiddenConnections] = useState<HiddenConnection[]>([]);
   const [crossInfluence, setCrossInfluence] = useState<CrossInfluence[]>([]);
@@ -117,7 +110,6 @@ export function CommandCenterPage() {
     setThreats((results[11].data as AuthorityThreat[]) ?? []);
     setDefenseActions((results[12].data as DefenseAction[]) ?? []);
     setSuggestions((results[13].data as AuthoritySuggestion[]) ?? []);
-    setSources((results[14].data as AuthoritySource[]) ?? []);
     setNegotiations((results[15].data as NegotiationDossier[]) ?? []);
     setHiddenConnections((results[16].data as HiddenConnection[]) ?? []);
     setCrossInfluence((results[17].data as CrossInfluence[]) ?? []);
@@ -309,8 +301,10 @@ export function CommandCenterPage() {
     };
     try {
       localStorage.setItem('risegoat_command_center_backup_' + user?.id, JSON.stringify(snapshot));
-    } catch {}
-  }, [loading, properties, contacts, connections, tasks, contents, opportunities, ledger, leverage, products, commissions]);
+    } catch (error) {
+      void error;
+    }
+  }, [loading, user?.id, properties, contacts, connections, tasks, contents, opportunities, ledger, leverage, products, commissions]);
 
   const nodes = useMemo(() => {
     const p = properties.map((x) => ({ id: x.id, type: 'property' as EntityType, name: x.name, label: x.property_type }));
@@ -814,8 +808,6 @@ function OpportunityPanel(props:{
   properties:AuthorityProperty[];
 }) {
   const [opportunity,setOpportunity]=useState(''); const [value,setValue]=useState(''); const [status,setStatus]=useState('Identificada');
-  const degree=new Map<string,number>();
-  const connected=new Set<string>();
   return (
     <div className="space-y-5">
       <Card className="p-5">
@@ -1044,7 +1036,6 @@ function Cell(props:{children:React.ReactNode;strong?:boolean}) { return <td cla
   negotiations:NegotiationDossier[]; hiddenConnections:HiddenConnection[]; crossInfluence:CrossInfluence[];
   onRefresh:()=>void;
 }) {
-  const nameMap=new Map(props.nodes.map((x)=>[x.id,x.name]));
   const degreeMap=new Map<string,number>();
   props.connections.forEach((x)=>{degreeMap.set(x.origin_id,(degreeMap.get(x.origin_id)||0)+1);degreeMap.set(x.destination_id,(degreeMap.get(x.destination_id)||0)+1)});
   const maxDegree=Math.max(1,...degreeMap.values());
