@@ -8,8 +8,8 @@ const ALIGN: Record<string,string> = { left:'text-left', center:'text-center', r
 interface BlockSettings { fontSize?:string; fontFamily?:string; align?:string; color?:string; bgColor?:string; fontWeight?:string; buttonUrl?:string; buttonBg?:string; buttonColor?:string; buttonRadius?:number; spacerHeight?:number; imageRounded?:boolean; imageWidth?:number; paddingY?:number; }
 
 export function PublicSalesPage({ slug }: { slug:string }) {
-  const [page,setPage]=useState<SalesPage|null>(null); const [blocks,setBlocks]=useState<SalesBlock[]>([]); const [loading,setLoading]=useState(true); const [notFound,setNotFound]=useState(false);
-  useEffect(()=>{let alive=true; supabase.from('sales_pages').select('*').eq('slug',slug.toLowerCase()).maybeSingle().then(async({data})=>{if(!alive)return;if(!data||!(data as SalesPage).is_published){setNotFound(true);setLoading(false);return;}const p=data as SalesPage;setPage(p);document.title=p.seo_title||p.title;
+  const [blocks,setBlocks]=useState<SalesBlock[]>([]); const [loading,setLoading]=useState(true); const [notFound,setNotFound]=useState(false);
+  useEffect(()=>{let alive=true; supabase.from('sales_pages').select('*').eq('slug',slug.toLowerCase()).maybeSingle().then(async({data})=>{if(!alive)return;if(!data||!(data as SalesPage).is_published){setNotFound(true);setLoading(false);return;}const p=data as SalesPage;document.title=p.seo_title||p.title;
 const title=p.seo_title||p.title;
 const description=p.seo_description||p.title;
 let meta=document.querySelector('meta[name="description"]') as HTMLMetaElement|null;
