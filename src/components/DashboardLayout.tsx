@@ -10,13 +10,13 @@ import {
 interface NavItem { label: string; path: string; icon: typeof LayoutDashboard; group: string; mode: 'shared' | 'pessoal' | 'negocios'; }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, group: 'Início', mode: 'shared' },
-  { label: 'Metas', path: '/goals', icon: Target, group: 'Planejamento', mode: 'shared' },
+  { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, group: 'Núcleo', mode: 'shared' },
+  { label: 'Fluxos de Ação', path: '/action-flows', icon: Workflow, group: 'Núcleo', mode: 'shared' },
+  { label: 'Metas', path: '/goals', icon: Target, group: 'Núcleo', mode: 'shared' },
   { label: 'Perfil', path: '/profile', icon: Users, group: 'Presença', mode: 'negocios' },
   { label: 'Links', path: '/links', icon: Link2, group: 'Presença', mode: 'negocios' },
   { label: 'Posts', path: '/posts', icon: FileText, group: 'Conteúdo', mode: 'negocios' },
   { label: 'Microblog', path: '/microblog', icon: MessageSquare, group: 'Conteúdo', mode: 'negocios' },
-  { label: 'Rascunhos', path: '/drafts', icon: FileText, group: 'Conteúdo', mode: 'negocios' },
   { label: 'Newsletter', path: '/newsletter', icon: Mail, group: 'Captação', mode: 'negocios' },
   { label: 'Leads', path: '/leads', icon: Users, group: 'Captação', mode: 'negocios' },
   { label: 'Analytics', path: '/analytics', icon: BarChart3, group: 'Medição', mode: 'negocios' },
@@ -27,7 +27,6 @@ const navItems: NavItem[] = [
   { label: 'Parcerias', path: '/partnerships', icon: Handshake, group: 'Estratégia', mode: 'negocios' },
   { label: 'Lançamentos', path: '/launches', icon: CalendarDays, group: 'Estratégia', mode: 'negocios' },
   { label: 'Radar', path: '/radar', icon: RadarIcon, group: 'Estratégia', mode: 'negocios' },
-  { label: 'Fluxos de Ação', path: '/action-flows', icon: Workflow, group: 'Execução', mode: 'shared' },
   { label: 'GOAT', path: '/goat', icon: Activity, group: 'Pessoal', mode: 'pessoal' },
   { label: 'Configurações', path: '/settings', icon: Settings, group: 'Conta', mode: 'shared' },
 ];
@@ -45,7 +44,7 @@ export function DashboardLayout({ children, currentPath, navigate }: DashboardLa
     'Conteúdo': 'text-violet-700 bg-violet-50',
     'Medição': 'text-cyan-700 bg-cyan-50',
     'Monetização': 'text-amber-700 bg-amber-50',
-    'Planejamento': 'text-slate-700 bg-slate-100',
+    'Núcleo': 'text-slate-700 bg-slate-100',
     'Execução': 'text-indigo-700 bg-indigo-50',
     'Estratégia': 'text-red-700 bg-red-50',
     'Pessoal': 'text-slate-700 bg-slate-100',
