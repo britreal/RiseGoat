@@ -522,9 +522,9 @@ export function CommandCenterPage() {
     <div className="min-h-full bg-gradient-to-br from-slate-50 via-white to-cyan-50/30 p-4 sm:p-6 lg:p-8 max-w-[1500px] mx-auto">
       <div className="mb-7 rounded-3xl border border-slate-200/80 bg-white/85 backdrop-blur-sm shadow-[0_12px_40px_rgba(15,23,42,0.06)] p-5 lg:p-6"><div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-cyan-600">Centro de Comando</p>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight mt-1">Teia de Autoridade</h1>
-          <p className="text-sm text-slate-500 mt-1 max-w-2xl">Conecte propriedades, pessoas, conteúdo, tarefas e oportunidades em uma visão única.</p>
+          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-100 bg-cyan-50 px-2.5 py-1"><span className="h-1.5 w-1.5 rounded-full bg-cyan-500" /><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-700">Centro de Comando</p></div>
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">Teia de Autoridade</h1>
+          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">Conecte propriedades, pessoas, conteúdo, tarefas e oportunidades em uma visão única.</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={syncRiseGoatData} className="flex items-center gap-2 px-3.5 py-2.5 border border-cyan-200 bg-cyan-50 text-cyan-700 rounded-xl text-xs font-semibold hover:bg-cyan-100 transition shadow-sm">
@@ -842,7 +842,7 @@ function OpportunityPanel(props:{
           <input required value={opportunity} onChange={(e)=>setOpportunity(e.target.value)} placeholder="Nova oportunidade..." className="px-3 py-2 border rounded-lg text-sm" />
           <input type="number" value={value} onChange={(e)=>setValue(e.target.value)} placeholder="Valor" className="px-3 py-2 border rounded-lg text-sm" />
           <Select value={status} onChange={setStatus} options={opportunityStatuses} label="Etapa" />
-          <button className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm"><Plus className="w-4 h-4 inline mr-1" />Adicionar</button>
+          <button className="px-4 py-2.5 rounded-xl bg-slate-950 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"><Plus className="w-4 h-4 inline mr-1" />Adicionar</button>
         </form>
       </CommandCard>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
@@ -851,7 +851,7 @@ function OpportunityPanel(props:{
             <div className="flex items-center justify-between gap-2 mb-4"><div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-cyan-500" /><h3 className="text-xs font-bold uppercase tracking-wide text-slate-700">{stage}</h3></div><span className="inline-flex min-w-6 justify-center rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-500">{props.opportunities.filter((o)=>o.status===stage).length}</span></div>
             <div className="space-y-2">
               {props.opportunities.filter((o)=>o.status===stage).map((op)=><div key={op.id} className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-100/90 hover:bg-white hover:shadow-sm transition">
-                <p className="text-sm font-medium text-slate-800">{op.opportunity}</p><p className="text-sm font-semibold text-slate-700 mt-2">{money(op.estimated_value)}</p>
+                <p className="text-sm font-semibold leading-5 text-slate-900">{op.opportunity}</p><p className="mt-2 text-sm font-bold text-slate-700">{money(op.estimated_value)}</p>
                 <div className="flex items-center gap-2 mt-2"><select value={op.status} onChange={(e)=>props.onUpdate(op.id,e.target.value)} className="flex-1 min-w-0 text-[11px] border border-slate-200/90 rounded-xl bg-white px-2.5 py-2">{opportunityStatuses.map((s)=><option key={s}>{s}</option>)}</select><button type="button" onClick={()=>{if(window.confirm('Apagar esta oportunidade?')) props.onDelete(op.id)}} aria-label="Apagar oportunidade" title="Apagar oportunidade" className="shrink-0 p-2 text-red-500 border border-red-100 rounded-lg hover:bg-red-50"><Trash2 className="w-4 h-4"/></button></div>
               </div>)}
             </div>
@@ -940,7 +940,7 @@ function IntelligencePanel(props:{
               <Input label="Riqueza" value={wealth} onChange={setWealth} type="number"/><Input label="Fama" value={fame} onChange={setFame} type="number"/><Input label="Decisão" value={decision} onChange={setDecision} type="number"/><Input label="Recursos" value={resources} onChange={setResources} type="number"/>
             </div>
             <Input label="Notas de inteligência" value={notes} onChange={setNotes} placeholder="Contexto, fontes, observações..."/>
-            <button onClick={()=>props.onUpdateContact(current.id,{wealth_score:Number(wealth||0),fame_score:Number(fame||0),decision_power_score:Number(decision||0),resources_score:Number(resources||0),intelligence_notes:notes})} className="mt-3 px-4 py-2 bg-slate-900 text-white text-xs rounded-lg">Salvar avaliação</button>
+            <button onClick={()=>props.onUpdateContact(current.id,{wealth_score:Number(wealth||0),fame_score:Number(fame||0),decision_power_score:Number(decision||0),resources_score:Number(resources||0),intelligence_notes:notes})} className="mt-3 px-4 py-2.5 rounded-xl bg-slate-950 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800">Salvar avaliação</button>
           </div>}
         </div>}
       </CommandCard>
@@ -1023,20 +1023,20 @@ function FinancePanel(props:{
         <CommandCard className="p-5">
           <div className="flex items-center justify-between mb-3"><h2 className="text-sm font-semibold text-slate-800">Pipeline de produtos</h2><Briefcase className="w-4 h-4 text-slate-400"/></div>
           <form className="space-y-2" onSubmit={(e)=>{e.preventDefault();props.onAddProduct({product,status,monthly_revenue:Number(revenue||0),margin:Number(margin||0)});setProduct('');setRevenue('');setMargin('')}}>
-            <Input label="Produto" value={product} onChange={setProduct} required/><Select label="Status" value={status} onChange={setStatus} options={['Ideia','Em criação','Pronto','Vendendo']}/><div className="grid grid-cols-2 gap-2"><Input label="Receita mensal" value={revenue} onChange={setRevenue} type="number"/><Input label="Margem %" value={margin} onChange={setMargin} type="number"/></div><button className="px-3 py-2 bg-slate-900 text-white text-xs rounded-lg"><Plus className="w-4 h-4 inline mr-1"/>Adicionar</button>
+            <Input label="Produto" value={product} onChange={setProduct} required/><Select label="Status" value={status} onChange={setStatus} options={['Ideia','Em criação','Pronto','Vendendo']}/><div className="grid grid-cols-2 gap-2"><Input label="Receita mensal" value={revenue} onChange={setRevenue} type="number"/><Input label="Margem %" value={margin} onChange={setMargin} type="number"/></div><button className="px-3.5 py-2.5 rounded-xl bg-slate-950 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800"><Plus className="w-4 h-4 inline mr-1"/>Adicionar</button>
           </form>
         </CommandCard>
         <CommandCard className="p-5">
           <div className="flex items-center justify-between mb-3"><h2 className="text-sm font-semibold text-slate-800">Calculadora de comissão</h2><Wallet className="w-4 h-4 text-slate-400"/></div>
           <form className="space-y-2" onSubmit={(e)=>{e.preventDefault();props.onAddCommission({business_value:Number(business||0),rate:Number(rate||0),payment_method:method});setBusiness('');setRate('');}}>
-            <div className="grid grid-cols-2 gap-2"><Input label="Valor do negócio" value={business} onChange={setBusiness} type="number"/><Input label="Taxa %" value={rate} onChange={setRate} type="number"/></div><Input label="Forma de pagamento" value={method} onChange={setMethod} placeholder="Pix, transferência..."/><button className="px-3 py-2 bg-slate-900 text-white text-xs rounded-lg"><Plus className="w-4 h-4 inline mr-1"/>Adicionar</button>
+            <div className="grid grid-cols-2 gap-2"><Input label="Valor do negócio" value={business} onChange={setBusiness} type="number"/><Input label="Taxa %" value={rate} onChange={setRate} type="number"/></div><Input label="Forma de pagamento" value={method} onChange={setMethod} placeholder="Pix, transferência..."/><button className="px-3.5 py-2.5 rounded-xl bg-slate-950 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800"><Plus className="w-4 h-4 inline mr-1"/>Adicionar</button>
           </form>
         </CommandCard>
       </div>
 
       <CommandCard className="p-5">
         <div className="mb-4"><h2 className="text-sm font-semibold text-slate-800">Monetização por nó</h2><p className="text-xs text-slate-400 mt-1">Registre receita direta, receita indireta e custo para acompanhar ROI de cada propriedade ou contato.</p></div>
-        {props.nodes.length>0?<><Select label="Nó" value={node} onChange={setNode} options={props.nodes.map((n)=>n.id)} labels={Object.fromEntries(props.nodes.map((n)=>[n.id,n.name]))}/><div className="grid sm:grid-cols-3 gap-2 mt-2"><Input label="Receita direta" value={direct} onChange={setDirect} type="number"/><Input label="Receita indireta" value={indirect} onChange={setIndirect} type="number"/><Input label="Custo" value={cost} onChange={setCost} type="number"/></div><div className="flex items-center justify-between mt-3"><span className="text-sm text-slate-500">ROI atual</span><span className="text-xl font-bold text-slate-900">{Number(roi).toFixed(1)}%</span></div><button onClick={saveNodeMoney} className="mt-3 px-3 py-2 bg-cyan-600 text-white text-xs rounded-lg">Salvar ROI</button></>:<p className="text-sm text-slate-400">Crie propriedades ou contatos.</p>}
+        {props.nodes.length>0?<><Select label="Nó" value={node} onChange={setNode} options={props.nodes.map((n)=>n.id)} labels={Object.fromEntries(props.nodes.map((n)=>[n.id,n.name]))}/><div className="grid sm:grid-cols-3 gap-2 mt-2"><Input label="Receita direta" value={direct} onChange={setDirect} type="number"/><Input label="Receita indireta" value={indirect} onChange={setIndirect} type="number"/><Input label="Custo" value={cost} onChange={setCost} type="number"/></div><div className="flex items-center justify-between mt-3"><span className="text-sm text-slate-500">ROI atual</span><span className="text-xl font-bold text-slate-900">{Number(roi).toFixed(1)}%</span></div><button onClick={saveNodeMoney} className="mt-3 px-3.5 py-2.5 rounded-xl bg-cyan-600 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-500">Salvar ROI</button></>:<p className="text-sm text-slate-400">Crie propriedades ou contatos.</p>}
       </CommandCard>
 
       <CommandCard className="p-5">
@@ -1105,11 +1105,11 @@ function Cell(props:{children:React.ReactNode;strong?:boolean}) { return <td cla
         <CommandCard className="p-5">
           <SectionHeader title="Ledger de reciprocidade" action={()=>{}} />
           <div className="space-y-2 mb-4">{props.contacts.slice(0,8).map((c)=><div key={c.id} className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50"><span className="text-sm text-slate-700">{c.name}</span><span className={'text-sm font-semibold '+((totals.get(c.id)||0)>=0?'text-emerald-600':'text-red-500')}>{money(totals.get(c.id)||0)}</span></div>)}</div>
-          {props.contacts.length>0?<><div className="grid grid-cols-2 gap-2"><Select label="Contato" value={selected} onChange={setSelected} options={props.contacts.map((c)=>c.id)} labels={Object.fromEntries(props.contacts.map((c)=>[c.id,c.name]))}/><Input label="Contexto" value={context} onChange={setContext}/><Input label="Valor dado" value={given} onChange={setGiven} type="number"/><Input label="Valor recebido" value={received} onChange={setReceived} type="number"/></div><button onClick={saveLedger} className="mt-2 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg">Registrar</button></>:<p className="text-sm text-slate-400">Cadastre contatos.</p>}
+          {props.contacts.length>0?<><div className="grid grid-cols-2 gap-2"><Select label="Contato" value={selected} onChange={setSelected} options={props.contacts.map((c)=>c.id)} labels={Object.fromEntries(props.contacts.map((c)=>[c.id,c.name]))}/><Input label="Contexto" value={context} onChange={setContext}/><Input label="Valor dado" value={given} onChange={setGiven} type="number"/><Input label="Valor recebido" value={received} onChange={setReceived} type="number"/></div><button onClick={saveLedger} className="mt-2 px-3.5 py-2.5 rounded-xl bg-slate-950 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800">Registrar</button></>:<p className="text-sm text-slate-400">Cadastre contatos.</p>}
         </CommandCard>
         <CommandCard className="p-5">
           <SectionHeader title="Dossiê de interesses e dores" action={()=>{}} />
-          {props.contacts.length>0?<><div className="grid sm:grid-cols-3 gap-2"><Select label="Contato" value={selected} onChange={setSelected} options={props.contacts.map((c)=>c.id)} labels={Object.fromEntries(props.contacts.map((c)=>[c.id,c.name]))}/><Input label="O que quer" value={wants} onChange={setWants}/><Input label="O que teme" value={fears} onChange={setFears}/></div><button onClick={saveDossier} className="mt-3 px-3 py-2 bg-cyan-600 text-white text-xs rounded-lg">Salvar dossiê</button></>:<p className="text-sm text-slate-400">Cadastre um contato.</p>}
+          {props.contacts.length>0?<><div className="grid sm:grid-cols-3 gap-2"><Select label="Contato" value={selected} onChange={setSelected} options={props.contacts.map((c)=>c.id)} labels={Object.fromEntries(props.contacts.map((c)=>[c.id,c.name]))}/><Input label="O que quer" value={wants} onChange={setWants}/><Input label="O que teme" value={fears} onChange={setFears}/></div><button onClick={saveDossier} className="mt-3 px-3.5 py-2.5 rounded-xl bg-cyan-600 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-500">Salvar dossiê</button></>:<p className="text-sm text-slate-400">Cadastre um contato.</p>}
         </CommandCard>
       </div>
 
@@ -1126,7 +1126,7 @@ function Cell(props:{children:React.ReactNode;strong?:boolean}) { return <td cla
         </CommandCard>
         <CommandCard className="p-5">
           <SectionHeader title="Influência cruzada" action={()=>{}} />
-          <div className="grid sm:grid-cols-2 gap-2"><Input label="Influenciador" value={influencer} onChange={setInfluencer}/><Input label="Influenciado" value={influenced} onChange={setInfluenced}/><Input label="Intensidade 1–10" value={intensity} onChange={setIntensity} type="number"/><Input label="Tema" value={topic} onChange={setTopic}/></div><button onClick={saveInfluence} className="mt-3 px-3 py-2 bg-cyan-600 text-white text-xs rounded-lg">Registrar influência</button>
+          <div className="grid sm:grid-cols-2 gap-2"><Input label="Influenciador" value={influencer} onChange={setInfluencer}/><Input label="Influenciado" value={influenced} onChange={setInfluenced}/><Input label="Intensidade 1–10" value={intensity} onChange={setIntensity} type="number"/><Input label="Tema" value={topic} onChange={setTopic}/></div><button onClick={saveInfluence} className="mt-3 px-3.5 py-2.5 rounded-xl bg-cyan-600 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-500">Registrar influência</button>
           <div className="mt-4 space-y-2">{props.crossInfluence.slice(0,8).map((x)=><div key={x.id} className="p-2.5 rounded-lg bg-slate-50 text-xs"><strong>{x.influencer}</strong> → {x.influenced} · {x.topic} · {x.intensity}/10</div>)}</div>
         </CommandCard>
       </div>
