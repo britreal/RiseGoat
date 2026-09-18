@@ -55,8 +55,9 @@ export function MicroblogPage() {
   async function post() {
     if (!user || !content.trim()) return;
     setPosting(true);
+    let nextImageUrl = imageUrl;
     try {
-      if (imageFile && user) imageUrl = await uploadUserImage(user.id, imageFile, 'microblog');
+      if (imageFile && user) nextImageUrl = await uploadUserImage(user.id, imageFile, 'microblog');
     } catch (error: any) {
       window.alert(error?.message || 'Não foi possível enviar a imagem.');
       setPosting(false);
@@ -66,7 +67,7 @@ export function MicroblogPage() {
       user_id: user.id,
       content: content.trim(),
       title: title.trim(),
-      image_url: imageUrl.trim(),
+      image_url: nextImageUrl.trim(),
       button_text: buttonText.trim(),
       button_url: buttonUrl.trim(),
       seo_title: seoTitle.trim(),
