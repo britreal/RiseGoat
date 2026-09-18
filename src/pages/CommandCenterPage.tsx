@@ -116,7 +116,7 @@ export function CommandCenterPage() {
     setRefreshing(false);
   };
 
-  useEffect(() => { load(); }, [user]);
+  useEffect(() => { load().then(() => runRadar()); }, [user]);
 
   async function runRadar() {
     if (!user) return;
@@ -389,6 +389,52 @@ export function CommandCenterPage() {
     if (row) setCommissions((v) => [row as Commission, ...v]);
   }
 
+  async function updateContactIntelligence(id: string, patch: { wealth_score?: number; fame_score?: number; decision_power_score?: number; resources_score?: number; intelligence_notes?: string }) {
+    if (!user) return;
+    const { error } = await supabase.from('authority_contacts').update(patch).eq('id', id).eq('user_id', user.id);
+    if (error) return setNotice(error.message);
+    setContacts((v) => v.map((x) => x.id === id ? { ...x, ...patch } : x));
+  }
+
+  async function createSuggestion(s: { source_entity_id:string; source_entity_type:EntityType; target_entity_id:string; target_entity_type:EntityType; score:number; reason:string }) {
+    if (!user) return;
+    const { data, error } = await supabase.from('authority_suggestions').upsert({
+      user_id:user.id, ...s, status:'Nova'
+    }, { onConflict:'user_id,source_entity_id,source_entity_type,target_entity_id,target_entity_type' }).select().single();
+    if (error) return setNotice(error.message);
+    if (data) setSuggestions((v) => [data as AuthoritySuggestion, ...v.filter((x) => x.id !== (data as AuthoritySuggestion).id)]);
+  }
+
+  async function addThreat(data: Partial<AuthorityThreat>) {
+    if (!user || !data.title?.trim()) return;
+    const { data: row, error } = await supabase.from('authority_threats').insert({
+      user_id:user.id, title:data.title.trim(), category:data.category || 'Reputação', severity:data.severity || 'Média',
+      source_url:data.source_url?.trim() || '', evidence:data.evidence?.trim() || '', status:'Aberta',
+      linked_entity_id:data.linked_entity_id || null, linked_entity_type:data.linked_entity_type || null,
+      due_date:data.due_date || null, response_summary:''
+    }).select().single();
+    if (error) return setNotice(error.message);
+    if (row) setThreats((v) => [row as AuthorityThreat, ...v]);
+  }
+
+  async function updateThreat(id:string, patch:Partial<AuthorityThreat>) {
+    if(!user) return;
+    const {error}=await supabase.from('authority_threats').update(patch).eq('id',id).eq('user_id',user.id);
+    if(error)return setNotice(error.message);
+    setThreats((v)=>v.map((x)=>x.id===id?{...x,...patch}:x));
+  }
+
+  async function addDefenseAction(threat: AuthorityThreat, actionType:string, responseText:string) {
+    if(!user)return;
+    const actionTitle = actionType === 'Criar conteúdo' ? 'Criar conteúdo positivo' : actionType === 'Notificar aliado' ? 'Acionar aliado' : 'Criar tarefa de resposta';
+    const {data,error}=await supabase.from('authority_defense_actions').insert({
+      user_id:user.id, threat_id:threat.id, action_type:actionType, status:'Sugerida',
+      action_title:actionTitle, response_text:responseText
+    }).select().single();
+    if(error)return setNotice(error.message);
+    if(data)setDefenseActions((v)=>[data as DefenseAction,...v]);
+  }
+
   async function deleteRow(table: string, id: string) {
     if (!user) return;
     const { error } = await supabase.from(table).delete().eq('id', id).eq('user_id', user.id);
@@ -428,6 +474,12 @@ export function CommandCenterPage() {
           <p className="text-sm text-slate-500 mt-1 max-w-2xl">Conecte propriedades, pessoas, conteúdo, tarefas e oportunidades em uma visão única.</p>
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={syncRiseGoatData} className="flex items-center gap-2 px-3 py-2 border border-cyan-200 bg-cyan-50 text-cyan-700 rounded-lg text-xs font-medium hover:bg-cyan-100">
+            <RefreshCw className="w-4 h-4" /> Sincronizar RiseGoat
+          </button>
+          <button onClick={runRadar} className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50">
+            <Target className="w-4 h-4" /> Rodar radar
+          </button>
           <label className="inline-flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 cursor-pointer hover:bg-slate-50">
             <Upload className="w-4 h-4" /> Importar
             <input type="file" accept="application/json" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) importData(file); e.currentTarget.value = ''; }} />
@@ -471,7 +523,11 @@ export function CommandCenterPage() {
 
       {tab === 'opportunities' && <OpportunityPanel opportunities={opportunities} onAdd={addOpportunity} onUpdate={updateOpportunity} />}
 
+      {tab === 'intelligence' && <IntelligencePanel contacts={contacts} properties={properties} dossiers={dossiers} suggestions={suggestions} nodes={nodes} onUpdateContact={updateContactIntelligence} onSaveSuggestion={createSuggestion} />}
+
       {tab === 'strategy' && <StrategyPanel contacts={contacts} leverage={leverage} ledger={ledger} connections={connections} nodes={nodes} onRefresh={load} />}
+
+      {tab === 'defense' && <DefensePanel threats={threats} actions={defenseActions} nodes={nodes} onAddThreat={addThreat} onUpdateThreat={updateThreat} onAddAction={addDefenseAction} />}
 
       {tab === 'finance' && <FinancePanel products={products} commissions={commissions} onAddProduct={addProduct} onAddCommission={addCommission} />}
     </div>
