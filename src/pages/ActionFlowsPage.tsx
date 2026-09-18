@@ -437,7 +437,7 @@ const TEMPLATES: Template[] = [
     ],
   },
   {
-    key: 'personal-routine', name: 'Rotina Pessoal', category: 'Personal',
+    key: 'personal-routine', name: 'Rotina Pessoal', category: 'Pessoal',
     description: 'Organize uma sequência diária de ações e decisões pessoais.',
     objective: 'Criar uma rotina executável e repetível.',
     goal: 'Rotina concluída',
@@ -451,7 +451,7 @@ const TEMPLATES: Template[] = [
     ],
   },
   {
-    key: 'study-plan', name: 'Plano de Estudos', category: 'Personal',
+    key: 'study-plan', name: 'Plano de Estudos', category: 'Pessoal',
     description: 'Do objetivo de aprendizado até revisão e execução.',
     objective: 'Transformar estudo em um processo consistente.',
     goal: 'Conteúdo dominado',
@@ -466,7 +466,7 @@ const TEMPLATES: Template[] = [
     ],
   },
   {
-    key: 'health-project', name: 'Projeto de Saúde', category: 'Personal',
+    key: 'health-project', name: 'Projeto de Saúde', category: 'Pessoal',
     description: 'Meta, rotina, acompanhamento corporal e revisão.',
     objective: 'Executar um projeto pessoal de evolução física.',
     goal: 'Meta física atingida',
@@ -480,7 +480,7 @@ const TEMPLATES: Template[] = [
     ],
   },
   {
-    key: 'personal-project', name: 'Projeto Pessoal', category: 'Personal',
+    key: 'personal-project', name: 'Projeto Pessoal', category: 'Pessoal',
     description: 'Estruture qualquer projeto pessoal em etapas reutilizáveis.',
     objective: 'Tirar um projeto da cabeça e levar até a conclusão.',
     goal: 'Projeto concluído',
@@ -624,7 +624,7 @@ const TEMPLATE_RESEARCH: Record<string, TemplateResearch> = {
 };
 
 function templateMode(template: Template): 'pessoal' | 'negocios' {
-  return template.category === 'Personal' ? 'pessoal' : 'negocios';
+  return template.category === 'Pessoal' ? 'pessoal' : 'negocios';
 }
 function moneyShort(v: number) {
   const n = Number(v || 0);
@@ -721,15 +721,29 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
   async function loadLibrary() {
     if (!user) { setLoading(false); return; }
     setLoading(true); setError('');
-    const [f, r] = await Promise.all([
-      supabase.from('action_flows').select('*').eq('user_id', user.id).eq('workspace_mode', workspaceMode).order('updated_at', { ascending: false }),
-      supabase.from('action_flow_runs').select('*').eq('user_id', user.id).order('started_at', { ascending: false }),
-    ]);
-    const e = f.error || r.error;
-    if (e) setError(e.message);
-    setFlows((f.data || []) as Flow[]);
-    setRuns((r.data || []) as Run[]);
-    setLoading(false);
+    try {
+      const { data: flowData, error: flowError } = await supabase
+        .from('action_flows')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('workspace_mode', workspaceMode)
+        .order('updated_at', { ascending: false });
+      if (flowError) throw flowError;
+      const currentFlows = (flowData || []) as Flow[];
+      const flowIds = currentFlows.map(f => f.id);
+      const { data: runData, error: runError } = flowIds.length
+        ? await supabase.from('action_flow_runs').select('*').eq('user_id', user.id).in('flow_id', flowIds).order('started_at', { ascending: false })
+        : { data: [], error: null };
+      if (runError) throw runError;
+      setFlows(currentFlows);
+      setRuns((runData || []) as Run[]);
+    } catch (e: any) {
+      setError(e?.message || 'Não foi possível carregar os fluxos.');
+      setFlows([]);
+      setRuns([]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { void loadLibrary(); }, [user?.id, workspaceMode]);
@@ -760,7 +774,7 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
       goal: template.goal,
     } : {
       name: 'Meu novo fluxo',
-      category: 'Negócios',
+      category: workspaceMode === 'pessoal' ? 'Pessoal' : 'Negócios',
       template_key: null,
       objective: '',
       goal: '',
@@ -1049,7 +1063,7 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
     <div className="p-5 lg:p-8 max-w-7xl mx-auto">
       <PageHeader
         title="Fluxos de Ação"
-        subtitle="Desenhe, salve e execute processos completos para qualquer negócio."
+        subtitle={workspaceMode === 'pessoal' ? 'Organize projetos pessoais com planos pesquisados, checklist e execução.' : 'Desenhe, salve e execute processos completos para negócios.'}
         action={<Button onClick={() => void createFlow()}><Plus className="w-4 h-4" /> Criar do zero</Button>}
       />
       <div className="grid lg:grid-cols-[1fr_280px] gap-5 mb-5">
