@@ -6,6 +6,8 @@ import { Eye, MousePointerClick, Users, TrendingUp, BarChart3 } from 'lucide-rea
 import type { PageVisit, LinkClick, NewsletterLead, Link } from '@/types';
 import { formatNumber } from '@/lib/utils';
 
+function money(value:number){ return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(value||0)); }
+
 export function AnalyticsPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -13,6 +15,7 @@ export function AnalyticsPage() {
   const [clicks, setClicks] = useState<LinkClick[]>([]);
   const [leads, setLeads] = useState<NewsletterLead[]>([]);
   const [links, setLinks] = useState<Link[]>([]);
+  const [revenueRows, setRevenueRows] = useState<any[]>([]);
   const [range, setRange] = useState<7 | 30 | 90>(30);
 
   useEffect(() => {
@@ -21,15 +24,31 @@ export function AnalyticsPage() {
       supabase.from('page_visits').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
       supabase.from('link_clicks').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
       supabase.from('newsletter_leads').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+      supabase.from('revenues').select('id,value,status,occurred_on,lead_id,source,utm_source,utm_medium,utm_campaign,utm_content,utm_term').eq('user_id', user.id).order('occurred_on', { ascending: false }),
+
       supabase.from('links').select('*').eq('user_id', user.id).order('clicks', { ascending: false }),
-    ]).then(([v, c, l, ln]) => {
+    ]).then(([v, c, l, r, ln]) => {
       setVisits((v.data as PageVisit[]) ?? []);
       setClicks((c.data as LinkClick[]) ?? []);
       setLeads((l.data as NewsletterLead[]) ?? []);
+      setRevenueRows((r.data as any[]) ?? []);
       setLinks((ln.data as Link[]) ?? []);
       setLoading(false);
     });
   }, [user]);
+
+  const leadMap = new Map(leads.map((lead) => [lead.id, lead]));
+  const attributionRows = revenueRows.filter((row) => row.status === 'received').reduce((acc: Record<string, { source:string; campaign:string; revenue:number; leads:number }>, row) => {
+    const lead = row.lead_id ? leadMap.get(row.lead_id) : undefined;
+    const source = row.utm_source || lead?.utm_source || row.source || 'direto';
+    const campaign = row.utm_campaign || lead?.utm_campaign || 'sem campanha';
+    const key = source + '|' + campaign;
+    if (!acc[key]) acc[key] = { source, campaign, revenue: 0, leads: 0 };
+    acc[key].revenue += Number(row.value || 0);
+    if (row.lead_id) acc[key].leads += 1;
+    return acc;
+  }, {});
+  const topAttribution = Object.values(attributionRows).sort((a,b) => b.revenue - a.revenue).slice(0,8);
 
   if (loading) return <Spinner />;
 
@@ -176,6 +195,21 @@ export function AnalyticsPage() {
             })}
           </div>
         )}
+      </Card>
+      <Card className="p-5 mt-5">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-800">Atribuição: origem → receita</h2>
+            <p className="text-xs text-slate-400 mt-1">Cruza UTM dos leads com receitas vinculadas a esses leads. Registros antigos sem UTM continuam aparecendo como direto.</p>
+          </div>
+          <BarChart3 className="w-4 h-4 text-slate-400" />
+        </div>
+        {topAttribution.length === 0 ? <p className="text-sm text-slate-400">Ainda não há receitas recebidas com dados de atribuição.</p> : <div className="space-y-2">
+          {topAttribution.map((row) => <div key={row.source + row.campaign} className="grid grid-cols-[1fr_auto_auto] gap-3 items-center p-3 rounded-xl bg-slate-50">
+            <div><p className="text-sm font-medium text-slate-700">{row.source}</p><p className="text-xs text-slate-400">{row.campaign} · {row.leads} lead(s) atribuídos</p></div>
+            <span className="text-xs text-slate-400">receita</span><span className="text-sm font-bold text-slate-900">{money(row.revenue)}</span>
+          </div>)}
+        </div>}
       </Card>
     </div>
   );
