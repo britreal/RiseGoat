@@ -16,6 +16,7 @@ import { SettingsPage } from '@/pages/SettingsPage';
 import { SalesPagesPage } from '@/pages/SalesPagesPage';
 import { CommandCenterPage } from '@/pages/CommandCenterPage';
 import { GoatPage } from '@/pages/GoatPage';
+import { OffersPage, RevenuePage, PartnershipsPage, LaunchesPage, GoalsPage, RadarPage } from '@/pages/BusinessModulesPage';
 import { SalesBuilderPage } from '@/pages/SalesBuilderPage';
 import { PublicPage } from '@/pages/PublicPage';
 import { PublicMicroblogPage } from '@/pages/PublicMicroblogPage';
@@ -59,6 +60,12 @@ function AppContent() {
     settings: <SettingsPage />,
     sales: <SalesPagesPage navigate={navigate} />,
     'command-center': <CommandCenterPage />,
+    offers: <OffersPage />,
+    revenue: <RevenuePage />,
+    partnerships: <PartnershipsPage />,
+    launches: <LaunchesPage />,
+    radar: <RadarPage />,
+    goals: <GoalsPage />,
   };
 
   return <DashboardLayout currentPath={currentPath} navigate={navigate}>{pageMap[route.name] ?? <DashboardPage navigate={navigate} />}</DashboardLayout>;
