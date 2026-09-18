@@ -1,6 +1,7 @@
+export type WorkspaceMode = 'pessoal' | 'negocios';
 export interface Profile {
   id: string; username: string; display_name: string; bio: string; avatar_url: string; cover_url: string;
-  theme_color: string; theme_font: string; accent_color: string; link_style: string; seo_title: string; seo_description: string; seo_image_url: string; created_at: string;
+  theme_color: string; theme_font: string; accent_color: string; link_style: string; seo_title: string; seo_description: string; seo_image_url: string; workspace_mode: WorkspaceMode; created_at: string;
 }
 export interface Link { id:string; user_id:string; label:string; url:string; icon:string; link_type:string; description:string; thumbnail_url:string; sensitive:boolean; product_price:string; product_currency:string; sort_order:number; is_active:boolean; clicks:number; created_at:string; }
 export interface MicroblogPost { id:string; user_id:string; content:string; title:string; image_url:string; seo_title:string; seo_description:string; seo_keywords:string; button_text:string; button_url:string; is_pinned:boolean; created_at:string; }
