@@ -872,7 +872,7 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
         <div className="flex flex-col md:flex-row gap-3">
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar fluxo ou template..." className="flex-1 h-11 rounded-xl border border-slate-200 px-3.5 text-sm outline-none focus:ring-4 focus:ring-slate-100" />
           <div className="flex gap-2 overflow-x-auto">
-            {['Todos','Negócios','Aquisição','Operação'].map(c=><button key={c} onClick={()=>setCategory(c)} className={'px-3.5 rounded-xl text-xs font-semibold whitespace-nowrap border ' + (category===c?'bg-slate-950 text-white border-slate-950':'bg-white text-slate-500 border-slate-200 hover:bg-slate-50')}>{c}</button>)}
+            {['Todos','Negócios','Aquisição','Operação','Personal'].map(c=><button key={c} onClick={()=>setCategory(c)} className={'px-3.5 rounded-xl text-xs font-semibold whitespace-nowrap border ' + (category===c?'bg-slate-950 text-white border-slate-950':'bg-white text-slate-500 border-slate-200 hover:bg-slate-50')}>{c}</button>)}
           </div>
         </div>
       </Card>
@@ -940,7 +940,7 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
             <>
               <div className="flex items-center justify-between mb-4"><div><p className="text-[10px] uppercase tracking-[0.16em] font-bold text-slate-400">Bloco selecionado</p><p className="text-sm font-black text-slate-900 mt-1">Editar etapa</p></div><button onClick={()=>removeNode(currentNode.id)} className="p-2 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50"><Trash2 className="w-4 h-4"/></button></div>
               <div className="space-y-3">
-                <SelectField label="Tipo" value={currentNode.node_type} onChange={v=>updateNode(currentNode.id,{node_type:v as NodeType})} options={Object.keys(NODE_META)}/>
+                <SelectField label="Tipo" value={currentNode.node_type} onChange={v=>updateNode(currentNode.id,{node_type:v as NodeType})} options={(Object.keys(NODE_META) as NodeType[]).map(type=>({ value:type, label:NODE_META[type].label }))}/>
                 <Field label="Nome" value={currentNode.label} onChange={v=>updateNode(currentNode.id,{label:v})}/>
                 <label className="block"><span className="block text-[11px] font-semibold text-slate-500 mb-1.5">Descrição</span><textarea rows={4} value={currentNode.description} onChange={e=>updateNode(currentNode.id,{description:e.target.value})} className="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:ring-4 focus:ring-slate-100"/></label>
                 <SelectField label="Módulo RiseGoat" value={currentNode.module_name || ''} onChange={v=>updateNode(currentNode.id,{module_name:v||null,module_path:v?(MODULES as any)[v]:null})} options={Object.keys(MODULES)}/>
