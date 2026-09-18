@@ -20,9 +20,14 @@ Deno.serve(async (req) => {
     if (campaignError) throw campaignError;
     if (!campaign) throw new Error("Campanha não encontrada");
 
-    const { data: recipients, error: recipientsError } = await admin.from("newsletter_leads").select("id,name,email").eq("user_id", user.id);
+    const { data: recipients, error: recipientsError } = await admin
+      .from("newsletter_leads")
+      .select("id,name,email")
+      .eq("user_id", user.id)
+      .eq("marketing_consent", true)
+      .is("unsubscribed_at", null);
     if (recipientsError) throw recipientsError;
-    if (!recipients?.length) throw new Error("Sua lista não possui inscritos");
+    if (!recipients?.length) throw new Error("Sua lista não possui inscritos com consentimento de marketing ativo");
 
     const transport = nodemailer.createTransport({
       host: connection.smtp_host,
