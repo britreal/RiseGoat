@@ -691,6 +691,50 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
     setRuns(v => v.filter(x => x.flow_id !== id));
   }
 
+  async function cloneFlow(source: Flow) {
+    if (!user) return;
+    setError('');
+    const { data: copied, error: fe } = await supabase.from('action_flows').insert({
+      user_id: user.id,
+      name: source.name + ' — cópia',
+      category: source.category,
+      template_key: source.template_key,
+      objective: source.objective,
+      goal: source.goal,
+      status: 'draft',
+    }).select().single();
+    if (fe || !copied) return setError(fe?.message || 'Não foi possível duplicar o fluxo.');
+    const { data: sourceNodes, error: ne } = await supabase.from('action_flow_nodes').select('*').eq('flow_id', source.id).eq('user_id', user.id).order('sort_order');
+    if (ne) return setError(ne.message);
+    const idMap = new Map<string, string>();
+    const nodeRows = (sourceNodes || []).map((n: FlowNode) => {
+      const id = crypto.randomUUID();
+      idMap.set(n.id, id);
+      return {
+        id, flow_id: copied.id, user_id: user.id, node_type: n.node_type, label: n.label,
+        description: n.description, module_name: n.module_name, module_path: n.module_path,
+        position_x: n.position_x, position_y: n.position_y, metadata: n.metadata, sort_order: n.sort_order,
+      };
+    });
+    if (nodeRows.length) {
+      const { error: ie } = await supabase.from('action_flow_nodes').insert(nodeRows);
+      if (ie) return setError(ie.message);
+    }
+    const { data: sourceEdges, error: ee } = await supabase.from('action_flow_edges').select('*').eq('flow_id', source.id).eq('user_id', user.id);
+    if (ee) return setError(ee.message);
+    const edgeRows = (sourceEdges || []).map((e: FlowEdge) => ({
+      id: crypto.randomUUID(), flow_id: copied.id, user_id: user.id,
+      source_node_id: idMap.get(e.source_node_id), target_node_id: idMap.get(e.target_node_id),
+      edge_label: e.edge_label, branch_key: e.branch_key,
+    })).filter(e => e.source_node_id && e.target_node_id);
+    if (edgeRows.length) {
+      const { error: ei } = await supabase.from('action_flow_edges').insert(edgeRows);
+      if (ei) return setError(ei.message);
+    }
+    setFlows(v => [copied as Flow, ...v]);
+    await openFlow(copied as Flow);
+  }
+
   async function startRun() {
     if (!flow || !user || nodes.length === 0) return;
     setRunLoading(true); setError('');
@@ -838,7 +882,7 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
       {flows.length > 0 && (
         <div className="mb-7">
           <div className="flex items-end justify-between mb-4"><div><p className="text-[10px] uppercase tracking-[0.16em] font-bold text-slate-400">Seus fluxos</p><h3 className="text-lg font-black text-slate-950 mt-1">Processos salvos</h3></div></div>
-          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3">{flows.map(f => <Card key={f.id} className="p-5 hover:shadow-md transition group"><div className="flex items-start gap-3"><div className="w-10 h-10 rounded-xl bg-slate-950 text-white flex items-center justify-center"><Map className="w-4 h-4"/></div><div className="min-w-0 flex-1"><p className="font-bold text-slate-800 truncate">{f.name}</p><p className="text-[11px] text-slate-400 mt-1">{f.category} · {f.goal || 'Sem meta'}</p></div><button onClick={()=>void deleteFlow(f.id)} className="p-2 text-slate-300 hover:text-red-500 rounded-lg"><Trash2 className="w-4 h-4"/></button></div><p className="text-xs text-slate-500 line-clamp-2 mt-4">{f.objective || 'Sem objetivo definido.'}</p><div className="flex items-center justify-between mt-5"><span className="text-[10px] font-semibold px-2 py-1 rounded-lg bg-slate-100 text-slate-500">{f.status}</span><button onClick={()=>void openFlow(f)} className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 hover:text-slate-950">Abrir <ArrowRight className="w-3.5 h-3.5"/></button></div></Card>)}</div>
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3">{flows.map(f => <Card key={f.id} className="p-5 hover:shadow-md transition group"><div className="flex items-start gap-3"><div className="w-10 h-10 rounded-xl bg-slate-950 text-white flex items-center justify-center"><Map className="w-4 h-4"/></div><div className="min-w-0 flex-1"><p className="font-bold text-slate-800 truncate">{f.name}</p><p className="text-[11px] text-slate-400 mt-1">{f.category} · {f.goal || 'Sem meta'}</p></div><div className="flex items-center gap-1"><button onClick={()=>void cloneFlow(f)} title="Duplicar fluxo" className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-lg"><Copy className="w-4 h-4"/></button><button onClick={()=>void deleteFlow(f.id)} title="Excluir fluxo" className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4"/></button></div></div><p className="text-xs text-slate-500 line-clamp-2 mt-4">{f.objective || 'Sem objetivo definido.'}</p><div className="flex items-center justify-between mt-5"><span className="text-[10px] font-semibold px-2 py-1 rounded-lg bg-slate-100 text-slate-500">{f.status}</span><button onClick={()=>void openFlow(f)} className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 hover:text-slate-950">Abrir <ArrowRight className="w-3.5 h-3.5"/></button></div></Card>)}</div>
         </div>
       )}
 
