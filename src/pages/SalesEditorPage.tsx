@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { Spinner } from '@/components/ui';
 import {
-  ArrowLeft, Plus, Trash2, GripVertical, Eye, Save, Loader2,
+  ArrowLeft, Plus, Trash2, Eye, Save, Loader2,
   Type, Image as ImageIcon, MousePointer, Minus, Settings,
   X, ChevronUp, ChevronDown,
 } from 'lucide-react';
