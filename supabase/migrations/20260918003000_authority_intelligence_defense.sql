@@ -225,14 +225,6 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.authority_run_radar(uuid) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.authority_run_radar(uuid) FROM anon;
-GRANT EXECUTE ON FUNCTION public.authority_run_radar(uuid) TO authenticated;
-
-REVOKE ALL ON FUNCTION public.authority_refresh_leverage(uuid) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.authority_refresh_leverage(uuid) FROM anon;
-GRANT EXECUTE ON FUNCTION public.authority_refresh_leverage(uuid) TO authenticated;
-
 CREATE OR REPLACE FUNCTION public.authority_refresh_leverage(p_user_id uuid)
 RETURNS void
 LANGUAGE plpgsql
@@ -307,6 +299,17 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.authority_refresh_leverage(uuid) TO authenticated;
+REVOKE ALL ON FUNCTION public.authority_run_radar(uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.authority_run_radar(uuid) FROM anon;
+GRANT EXECUTE ON FUNCTION public.authority_run_radar(uuid) TO authenticated;
+
+REVOKE ALL ON FUNCTION public.authority_refresh_leverage(uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.authority_refresh_leverage(uuid) FROM anon;
+GRANT EXECUTE ON FUNCTION public.authority_refresh_leverage(uuid) TO authenticated;
+
+GRANT SELECT ON public.authority_contact_intelligence TO authenticated;
+REVOKE ALL ON public.authority_contact_intelligence FROM anon;
+
 
 CREATE OR REPLACE FUNCTION public.authority_connections_refresh_leverage()
 RETURNS trigger
@@ -347,12 +350,12 @@ RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
-AS $
+AS $$
 BEGIN
   PERFORM public.authority_refresh_leverage(COALESCE(NEW.user_id, OLD.user_id));
   RETURN COALESCE(NEW, OLD);
 END;
-$;
+$$;
 
 DROP TRIGGER IF EXISTS trg_authority_contacts_refresh_leverage ON public.authority_contacts;
 CREATE TRIGGER trg_authority_contacts_refresh_leverage
