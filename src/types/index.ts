@@ -13,10 +13,10 @@ export interface SalesBlock { id:string; page_id:string; user_id:string; block_t
 export interface EmailConnection { user_id:string; smtp_host:string; smtp_port:number; smtp_user:string; from_name:string; from_email:string; created_at:string; }
 export interface Campaign { id:string; user_id:string; subject:string; body:string; status:string; total_recipients:number; sent_count:number; error_count:number; last_error:string; created_at:string; updated_at:string; }
 export interface AuthorityProperty {
-  id:string; user_id:string; name:string; property_type:string; platform:string; url:string; description:string; status:string; objective:string; tags:string; files:unknown[]; created_at:string; updated_at:string;
+  id:string; user_id:string; name:string; property_type:string; platform:string; url:string; description:string; status:string; objective:string; tags:string; files:unknown[]; source_kind:string; source_id:string|null; audience_score:number; resources_score:number; created_at:string; updated_at:string;
 }
 export interface AuthorityContact {
-  id:string; user_id:string; name:string; email:string; telegram:string; occupation:string; status:string; strategic_value:string; next_action:string; next_action_at:string|null; tags:string; files:unknown[]; created_at:string; updated_at:string;
+  id:string; user_id:string; name:string; email:string; telegram:string; occupation:string; status:string; strategic_value:string; next_action:string; next_action_at:string|null; tags:string; files:unknown[]; wealth_score:number; fame_score:number; decision_power_score:number; resources_score:number; intelligence_notes:string; source_kind:string; source_id:string|null; created_at:string; updated_at:string;
 }
 export interface AuthorityConnection {
   id:string; user_id:string; origin_id:string; origin_type:'property'|'contact'; destination_id:string; destination_type:'property'|'contact'; connection_type:string; description:string; strength:string; created_at:string;
@@ -25,7 +25,7 @@ export interface AuthorityTask {
   id:string; user_id:string; title:string; entity_id:string|null; entity_type:'property'|'contact'|null; task_type:string; priority:string; due_date:string|null; status:string; created_at:string; updated_at:string;
 }
 export interface AuthorityContent {
-  id:string; user_id:string; title:string; property_id:string|null; content_type:string; status:string; link:string; views:number; clicks:number; conversions:number; published_at:string|null; tags:string; created_at:string; updated_at:string;
+  id:string; user_id:string; title:string; property_id:string|null; content_type:string; status:string; link:string; views:number; clicks:number; conversions:number; published_at:string|null; tags:string; source_kind:string; source_id:string|null; created_at:string; updated_at:string;
 }
 export interface AuthorityOpportunity {
   id:string; user_id:string; opportunity:string; involved:string; estimated_value:number; status:string; your_part:string; notes:string; created_at:string; updated_at:string;
