@@ -14,6 +14,7 @@ import { LeadsPage } from '@/pages/LeadsPage';
 import { AnalyticsPage } from '@/pages/AnalyticsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { SalesPagesPage } from '@/pages/SalesPagesPage';
+import { CommandCenterPage } from '@/pages/CommandCenterPage';
 import { SalesBuilderPage } from '@/pages/SalesBuilderPage';
 import { PublicPage } from '@/pages/PublicPage';
 import { PublicMicroblogPage } from '@/pages/PublicMicroblogPage';
@@ -54,6 +55,7 @@ function AppContent() {
     analytics: <AnalyticsPage />,
     settings: <SettingsPage />,
     sales: <SalesPagesPage navigate={navigate} />,
+    'command-center': <CommandCenterPage />,
   };
 
   return <DashboardLayout currentPath={currentPath} navigate={navigate}>{pageMap[route.name] ?? <DashboardPage navigate={navigate} />}</DashboardLayout>;
