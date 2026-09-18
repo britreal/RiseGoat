@@ -347,12 +347,12 @@ RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
-AS $$
+AS $
 BEGIN
-  PERFORM public.authority_refresh_leverage(NEW.user_id);
-  RETURN NEW;
+  PERFORM public.authority_refresh_leverage(COALESCE(NEW.user_id, OLD.user_id));
+  RETURN COALESCE(NEW, OLD);
 END;
-$$;
+$;
 
 DROP TRIGGER IF EXISTS trg_authority_contacts_refresh_leverage ON public.authority_contacts;
 CREATE TRIGGER trg_authority_contacts_refresh_leverage
