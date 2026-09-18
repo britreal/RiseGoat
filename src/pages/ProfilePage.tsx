@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { uploadUserImage } from '@/lib/storage';
 import { PageHeader, Card, Spinner } from '@/components/ui';
-import { Save, Loader2, Check } from 'lucide-react';
+import { Save, Loader2, Check, Upload } from 'lucide-react';
+
 
 const THEME_PRESETS = [
   { name: 'Slate', bg: '#0f172a', accent: '#06b6d4' },
@@ -47,6 +49,9 @@ export function ProfilePage() {
   const [seoTitle, setSeoTitle] = useState('');
   const [seoDescription, setSeoDescription] = useState('');
   const [seoImageUrl, setSeoImageUrl] = useState('');
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [seoImageFile, setSeoImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -77,28 +82,41 @@ export function ProfilePage() {
   async function handleSave() {
     setSaving(true);
     setSaved(false);
-    const { error } = await supabase
+    try {
+      if (!user) throw new Error('Usuário não autenticado.');
+      let nextAvatar = avatarUrl;
+      let nextCover = coverUrl;
+      let nextSeoImage = seoImageUrl;
+      if (avatarFile) nextAvatar = await uploadUserImage(user.id, avatarFile, 'profile');
+      if (coverFile) nextCover = await uploadUserImage(user.id, coverFile, 'profile');
+      if (seoImageFile) nextSeoImage = await uploadUserImage(user.id, seoImageFile, 'seo');
+      const { error } = await supabase
       .from('profiles')
       .update({
         display_name: displayName,
         bio,
-        avatar_url: avatarUrl,
-        cover_url: coverUrl,
+        avatar_url: nextAvatar,
+        cover_url: nextCover,
         theme_color: themeColor,
         accent_color: accentColor,
         theme_font: themeFont,
         link_style: linkStyle,
         seo_title: seoTitle.trim(),
         seo_description: seoDescription.trim(),
-        seo_image_url: seoImageUrl.trim(),
+        seo_image_url: nextSeoImage.trim(),
       })
       .eq('id', user!.id);
-    if (!error) {
+      if (error) throw error;
+      setAvatarUrl(nextAvatar); setCoverUrl(nextCover); setSeoImageUrl(nextSeoImage);
+      setAvatarFile(null); setCoverFile(null); setSeoImageFile(null);
       setSaved(true);
       await refreshProfile();
       setTimeout(() => setSaved(false), 2500);
+    } catch (error: any) {
+      window.alert(error?.message || 'Não foi possível salvar as imagens.');
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   }
 
   if (loading) return <Spinner />;
@@ -163,29 +181,23 @@ export function ProfilePage() {
         <Card className="p-6 space-y-4">
           <h2 className="text-sm font-semibold text-slate-800">Imagens</h2>
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1.5">URL da foto de perfil</label>
-            <div className="flex gap-3 items-start">
+            <label className="block text-xs font-medium text-slate-500 mb-1.5">Foto de perfil</label>
+            <div className="flex gap-3 items-center">
               <div className="w-16 h-16 rounded-full overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
                 {avatarUrl && <img src={avatarUrl} alt="" className="w-full h-full object-cover" />}
               </div>
-              <input
-                type="url"
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-                placeholder="https://..."
-                className="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
-              />
+              <label className="flex-1 flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-sm text-slate-600">
+                <Upload className="w-4 h-4" /> {avatarFile?.name || 'Escolher imagem do PC ou celular'}
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => setAvatarFile(e.target.files?.[0] || null)} />
+              </label>
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1.5">URL da imagem de capa</label>
-            <input
-              type="url"
-              value={coverUrl}
-              onChange={(e) => setCoverUrl(e.target.value)}
-              placeholder="https://..."
-              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
-            />
+            <label className="block text-xs font-medium text-slate-500 mb-1.5">Imagem de capa</label>
+            <label className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-sm text-slate-600">
+              <Upload className="w-4 h-4" /> {coverFile?.name || 'Escolher imagem do PC ou celular'}
+              <input type="file" accept="image/*" className="hidden" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} />
+            </label>
           </div>
         </Card>
 
@@ -244,8 +256,11 @@ export function ProfilePage() {
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-500 mb-1">Imagem para compartilhamento</label>
-            <input type="url" value={seoImageUrl} onChange={(e) => setSeoImageUrl(e.target.value)} placeholder={coverUrl || avatarUrl || 'https://...'} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400" />
-            <p className="text-[11px] text-slate-400 mt-1">Pode usar a capa ou a foto de perfil.</p>
+            <label className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-sm text-slate-600">
+              <Upload className="w-4 h-4" /> {seoImageFile?.name || 'Escolher imagem do PC ou celular'}
+              <input type="file" accept="image/*" className="hidden" onChange={(e) => setSeoImageFile(e.target.files?.[0] || null)} />
+            </label>
+            <p className="text-[11px] text-slate-400 mt-1">A imagem será armazenada no Supabase.</p>
           </div>
         </Card>
 
