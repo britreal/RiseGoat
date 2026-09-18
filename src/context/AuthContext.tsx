@@ -13,7 +13,7 @@ interface AuthContextValue {
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   workspaceMode: WorkspaceMode;
-  setWorkspaceMode: (mode: WorkspaceMode) => Promise<void>;
+  setWorkspaceMode: (mode: WorkspaceMode) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function setWorkspaceMode(mode: WorkspaceMode) {
-    if (!user) return;
+    if (!user) return false;
     const previous = workspaceMode;
     setWorkspaceModeState(mode);
     localStorage.setItem('risegoat-workspace-mode', mode);
@@ -99,9 +99,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) {
       setWorkspaceModeState(previous);
       localStorage.setItem('risegoat-workspace-mode', previous);
-      return;
+      return false;
     }
     setProfile((current) => current ? { ...current, workspace_mode: mode } : current);
+    return true;
   }
 
   async function signIn(email: string, password: string) {
