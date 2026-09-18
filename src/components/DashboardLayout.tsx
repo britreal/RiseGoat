@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import {
   Sparkles, LayoutDashboard, Link2, MessageSquare, Mail, FileText, Users,
   BarChart3, Settings, LogOut, ExternalLink, Menu, X, ShoppingBag, Network, Activity,
+  CircleDollarSign, Handshake, CalendarDays, Radar as RadarIcon, Target,
 } from 'lucide-react';
 
 interface NavItem { label: string; path: string; icon: typeof LayoutDashboard; group: string; }
@@ -16,12 +17,18 @@ const navItems: NavItem[] = [
   { label: 'Newsletter', path: '/newsletter', icon: Mail, group: 'Crescimento' },
   { label: 'Posts', path: '/posts', icon: FileText, group: 'Conteúdo' },
   { label: 'Rascunhos', path: '/drafts', icon: FileText, group: 'Conteúdo' },
-  { label: 'Páginas de venda', path: '/sales', icon: ShoppingBag, group: 'Monetização' },
+  { label: 'Páginas de Venda', path: '/sales', icon: ShoppingBag, group: 'Monetização' },
+  { label: 'Ofertas', path: '/offers', icon: ShoppingBag, group: 'Monetização' },
+  { label: 'Receita', path: '/revenue', icon: CircleDollarSign, group: 'Monetização' },
   { label: 'Centro de Comando', path: '/command-center', icon: Network, group: 'Estratégia' },
   { label: 'GOAT', path: '/goat', icon: Activity, group: 'Estratégia' },
+  { label: 'Parcerias', path: '/partnerships', icon: Handshake, group: 'Estratégia' },
+  { label: 'Lançamentos', path: '/launches', icon: CalendarDays, group: 'Estratégia' },
+  { label: 'Radar', path: '/radar', icon: RadarIcon, group: 'Estratégia' },
   { label: 'Leads', path: '/leads', icon: Users, group: 'Crescimento' },
   { label: 'Analytics', path: '/analytics', icon: BarChart3, group: 'Crescimento' },
   { label: 'Configurações', path: '/settings', icon: Settings, group: 'Conta' },
+  { label: 'Metas', path: '/goals', icon: Target, group: 'Conta' },
 ];
 
 interface DashboardLayoutProps { children: ReactNode; currentPath: string; navigate: (path: string) => void; }
@@ -30,6 +37,15 @@ export function DashboardLayout({ children, currentPath, navigate }: DashboardLa
   const { profile, signOut } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const groups = [...new Set(navItems.map((n) => n.group))];
+  const groupTone: Record<string, string> = {
+    'Minha Página': 'text-blue-700 bg-blue-50',
+    'Crescimento': 'text-emerald-700 bg-emerald-50',
+    'Conteúdo': 'text-violet-700 bg-violet-50',
+    'Monetização': 'text-amber-700 bg-amber-50',
+    'Estratégia': 'text-red-700 bg-red-50',
+    'Conta': 'text-slate-600 bg-slate-100',
+    'Início': 'text-slate-700 bg-slate-100',
+  };
   function handleNav(path: string) { navigate(path); setMobileOpen(false); }
 
   return (
@@ -40,7 +56,7 @@ export function DashboardLayout({ children, currentPath, navigate }: DashboardLa
           <span className="font-bold text-slate-800 tracking-tight">RiseGoat</span>
         </div>
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5">
-          {groups.map((group) => <div key={group}><p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{group}</p><div className="space-y-0.5">{navItems.filter((n) => n.group === group).map((item) => <button key={item.path} onClick={() => handleNav(item.path)} className={cn('w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition', currentPath === item.path ? 'bg-cyan-50 text-cyan-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')}><item.icon className="w-4 h-4 shrink-0" />{item.label}</button>)}</div></div>)}
+          {groups.map((group) => <div key={group}><p className={cn('px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider', groupTone[group]?.split(' ')[0] || 'text-slate-400')}>{group}</p><div className="space-y-0.5">{navItems.filter((n) => n.group === group).map((item) => <button key={item.path} onClick={() => handleNav(item.path)} className={cn('w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition', currentPath === item.path ? groupTone[item.group] : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')}><item.icon className="w-4 h-4 shrink-0" />{item.label}</button>)}</div></div>)}
         </nav>
         <div className="border-t border-slate-200 p-3 space-y-1">
           {profile && <button onClick={() => window.open(`/u/${profile.username}`, '_blank')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition"><ExternalLink className="w-4 h-4 shrink-0" />Ver minha página</button>}
