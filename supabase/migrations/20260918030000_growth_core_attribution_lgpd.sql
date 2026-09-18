@@ -54,3 +54,24 @@ NOTIFY pgrst, 'reload schema';
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_newsletter_leads_unsubscribe_token
   ON public.newsletter_leads(unsubscribe_token);
+
+CREATE OR REPLACE FUNCTION public.unsubscribe_newsletter(p_token uuid)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  changed integer := 0;
+BEGIN
+  UPDATE public.newsletter_leads
+  SET unsubscribed_at = now()
+  WHERE unsubscribe_token = p_token
+    AND unsubscribed_at IS NULL;
+  GET DIAGNOSTICS changed = ROW_COUNT;
+  RETURN jsonb_build_object('ok', true, 'changed', changed);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.unsubscribe_newsletter(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.unsubscribe_newsletter(uuid) TO anon, authenticated;
