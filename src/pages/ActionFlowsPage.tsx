@@ -923,7 +923,7 @@ export function ActionFlowsPage({ navigate }: { navigate: (path: string) => void
           <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full border border-white/10" />
           <div className="absolute right-20 -bottom-20 w-52 h-52 rounded-full border border-white/5" />
           <div className="relative">
-            <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] font-bold text-slate-400"><Map className="w-3.5 h-3.5" /> Sistema de execução</div>
+            <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] font-bold text-slate-400"><MapIcon className="w-3.5 h-3.5" /> Sistema de execução</div>
             <h2 className="text-3xl font-black tracking-tight mt-3 max-w-2xl">Pare de guardar processos na cabeça.</h2>
             <p className="text-sm text-slate-300 mt-2 max-w-2xl leading-6">Escolha um modelo, adapte o caminho ao seu negócio ou desenhe algo completamente novo. Depois execute etapa por etapa sem perder o contexto.</p>
             <div className="flex flex-wrap gap-2 mt-5">
