@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { PageHeader, Card, Spinner, EmptyState } from '@/components/ui';
 import { Users, Download, Trash2, MapPin } from 'lucide-react';
 import type { NewsletterLead } from '@/types';
-import { formatDateTime, exportToCSV, timeAgo } from '@/lib/utils';
+import { exportToCSV, timeAgo } from '@/lib/utils';
 
 export function LeadsPage() {
   const { user } = useAuth();
