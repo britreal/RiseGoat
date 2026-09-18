@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { uploadUserImage } from '@/lib/storage';
 import { useAuth } from '@/context/AuthContext';
 import { Card, PageHeader, Spinner } from '@/components/ui';
 import { Activity, Check, Plus, Trash2, X, Upload } from 'lucide-react';
@@ -67,6 +68,13 @@ export function GoatPage() {
 
   useEffect(() => { void load(); }, [user?.id]);
 
+  useEffect(() => {
+    if (!modal) return;
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') resetModal(); };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [modal]);
+
   async function toggle(h: any) {
     if (!user) return;
     const completed = logs.some(x => x.habit_id === h.id && x.completed_on === today);
@@ -77,17 +85,6 @@ export function GoatPage() {
     await load();
   }
 
-  async function uploadImage(file: File) {
-    if (!user) return '';
-    if (!file.type.startsWith('image/')) throw new Error('Selecione uma imagem válida.');
-    if (file.size > 8 * 1024 * 1024) throw new Error('A imagem deve ter no máximo 8 MB.');
-    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
-    const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-    const result = await supabase.storage.from('goat-media').upload(path, file, { upsert: false, contentType: file.type });
-    if (result.error) throw result.error;
-    return supabase.storage.from('goat-media').getPublicUrl(path).data.publicUrl;
-  }
-
   function resetModal() {
     setModal(''); setForm({}); setSelectedFile(null); setBulkText('');
   }
@@ -96,7 +93,7 @@ export function GoatPage() {
     if (!user) return;
     try {
       let imageUrl = form.image_url || '';
-      if (selectedFile) imageUrl = await uploadImage(selectedFile);
+      if (selectedFile) imageUrl = await uploadUserImage(user.id, selectedFile, modal === 'habit' ? 'goat-habits' : 'goat-library');
 
       let result: any;
       if (modal === 'metric') {
