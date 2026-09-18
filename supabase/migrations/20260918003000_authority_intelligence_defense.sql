@@ -112,7 +112,7 @@ BEGIN
   END LOOP;
 END $$;
 
-CREATE OR REPLACE VIEW public.authority_contact_intelligence AS
+CREATE OR REPLACE VIEW public.authority_contact_intelligence WITH (security_invoker = true) AS
 SELECT
   c.*,
   round((c.wealth_score + c.fame_score + c.decision_power_score) / 3.0, 2) AS dialog_score,
@@ -327,6 +327,8 @@ DROP TRIGGER IF EXISTS trg_authority_contacts_refresh_leverage ON public.authori
 CREATE TRIGGER trg_authority_contacts_refresh_leverage
 AFTER INSERT OR UPDATE ON public.authority_contacts
 FOR EACH ROW EXECUTE FUNCTION public.authority_contact_refresh_leverage();
+
+CREATE UNIQUE INDEX IF NOT EXISTS product_pipeline_user_product_unique ON public.product_pipeline(user_id, product);
 
 CREATE INDEX IF NOT EXISTS idx_authority_threats_user_status ON public.authority_threats(user_id, status, severity);
 CREATE INDEX IF NOT EXISTS idx_authority_defense_actions_threat ON public.authority_defense_actions(user_id, threat_id);
