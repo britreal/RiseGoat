@@ -154,124 +154,244 @@ export function SettingsPage() {
           </div>
 
           <div className="p-6 space-y-7">
-            <div className="grid md:grid-cols-3 gap-3">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center mb-3">
-                  <Target className="w-4 h-4 text-slate-700" />
-                </div>
-                <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400">Objetivo</p>
-                <p className="text-sm font-bold text-slate-800 mt-1">Transformar atenção em sistema</p>
-                <p className="text-xs text-slate-500 mt-1 leading-5">Planejar, publicar, captar, analisar e monetizar em um único ambiente.</p>
+          <div className="grid lg:grid-cols-[1.35fr_.65fr] gap-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <div className="flex items-center gap-2">
+                <span className="w-8 h-8 rounded-xl bg-slate-950 text-white flex items-center justify-center">
+                  <Info className="w-4 h-4" />
+                </span>
+                <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-slate-400">Documentação viva</p>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center mb-3">
-                  <Network className="w-4 h-4 text-slate-700" />
-                </div>
-                <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400">Lógica</p>
-                <p className="text-sm font-bold text-slate-800 mt-1">Conteúdo → audiência → negócio</p>
-                <p className="text-xs text-slate-500 mt-1 leading-5">Cada ferramenta alimenta a próxima etapa e reduz a fragmentação operacional.</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center mb-3">
-                  <Sparkles className="w-4 h-4 text-slate-700" />
-                </div>
-                <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400">Resultado</p>
-                <p className="text-sm font-bold text-slate-800 mt-1">Mais clareza e execução</p>
-                <p className="text-xs text-slate-500 mt-1 leading-5">Menos ferramentas soltas, menos informação perdida e mais visão do negócio.</p>
-              </div>
+              <h3 className="text-lg font-black tracking-tight text-slate-950 mt-3">O RiseGoat mudou de um painel de páginas para um sistema operacional pessoal + negócios.</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-5">
+                A arquitetura atual separa o espaço <strong>Pessoal</strong> do espaço <strong>Negócios</strong>, mantém os dados do usuário no Supabase
+                e transforma processos em fluxos executáveis. Esta página resume o estado atual do produto.
+              </p>
             </div>
-
-            <div>
-              <div className="flex items-end justify-between gap-3 mb-4">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-slate-400">Ordem do sistema</p>
-                  <h3 className="text-lg font-black tracking-tight text-slate-950 mt-1">Como usar o RiseGoat</h3>
-                </div>
-                <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] text-slate-400"><Layers3 className="w-3.5 h-3.5" /> Fluxo recomendado</span>
-              </div>
-
-              <div className="space-y-3">
-                {[
-                  { n: '01', name: 'Dashboard', group: 'Início', icon: BarChart3, function: 'Centraliza a visão inicial da operação.', how: 'Use como ponto de entrada para conferir indicadores e acessar rapidamente as áreas principais.', pain: 'Evita trabalhar sem visão do que precisa de atenção.' },
-                  { n: '02', name: 'Fluxos de Ação', group: 'Início', icon: ArrowRight, function: 'Desenha e executa processos completos para qualquer negócio.', how: 'Escolha um template ou comece do zero; arraste blocos, conecte etapas, vincule módulos e execute cada passo.', pain: 'Resolve a necessidade de transformar uma ideia de negócio em um processo visual, reutilizável e executável.' },
-                  { n: '03', name: 'Perfil', group: 'Minha Página', icon: Settings2, function: 'Constrói a identidade e a página pública.', how: 'Cadastre nome, bio, imagens, SEO e informações exibidas publicamente.', pain: 'Resolve a falta de uma presença central para sua marca.' },
-                  { n: '04', name: 'Links', group: 'Minha Página', icon: ArrowRight, function: 'Organiza links, ofertas, afiliados e destinos.', how: 'Crie, ordene, ative e acompanhe links usados na sua página.', pain: 'Evita espalhar destinos e perder cliques ou oportunidades.' },
-                  { n: '05', name: 'Microblog', group: 'Minha Página', icon: Sparkles, function: 'Publica conteúdo curto ligado ao seu perfil.', how: 'Crie posts rápidos, imagens, CTA e mantenha uma camada contínua de conteúdo.', pain: 'Resolve o problema de ter ideias sem um fluxo simples de publicação.' },
-                  { n: '06', name: 'Newsletter', group: 'Crescimento', icon: Mail, function: 'Opera comunicação direta por e-mail.', how: 'Conecte SMTP, crie campanhas e envie conteúdo e ofertas aos seus leads.', pain: 'Reduz dependência exclusiva das redes sociais.' },
-                  { n: '07', name: 'Leads', group: 'Crescimento', icon: Target, function: 'Centraliza pessoas captadas pela operação.', how: 'Acompanhe nomes, e-mails e origens para transformar audiência em relacionamento.', pain: 'Evita perder potenciais clientes em ferramentas separadas.' },
-                  { n: '08', name: 'Analytics', group: 'Crescimento', icon: BarChart3, function: 'Mostra comportamento e resultados.', how: 'Acompanhe visitas, cliques e sinais de desempenho das propriedades digitais.', pain: 'Substitui decisões baseadas apenas em sensação por dados observáveis.' },
-                  { n: '09', name: 'Posts', group: 'Conteúdo', icon: BookOpen, function: 'Organiza a produção e publicação de conteúdo.', how: 'Crie posts, adicione mídia e mantenha a produção dentro do ecossistema.', pain: 'Reduz dispersão e facilita manter consistência.' },
-                  { n: '10', name: 'Rascunhos', group: 'Conteúdo', icon: BookOpen, function: 'Guarda ideias e conteúdos antes da publicação.', how: 'Salve materiais incompletos e retome depois.', pain: 'Evita perder ideias e reduz o atrito da criação.' },
-                  { n: '11', name: 'Páginas de Venda', group: 'Monetização', icon: Target, function: 'Cria páginas de venda com blocos editáveis.', how: 'Monte texto, imagem, espaço, botão, cores, fontes e tamanho; publique quando estiver pronto.', pain: 'Evita depender de outra ferramenta para montar a estrutura comercial.' },
-                  { n: '12', name: 'Ofertas', group: 'Monetização', icon: CircleDollarSign, function: 'Organiza tudo que pode ser vendido.', how: 'Cadastre tipo, status, preço, margem, comissão, canal, receita e vincule uma página de venda.', pain: 'Resolve a falta de uma visão central do catálogo e da rentabilidade das ofertas.' },
-                  { n: '13', name: 'Receita', group: 'Monetização', icon: CircleDollarSign, function: 'Controla dinheiro recebido e pendente.', how: 'Registre fonte, valor e data e conecte cada receita a oferta, parceria, lead e lançamento.', pain: 'Evita perder o histórico financeiro e mostra distância até a meta mensal.' },
-                  { n: '14', name: 'Centro de Comando', group: 'Estratégia', icon: Network, function: 'Integra propriedades, contatos, conexões, oportunidades, estratégia, defesa e finanças.', how: 'Use a Teia de Autoridade e seus painéis para organizar a estrutura estratégica.', pain: 'Resolve a falta de visão integrada sobre ativos, pessoas e oportunidades.' },
-                  { n: '15', name: 'GOAT', group: 'Personal', icon: Sparkles, function: 'Acompanha desenvolvimento pessoal e consistência.', how: 'Gerencie hábitos, heatmap, Body Analytics, livros e audiobooks.', pain: 'Ajuda a transformar intenção pessoal em rotina acompanhável.' },
-                  { n: '16', name: 'Parcerias', group: 'Estratégia', icon: Handshake, function: 'Organiza afiliados, parceiros e colaboradores.', how: 'Cadastre comissão, vendas, valor a pagar e conecte parceiros a leads e receitas.', pain: 'Evita controlar relacionamentos comerciais de forma espalhada.' },
-                  { n: '17', name: 'Lançamentos', group: 'Estratégia', icon: CalendarDays, function: 'Planeja campanhas por período e fase.', how: 'Monte kanban, calendário, metas e resultados e vincule posts e newsletters.', pain: 'Evita executar campanhas sem cronograma ou conexão entre conteúdo e resultado.' },
-                  { n: '18', name: 'Radar', group: 'Estratégia', icon: RadarIcon, function: 'Cruza dados automaticamente para encontrar oportunidades.', how: 'Compara interesses, ofertas e sinais de audiência, atualiza o score de alavancagem e permite criar tarefas.', pain: 'Reduz oportunidades escondidas em dados que estão isolados.' },
-                  { n: '19', name: 'Configurações', group: 'Conta', icon: Settings2, function: 'Administra conta, segurança e integrações.', how: 'Gerencie senha, SMTP, conexão do banco e documentação do sistema.', pain: 'Mantém configurações críticas centralizadas.' },
-                  { n: '20', name: 'Metas', group: 'Conta', icon: Target, function: 'Transforma objetivos macro em resultados-chave.', how: 'Cadastre três resultados-chave, progresso, prazo, revisão semanal e módulos vinculados.', pain: 'Evita trabalhar muito sem uma direção mensurável.' },
-                ].map((item, index, all) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={item.name} className="relative rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
-                      <div className="flex gap-4">
-                        <div className="shrink-0">
-                          <div className="w-10 h-10 rounded-xl bg-slate-950 text-white flex items-center justify-center text-xs font-black">{item.n}</div>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <Icon className="w-4 h-4 text-slate-500" />
-                            <h4 className="text-sm font-bold text-slate-900">{item.name}</h4>
-                            <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-500">{item.group}</span>
-                          </div>
-                          <div className="grid lg:grid-cols-3 gap-4 mt-4">
-                            <div>
-                              <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400">Funcionalidade</p>
-                              <p className="text-xs text-slate-600 mt-1.5 leading-5">{item.function}</p>
-                            </div>
-                            <div>
-                              <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400">Como funciona</p>
-                              <p className="text-xs text-slate-600 mt-1.5 leading-5">{item.how}</p>
-                            </div>
-                            <div>
-                              <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400">Dor que resolve</p>
-                              <p className="text-xs text-slate-600 mt-1.5 leading-5">{item.pain}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      {index < all.length - 1 && <div className="hidden sm:block absolute left-[34px] -bottom-3 h-3 border-l border-dashed border-slate-200" />}
-                    </div>
-                  );
-                })}
-              </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-slate-400">Versão documental</p>
+              <p className="text-lg font-black text-slate-950 mt-1">18/09/2026</p>
+              <p className="text-xs text-slate-500 mt-2 leading-5">Atualizada após a última rodada de arquitetura, Fluxos de Ação, workspace e segurança.</p>
             </div>
+          </div>
 
-            <div className="rounded-2xl border border-cyan-100 bg-cyan-50/60 p-5">
-              <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-cyan-700">Visão operacional</p>
-              <div className="flex flex-wrap items-center gap-2 mt-3 text-xs font-semibold text-slate-700">
-                <span className="px-3 py-2 rounded-xl bg-white border border-cyan-100">Construir presença</span>
-                <ArrowRight className="w-4 h-4 text-cyan-500" />
-                <span className="px-3 py-2 rounded-xl bg-white border border-cyan-100">Publicar conteúdo</span>
-                <ArrowRight className="w-4 h-4 text-cyan-500" />
-                <span className="px-3 py-2 rounded-xl bg-white border border-cyan-100">Captar audiência</span>
-                <ArrowRight className="w-4 h-4 text-cyan-500" />
-                <span className="px-3 py-2 rounded-xl bg-white border border-cyan-100">Medir comportamento</span>
-                <ArrowRight className="w-4 h-4 text-cyan-500" />
-                <span className="px-3 py-2 rounded-xl bg-white border border-cyan-100">Monetizar</span>
-                <ArrowRight className="w-4 h-4 text-cyan-500" />
-                <span className="px-3 py-2 rounded-xl bg-white border border-cyan-100">Evoluir</span>
+          <div className="grid md:grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="flex items-center gap-2">
+                <UserRound className="w-4 h-4 text-slate-700" />
+                <p className="text-sm font-bold text-slate-900">Pessoal</p>
               </div>
-              <p className="text-xs text-slate-500 mt-4 leading-5">
-                O fluxo é contínuo: o conteúdo gera atenção, a atenção pode virar lead ou clique, os dados mostram o que funcionou,
-                a monetização transforma resultado em negócio e o GOAT mantém a disciplina para repetir o processo.
+              <p className="text-xs text-slate-500 mt-2 leading-5">
+                Espaço para desenvolvimento individual, hábitos, corpo, estudos, projetos e metas pessoais. O GOAT fica aqui e os
+                passos de um fluxo podem ser marcados como feitos diretamente na execução.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="flex items-center gap-2">
+                <Network className="w-4 h-4 text-slate-700" />
+                <p className="text-sm font-bold text-slate-900">Negócios</p>
+              </div>
+              <p className="text-xs text-slate-500 mt-2 leading-5">
+                Espaço para presença, conteúdo, audiência, leads, analytics, vendas, receita, estratégia, parcerias e lançamentos.
+                O sistema esconde áreas incompatíveis com o modo ativo e protege também o acesso direto às rotas.
               </p>
             </div>
           </div>
-        </Card>
 
+          <div>
+            <div className="flex items-end justify-between gap-3 mb-4">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-slate-400">Arquitetura atual</p>
+                <h3 className="text-lg font-black tracking-tight text-slate-950 mt-1">Como as partes do sistema se organizam</h3>
+              </div>
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] text-slate-400">
+                <Layers3 className="w-3.5 h-3.5" /> 2 espaços + módulos compartilhados
+              </span>
+            </div>
+
+            <div className="grid lg:grid-cols-3 gap-3">
+              {[
+                {
+                  name: 'Núcleo',
+                  items: 'Dashboard, Fluxos de Ação e Metas',
+                  text: 'Planejar, acompanhar e executar objetivos sem depender de várias ferramentas separadas.'
+                },
+                {
+                  name: 'Negócios',
+                  items: 'Perfil, Links, Microblog, Newsletter, Leads, Analytics, Posts, Rascunhos, Páginas de Venda, Ofertas, Receita, Centro de Comando, Parcerias, Lançamentos e Radar',
+                  text: 'Opera a presença pública, aquisição, conteúdo, monetização e camada estratégica.'
+                },
+                {
+                  name: 'Pessoal',
+                  items: 'Dashboard pessoal, GOAT, Fluxos de Ação e Metas',
+                  text: 'Concentra rotina e evolução pessoal, com processos executáveis e acompanhamento de progresso.'
+                },
+              ].map(section => (
+                <div key={section.name} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400">{section.name}</p>
+                  <p className="text-sm font-bold text-slate-900 mt-1">{section.items}</p>
+                  <p className="text-xs text-slate-500 mt-2 leading-5">{section.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-end justify-between gap-3 mb-4">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-slate-400">Atualizações estruturais</p>
+                <h3 className="text-lg font-black tracking-tight text-slate-950 mt-1">O que foi adicionado ou reformulado</h3>
+              </div>
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] text-slate-400">
+                <Check className="w-3.5 h-3.5" /> Consolidado do histórico recente
+              </span>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-3">
+              {[
+                {
+                  title: 'Pessoal / Negócios',
+                  text: 'Switcher persistente no topo, dados separados por workspace, dashboard próprio para Pessoal e bloqueio de rotas incompatíveis.',
+                },
+                {
+                  title: 'Fluxos de Ação 2.0',
+                  text: 'Biblioteca com templates pessoais e de negócios, Canvas, execução e duplicação. Os templates atuais possuem plano base/documentado e plano ideal do RiseGoat.',
+                },
+                {
+                  title: 'Proveniência das fontes',
+                  text: 'Cada template pesquisado guarda as fontes utilizadas, o modo do plano escolhido e metadados que distinguem etapas baseadas em fontes da camada organizacional do RiseGoat.',
+                },
+                {
+                  title: 'Execução pessoal',
+                  text: 'Etapas de Fluxos de Ação no espaço Pessoal podem funcionar como checklist, com ação de marcar como feito sem precisar entrar no GOAT.',
+                },
+                {
+                  title: 'Monetização',
+                  text: 'Foram adicionados Ofertas, Receita, Parcerias, Lançamentos e Metas/resultado-chave, além das relações entre receita, ofertas e lançamentos.',
+                },
+                {
+                  title: 'Páginas de Venda',
+                  text: 'Builder visual com blocos editáveis para texto, imagem, espaçamento, botões, cores, fontes e tamanhos, com página pública por slug.',
+                },
+                {
+                  title: 'GOAT',
+                  text: 'Hábitos, heatmap, biblioteca de livros/audiobooks e Body Analytics, com popups mais claros e acompanhamento de evolução corporal.',
+                },
+                {
+                  title: 'Mídia e uploads',
+                  text: 'Uploads diretos para Supabase em perfil, posts, microblog e páginas de venda, com helper compartilhado e validação de imagens.',
+                },
+                {
+                  title: 'Segurança e autenticação',
+                  text: 'Novos usuários recebem perfil automaticamente; tabelas legadas receberam políticas de proprietário e funções legadas tiveram o search_path protegido.',
+                },
+                {
+                  title: 'Infraestrutura',
+                  text: 'O RiseGoat usa exclusivamente o projeto Supabase Fluently, com Auth, Database, Storage e Edge Functions para os fluxos que precisam de backend seguro.',
+                },
+                {
+                  title: 'Desempenho e estabilidade',
+                  text: 'Foram adicionados índices para chaves estrangeiras, correções para estados de loading, conflitos de ícones, renderização do GOAT e estados vazios de Receita.',
+                },
+                {
+                  title: 'Qualidade de código',
+                  text: 'Existe workflow de CI para typecheck, lint e build. A última verificação conhecida passou no typecheck; o lint ainda possui avisos/erros legados fora desta documentação.',
+                },
+              ].map((item, index) => (
+                <div key={item.title} className="rounded-2xl border border-slate-200 bg-white p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="w-8 h-8 shrink-0 rounded-xl bg-slate-950 text-white flex items-center justify-center text-[10px] font-black">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900">{item.title}</h4>
+                      <p className="text-xs text-slate-500 mt-1.5 leading-5">{item.text}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-4">
+              <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-slate-400">Fluxos de Ação</p>
+              <h3 className="text-lg font-black tracking-tight text-slate-950 mt-1">A diferença entre plano base e plano ideal</h3>
+            </div>
+            <div className="grid md:grid-cols-2 gap-3">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <p className="text-sm font-bold text-slate-900">Plano base / documentado</p>
+                <p className="text-xs text-slate-600 mt-2 leading-5">
+                  É a síntese operacional das fontes utilizadas para aquele template. As fontes ficam visíveis na biblioteca do fluxo
+                  e são registradas junto ao processo salvo.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-cyan-100 bg-cyan-50/60 p-5">
+                <p className="text-sm font-bold text-slate-900">Plano ideal do RiseGoat</p>
+                <p className="text-xs text-slate-600 mt-2 leading-5">
+                  É uma camada de organização criada pelo próprio sistema para transformar o plano base em um processo mais executável,
+                  conectando etapas a módulos, decisões, métricas e resultados. Não é apresentado como exigência das fontes.
+                </p>
+              </div>
+            </div>
+            <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="flex flex-wrap gap-2">
+                {['Shopify', 'Google Analytics', 'Mailchimp', 'HubSpot', 'SBA', 'Atlassian', 'Learning Scientists', 'CDC', 'NIH/NICHD', 'Todoist', 'Stripe'].map(source => (
+                  <span key={source} className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-[11px] font-semibold text-slate-600">{source}</span>
+                ))}
+              </div>
+              <p className="text-[11px] text-slate-400 mt-3 leading-5">
+                Estas são as famílias de fontes usadas na pesquisa dos templates atuais. A biblioteca do Fluxo de Ação mantém as URLs
+                específicas associadas a cada template.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-cyan-100 bg-cyan-50/60 p-5">
+            <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-cyan-700">Ciclo operacional</p>
+            <div className="flex flex-wrap items-center gap-2 mt-3 text-xs font-semibold text-slate-700">
+              {[
+                'Definir objetivo',
+                'Escolher ou criar fluxo',
+                'Executar etapas',
+                'Marcar / medir',
+                'Conectar módulos',
+                'Revisar resultado',
+                'Repetir ou ajustar',
+              ].map((step, index, all) => (
+                <span key={step} className="inline-flex items-center gap-2">
+                  <span className="px-3 py-2 rounded-xl bg-white border border-cyan-100">{step}</span>
+                  {index < all.length - 1 && <ArrowRight className="w-4 h-4 text-cyan-500" />}
+                </span>
+              ))}
+            </div>
+            <p className="text-xs text-slate-500 mt-4 leading-5">
+              O sistema não obriga que todo trabalho siga uma única ordem. O ciclo acima é uma forma de entender como objetivos,
+              processos, execução, métricas e revisão se relacionam dentro do RiseGoat.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            <div className="flex items-center gap-2">
+              <Database className="w-4 h-4 text-slate-700" />
+              <p className="text-sm font-bold text-slate-900">Camada de dados</p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-3 mt-4">
+              <div className="rounded-xl bg-slate-50 border border-slate-200 p-3">
+                <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400">Identidade</p>
+                <p className="text-xs text-slate-600 mt-1 leading-5">Supabase Auth + perfil do usuário, com workspace persistido.</p>
+              </div>
+              <div className="rounded-xl bg-slate-50 border border-slate-200 p-3">
+                <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400">Operação</p>
+                <p className="text-xs text-slate-600 mt-1 leading-5">Dados de conteúdo, leads, ofertas, receita, estratégia, metas, GOAT e fluxos.</p>
+              </div>
+              <div className="rounded-xl bg-slate-50 border border-slate-200 p-3">
+                <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-slate-400">Mídia / integrações</p>
+                <p className="text-xs text-slate-600 mt-1 leading-5">Storage para imagens e Edge Functions para operações que exigem backend seguro, como SMTP.</p>
+              </div>
+            </div>
+          </div>
+        </div>
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-1"><Database className="w-4 h-4 text-cyan-500" /><h2 className="text-sm font-semibold text-slate-800">Supabase</h2></div>
           <p className="text-xs text-slate-500 mb-4">Banco de dados e autenticação do RiseGoat.</p>
