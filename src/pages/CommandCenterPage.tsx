@@ -571,7 +571,7 @@ export function CommandCenterPage() {
 
       {tab === 'intelligence' && <IntelligencePanel contacts={contacts} properties={properties} dossiers={dossiers} suggestions={suggestions} nodes={nodes} connections={connections} onUpdateContact={updateContactIntelligence} onSaveSuggestion={createSuggestion} />}
 
-      {tab === 'strategy' && <StrategyPanel contacts={contacts} leverage={leverage} ledger={ledger} connections={connections} nodes={nodes} negotiations={negotiations} hiddenConnections={hiddenConnections} crossInfluence={crossInfluence} onRefresh={load} />}
+      {tab === 'strategy' && <StrategyPanel userId={user?.id ?? ''} contacts={contacts} leverage={leverage} ledger={ledger} connections={connections} nodes={nodes} negotiations={negotiations} hiddenConnections={hiddenConnections} crossInfluence={crossInfluence} onRefresh={load} />}
 
       {tab === 'defense' && <DefensePanel threats={threats} actions={defenseActions} nodes={nodes} onAddThreat={addThreat} onUpdateThreat={updateThreat} onAddAction={addDefenseAction} />}
 
@@ -1048,6 +1048,7 @@ function Table<T extends { id:string }>(props:{rows:T[];columns:string[];empty:s
   return props.rows.length===0?<Card className="p-8"><p className="text-sm text-slate-400 text-center">{props.empty}</p></Card>:<Card className="overflow-hidden"><div className="overflow-x-auto"><table className="w-full text-left"><thead><tr className="border-b border-slate-100 bg-slate-50">{props.columns.map((c)=><th key={c} className="px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase">{c}</th>)}<th className="px-4 py-3"/></tr></thead><tbody className="divide-y divide-slate-100">{props.rows.map((row)=><tr key={row.id} className="hover:bg-slate-50/60">{props.render(row)}<td className="px-4 py-3 text-right">{props.actions(row)}</td></tr>)}</tbody></table></div></Card>;
 }
 function Cell(props:{children:React.ReactNode;strong?:boolean}) { return <td className={'px-4 py-3 text-sm ' + (props.strong?'font-medium text-slate-800':'text-slate-500')}>{props.children}</td>; }function StrategyPanel(props:{
+  userId:string;
   contacts:AuthorityContact[]; leverage:LeverageNode[]; ledger:ReciprocityEntry[];
   connections:AuthorityConnection[]; nodes:Array<{id:string;type:EntityType;name:string;label:string}>;
   negotiations:NegotiationDossier[]; hiddenConnections:HiddenConnection[]; crossInfluence:CrossInfluence[];
@@ -1074,7 +1075,6 @@ function Cell(props:{children:React.ReactNode;strong?:boolean}) { return <td cla
   const [history,setHistory]=useState(''); const [style,setStyle]=useState(''); const [limits,setLimits]=useState(''); const [triggers,setTriggers]=useState(''); const [alternatives,setAlternatives]=useState('');
   const [personA,setPersonA]=useState(''); const [personB,setPersonB]=useState(''); const [relation,setRelation]=useState(''); const [source,setSource]=useState(''); const [strength,setStrength]=useState('Média');
   const [influencer,setInfluencer]=useState(''); const [influenced,setInfluenced]=useState(''); const [intensity,setIntensity]=useState('5'); const [topic,setTopic]=useState('');
-  const userId=props.contacts[0]?.user_id;
   async function saveLedger(){if(!selected||!userId)return;const {error}=await supabase.from('reciprocity_ledger').insert({user_id:userId,contact_id:selected,favor_given:given,favor_received:received,value_given:Number(given||0),value_received:Number(received||0),context,entry_date:new Date().toISOString().slice(0,10)});if(error)return;setGiven('');setReceived('');setContext('');props.onRefresh();}
   async function saveDossier(){if(!selected||!userId)return;const {error}=await supabase.from('contact_dossiers').upsert({user_id:userId,contact_id:selected,wants,fears},{onConflict:'contact_id'});if(error)return;setWants('');setFears('');props.onRefresh();}
   async function saveNegotiation(){if(!selected||!userId)return;const {error}=await supabase.from('contact_negotiations').upsert({user_id:userId,contact_id:selected,history,style,limits,triggers,alternatives},{onConflict:'contact_id'});if(error)return;props.onRefresh();}
