@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 export type Route =
   | { name: 'auth' }
   | { name: 'dashboard' }
+  | { name: 'action-flows' }
   | { name: 'profile' }
   | { name: 'links' }
   | { name: 'microblog' }
@@ -41,6 +42,7 @@ function parseHash(): Route {
   if (parts[0] === 'u' && parts[1]) return { name: 'public', username: decodeURIComponent(parts[1]) };
   if (parts[0] === 'p' && parts[1]) return { name: 'public-sales', slug: parts.slice(1).map(decodeURIComponent).join('/') };
   if (parts[0] === 'dashboard') return { name: 'dashboard' };
+  if (parts[0] === 'action-flows') return { name: 'action-flows' };
   if (parts[0] === 'profile') return { name: 'profile' };
   if (parts[0] === 'links') return { name: 'links' };
   if (parts[0] === 'microblog') return { name: 'microblog' };
