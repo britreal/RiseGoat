@@ -7,7 +7,7 @@ import type { PageVisit, LinkClick, NewsletterLead, Link, MicroblogPost } from '
 import { formatNumber, timeAgo } from '@/lib/utils';
 
 export function DashboardPage({ navigate }: { navigate: (path: string) => void }) {
-  const { user, profile } = useAuth();
+  const { user, profile, workspaceMode } = useAuth();
   const [loading, setLoading] = useState(true);
   const [visits, setVisits] = useState<PageVisit[]>([]);
   const [clicks, setClicks] = useState<LinkClick[]>([]);
@@ -54,6 +54,48 @@ export function DashboardPage({ navigate }: { navigate: (path: string) => void }
     green: 'bg-green-50 text-green-600',
     amber: 'bg-amber-50 text-amber-600',
   };
+
+  if (workspaceMode === 'pessoal') {
+    return (
+      <div className="p-6 lg:p-8 max-w-5xl mx-auto">
+        <div className="mb-6">
+          <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-slate-400">Pessoal</p>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight mt-1">Olá{profile?.display_name ? ', ' + profile.display_name : ''}!</h1>
+          <p className="text-sm text-slate-500 mt-1">Seu espaço pessoal para executar projetos, acompanhar metas e evoluir com consistência.</p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-4 mb-6">
+          <button onClick={() => navigate('/action-flows')} className="text-left">
+            <Card className="p-5 h-full hover:shadow-md transition">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mb-4"><ArrowRight className="w-5 h-5 text-slate-700"/></div>
+              <p className="text-sm font-bold text-slate-800">Fluxos de Ação</p>
+              <p className="text-xs text-slate-400 mt-1 leading-5">Transforme um objetivo pessoal em etapas executáveis e marque o que foi feito.</p>
+            </Card>
+          </button>
+          <button onClick={() => navigate('/goat')} className="text-left">
+            <Card className="p-5 h-full hover:shadow-md transition">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center mb-4"><TrendingUp className="w-5 h-5 text-emerald-700"/></div>
+              <p className="text-sm font-bold text-slate-800">GOAT</p>
+              <p className="text-xs text-slate-400 mt-1 leading-5">Hábitos, heatmap, livros, audiobooks e acompanhamento corporal.</p>
+            </Card>
+          </button>
+          <button onClick={() => navigate('/goals')} className="text-left">
+            <Card className="p-5 h-full hover:shadow-md transition">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-4"><Users className="w-5 h-5 text-blue-700"/></div>
+              <p className="text-sm font-bold text-slate-800">Metas</p>
+              <p className="text-xs text-slate-400 mt-1 leading-5">Objetivos e resultados-chave para manter direção e revisão.</p>
+            </Card>
+          </button>
+        </div>
+
+        <Card className="p-5 bg-slate-950 text-white border-0">
+          <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-slate-400">Regra do espaço pessoal</p>
+          <h2 className="text-lg font-black mt-1">Faça, marque e avance.</h2>
+          <p className="text-xs text-slate-300 mt-1.5 max-w-2xl leading-5">Use o fluxo como checklist operacional. Você não precisa entrar no GOAT para dar check em uma etapa de um projeto pessoal.</p>
+        </Card>
+      </div>
+    );
+  }
 
   const publicUrl = `${window.location.origin}/u/${profile?.username}`;
 
