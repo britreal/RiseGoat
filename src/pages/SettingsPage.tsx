@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { PageHeader, Card } from '@/components/ui';
-import { Check, AlertTriangle, Mail, Loader2, ShieldCheck, Database, BookOpen, ArrowRight, Target, Sparkles, Network, BarChart3, Settings2, Layers3 } from 'lucide-react';
+import { Check, AlertTriangle, Mail, Loader2, ShieldCheck, Database, BookOpen, ArrowRight, Target, Sparkles, Network, BarChart3, Settings2, Layers3, CircleDollarSign, Handshake, CalendarDays, Radar as RadarIcon } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export function SettingsPage() {
