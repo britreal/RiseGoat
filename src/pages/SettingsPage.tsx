@@ -250,7 +250,7 @@ export function SettingsPage() {
                 },
                 {
                   name: 'Negócios',
-                  items: 'Perfil, Links, Microblog, Newsletter, Leads, Analytics, Posts, Rascunhos, Páginas de Venda, Ofertas, Portfólio de Produtos, Receita, Centro de Comando, Parcerias, Lançamentos e Radar',
+                  items: 'Perfil, Links, Microblog, Newsletter, Leads, Analytics, Posts, Rascunhos, Páginas de Venda, Ofertas, Portfólio de Produtos, Escritor de Livros/Ebooks, Receita, Centro de Comando, Parcerias, Lançamentos e Radar',
                   text: 'Opera a presença pública, aquisição, conteúdo, monetização e camada estratégica.'
                 },
                 {
