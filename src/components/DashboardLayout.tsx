@@ -28,7 +28,7 @@ export function DashboardLayout({ children, currentPath, navigate }: DashboardLa
   async function handleWorkspaceMode(mode: 'pessoal' | 'negocios') {
     const saved = await setWorkspaceMode(mode);
     if (!saved) return;
-    const businessPaths = ['/profile','/links','/microblog','/newsletter','/leads','/analytics','/posts','/sales','/offers','/revenue','/command-center','/partnerships','/launches','/radar'];
+    const businessPaths = ['/profile','/links','/microblog','/newsletter','/leads','/analytics','/posts','/drafts','/sales','/offers','/product-portfolio','/book-writer','/revenue','/command-center','/partnerships','/launches','/radar'];
     if (mode === 'pessoal' && businessPaths.includes(currentPath)) navigate('/dashboard');
     if (mode === 'negocios' && currentPath === '/goat') navigate('/dashboard');
     setMobileOpen(false);
