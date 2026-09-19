@@ -1,15 +1,15 @@
 import { type ReactNode, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import { Sparkles, ExternalLink, LogOut, Menu, X, UserRound, BriefcaseBusiness, Settings } from 'lucide-react';
+import { Sparkles, ExternalLink, LogOut, Menu, X, UserRound, BriefcaseBusiness } from 'lucide-react';
 
 import { navItems } from '@/lib/navigation';
 interface DashboardLayoutProps { children: ReactNode; currentPath: string; navigate: (path: string) => void; }
 
 export function DashboardLayout({ children, currentPath, navigate }: DashboardLayoutProps) {
-  const { profile, signOut, workspaceMode, setWorkspaceMode } = useAuth();
+  const { profile, signOut, workspaceMode, setWorkspaceMode, menuVisibility } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const visibleNavItems = navItems.filter((item) => (item.mode === 'shared' || item.mode === workspaceMode) && profile?.menu_visibility?.[item.path] !== false);
+  const visibleNavItems = navItems.filter((item) => (item.mode === 'shared' || item.mode === workspaceMode) && menuVisibility[item.path] !== false);
   const groups = [...new Set(visibleNavItems.map((n) => n.group))];
   const groupTone: Record<string, string> = {
     'Presença': 'text-blue-700 bg-blue-50',
