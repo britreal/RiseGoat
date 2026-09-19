@@ -9,7 +9,7 @@ interface DashboardLayoutProps { children: ReactNode; currentPath: string; navig
 export function DashboardLayout({ children, currentPath, navigate }: DashboardLayoutProps) {
   const { profile, signOut, workspaceMode, setWorkspaceMode, menuVisibility } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const visibleNavItems = navItems.filter((item) => (item.mode === 'shared' || item.mode === workspaceMode) && menuVisibility[item.path] !== false);
+  const visibleNavItems = navItems.filter((item) => {\n    const modeVisible = item.mode === 'shared' || item.mode === workspaceMode;\n    const visibilityAllowed = item.controllable === false || menuVisibility[item.path] !== false;\n    return modeVisible && visibilityAllowed;\n  });
   const groups = [...new Set(visibleNavItems.map((n) => n.group))];
   const groupTone: Record<string, string> = {
     'Presença': 'text-blue-700 bg-blue-50',
