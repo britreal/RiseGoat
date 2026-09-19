@@ -138,7 +138,7 @@ export function BookWriterPage(){
   async function saveBook(patch:Partial<Book>,showNotice=false){
     if(!user||!book)return false;
     setSaving(true);
-    const {data,e}=await (async()=>{const r=await supabase.from('books').update(patch).eq('id',book.id).eq('user_id',user.id).select().single();return {data:r.data,error:r.error};})();
+    const {data,error:e}=await supabase.from('books').update(patch).eq('id',book.id).eq('user_id',user.id).select().single();
     setSaving(false);
     if(e){setError(e.message);return false;}
     setBook(data as Book);
@@ -159,7 +159,7 @@ export function BookWriterPage(){
     if(!user||!book)return false;
     setSaving(true);
     const content=ch.content;
-    const {data,e}=await supabase.from('book_chapters').update({title:ch.title,summary:ch.summary,content,status:ch.status,order:ch.order}).eq('id',ch.id).eq('book_id',book.id).select().single();
+    const {data,error:e}=await supabase.from('book_chapters').update({title:ch.title,summary:ch.summary,content,status:ch.status,order:ch.order}).eq('id',ch.id).eq('book_id',book.id).select().single();
     setSaving(false);
     if(e){setError(e.message);return false;}
     const updated=data as BookChapter;
@@ -192,7 +192,7 @@ export function BookWriterPage(){
     base.user_id=user.id;
     base.title='Novo livro';
     setSaving(true);
-    const {data,e}=await supabase.from('books').insert({
+    const {data,error:e}=await supabase.from('books').insert({
       user_id:user.id,title:base.title,subtitle:base.subtitle,genre:base.genre,target_audience:base.target_audience,promise:base.promise,
       tone:base.tone,estimated_words:base.estimated_words,language:base.language,platform:base.platform,status:'Conceito',
       current_step:1,cover_image:'',description:'',keywords:[],categories:[],isbn:'',price:0,rights:base.rights,introduction:'',
@@ -207,7 +207,7 @@ export function BookWriterPage(){
   async function addChapter(){
     if(!book)return;
     const title=newChapterTitle.trim()||'Capítulo '+(chapters.length+1);
-    const {data,e}=await supabase.from('book_chapters').insert({book_id:book.id,title,summary:newChapterSummary.trim(),content:'',status:'Rascunho',order:chapters.length}).select().single();
+    const {data,error:e}=await supabase.from('book_chapters').insert({book_id:book.id,title,summary:newChapterSummary.trim(),content:'',status:'Rascunho',order:chapters.length}).select().single();
     if(e){setError(e.message);return;}
     setChapters(prev=>[...prev,data as BookChapter]);setSelectedChapter(data as BookChapter);setNewChapterTitle('');setNewChapterSummary('');
     setView('editor');
@@ -273,7 +273,7 @@ export function BookWriterPage(){
   }
 
   async function addComment(paragraphIndex:number){
-    if(!user||!book||!selectedChapter||!commentText.trim())return;
+    if(!user||!book||!selectedChapter)return;
     const draft=commentDrafts[paragraphIndex]||''; if(!draft.trim())return; const {data,e}=await supabase.from('book_comments').insert({book_id:book.id,chapter_id:selectedChapter.id,paragraph_index:paragraphIndex,comment:draft.trim()}).select().single();
     if(e){setError(e.message);return;}
     setComments(prev=>[...prev,data as typeof comments[number]]);setCommentDrafts(prev=>({...prev,[paragraphIndex]:''}));
@@ -309,7 +309,7 @@ export function BookWriterPage(){
   async function exportCoverPng(){
     if(!book||!user)return;
     try{
-      const blob=await buildCoverPng({title:book.title||'Título',subtitle:book.subtitle,author:book.author_name||profile?.display_name||'Autor',background:coverBackground,foreground:coverForeground});
+      const blob=await buildCoverPng({title:book.title||'Título',subtitle:book.subtitle,author:book.author_name||profile?.display_name||'Autor',background:coverBackground,foreground:coverForeground,font:coverFont,layout:coverLayout});
       const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=slug(book.title)+'.png';a.click();URL.revokeObjectURL(url);
       const path=user.id+'/book-exports/'+slug(book.title)+'-'+Date.now()+'.png';
       const up=await supabase.storage.from('risegoat-media').upload(path,blob,{upsert:false,contentType:'image/png'});
