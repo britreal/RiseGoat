@@ -60,7 +60,7 @@ function AppContent() {
     return <SalesBuilderPage pageId={route.pageId} navigate={navigate} />;
   }
 
-  const currentPath = route.name === 'drafts' ? '/posts' : `/${route.name}`;
+  const currentPath = `/${route.name}`;
   const pageMap: Record<string, React.ReactNode> = {
     dashboard: <DashboardPage navigate={navigate} />,
     'action-flows': <ActionFlowsPage navigate={navigate} />,
@@ -68,8 +68,8 @@ function AppContent() {
     links: <LinksPage />,
     microblog: <MicroblogPage />,
     newsletter: <NewsletterPage />,
-    posts: <PostsPage />,
-    drafts: <PostsPage />,
+    posts: <PostsPage initialView="all" />,
+    drafts: <PostsPage initialView="drafts" />,
     leads: <LeadsPage />,
     analytics: <AnalyticsPage />,
     settings: <SettingsPage />,
