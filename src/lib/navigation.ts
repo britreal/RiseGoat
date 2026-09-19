@@ -2,6 +2,7 @@ import type { LucideIcon } from 'lucide-react';
 import {
   Activity,
   BarChart3,
+  BookOpen,
   CalendarDays,
   CircleDollarSign,
   FileText,
@@ -40,6 +41,7 @@ export const navItems: NavItem[] = [
   { label: 'Links', path: '/links', icon: Link2, group: 'Presença', mode: 'negocios' },
 
   { label: 'Posts', path: '/posts', icon: FileText, group: 'Conteúdo', mode: 'negocios' },
+  { label: 'Rascunhos', path: '/drafts', icon: FileText, group: 'Conteúdo', mode: 'negocios' },
   { label: 'Microblog', path: '/microblog', icon: MessageSquare, group: 'Conteúdo', mode: 'negocios' },
 
   { label: 'Newsletter', path: '/newsletter', icon: Mail, group: 'Captação', mode: 'negocios' },
@@ -50,6 +52,7 @@ export const navItems: NavItem[] = [
   { label: 'Ofertas', path: '/offers', icon: ShoppingBag, group: 'Monetização', mode: 'negocios' },
   { label: 'Páginas de Venda', path: '/sales', icon: ShoppingBag, group: 'Monetização', mode: 'negocios' },
   { label: 'Portfólio de Produtos', path: '/product-portfolio', icon: PackageOpen, group: 'Monetização', mode: 'negocios' },
+  { label: 'Escritor de Livros/Ebooks', path: '/book-writer', icon: BookOpen, group: 'Monetização', mode: 'negocios' },
   { label: 'Receita', path: '/revenue', icon: CircleDollarSign, group: 'Monetização', mode: 'negocios' },
 
   { label: 'Centro de Comando', path: '/command-center', icon: Network, group: 'Estratégia', mode: 'negocios' },
