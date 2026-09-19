@@ -7,12 +7,12 @@ import type { Draft, MicroblogPost } from '@/types';
 import { uploadUserImage } from '@/lib/storage';
 import { timeAgo } from '@/lib/utils';
 
-export function PostsPage() {
+export function PostsPage({ initialView = 'all' }: { initialView?: 'all' | 'drafts' }) {
   const { user } = useAuth();
   const [posts, setPosts] = useState<MicroblogPost[]>([]);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<'all'|'drafts'>('all');
+  const [view, setView] = useState<'all'|'drafts'>(initialView);
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
