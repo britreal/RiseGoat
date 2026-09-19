@@ -15,6 +15,7 @@ interface AuthContextValue {
   workspaceMode: WorkspaceMode;
   setWorkspaceMode: (mode: WorkspaceMode) => Promise<boolean>;
   menuVisibility: MenuVisibility;
+  setMenuVisibility: (visibility: MenuVisibility) => Promise<boolean>;
   setMenuItemVisibility: (path: string, visible: boolean) => Promise<boolean>;
 }
 
@@ -109,18 +110,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return true;
   }
 
-  async function setMenuItemVisibility(path: string, visible: boolean) {
+  async function setMenuVisibility(visibility: MenuVisibility) {
     if (!user) return false;
     const previous = menuVisibility;
-    const next = { ...previous, [path]: visible };
-    setMenuVisibilityState(next);
-    const { error } = await supabase.from('profiles').update({ menu_visibility: next }).eq('id', user.id);
+    setMenuVisibilityState(visibility);
+    const { error } = await supabase.from('profiles').update({ menu_visibility: visibility }).eq('id', user.id);
     if (error) {
       setMenuVisibilityState(previous);
       return false;
     }
-    setProfile((current) => current ? { ...current, menu_visibility: next } : current);
+    setProfile((current) => current ? { ...current, menu_visibility: visibility } : current);
     return true;
+  }
+
+  async function setMenuItemVisibility(path: string, visible: boolean) {
+    return setMenuVisibility({ ...menuVisibility, [path]: visible });
   }
 
   async function signIn(email: string, password: string) {
@@ -150,7 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, loading, signIn, signUp, signOut, refreshProfile, workspaceMode, setWorkspaceMode, menuVisibility, setMenuItemVisibility }}>
+    <AuthContext.Provider value={{ session, user, profile, loading, signIn, signUp, signOut, refreshProfile, workspaceMode, setWorkspaceMode, menuVisibility, setMenuVisibility, setMenuItemVisibility }}>
       {children}
     </AuthContext.Provider>
   );
