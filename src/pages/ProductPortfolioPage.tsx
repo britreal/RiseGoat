@@ -5,9 +5,9 @@ import { supabase } from '@/lib/supabase';
 import { uploadUserImage } from '@/lib/storage';
 import type { Product, ProductAlert, ProductCurrency, ProductLanguage, ProductMetric, ProductPlatform, ProductSale, ProductStatus, ProductType } from '@/types';
 import {
-  AlertTriangle, ArrowLeft, ArrowRight, BarChart3, CalendarDays, Check, ChevronDown, CircleDollarSign,
-  Copy, Download, Eye, ImagePlus, Layers3, Link2, PackageOpen, Pause, Pencil, Plus, RefreshCw,
-  Search, ShoppingBag, Target, Trash2, TrendingUp, WandSparkles, X
+  AlertTriangle, ArrowLeft, ArrowRight, BarChart3, CalendarDays, ChevronDown,
+  Copy, Download, ImagePlus, Layers3, PackageOpen, Pause, Pencil, Plus, RefreshCw,
+  Search, Target, Trash2, TrendingUp, WandSparkles, X
 } from 'lucide-react';
 
 type Tab = 'dashboard' | 'produtos' | 'oportunidades' | 'alertas' | 'detalhe';
