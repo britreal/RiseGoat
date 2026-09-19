@@ -51,9 +51,9 @@ export function buildPdf(book:{title:string;author_name:string},chapters:{title:
   return download(bytes(pdf),safeName(book.title)+'.pdf','application/pdf');
 }
 
-export async function buildCoverPng(options:{title:string;subtitle:string;author:string;background:string;foreground:string}){
+export async function buildCoverPng(options:{title:string;subtitle:string;author:string;background:string;foreground:string;font:'serif'|'sans'|'mono';layout:'center'|'top'|'minimal'}){
   const canvas=document.createElement('canvas');canvas.width=1600;canvas.height=2560;const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Canvas indisponível');ctx.fillStyle=options.background;ctx.fillRect(0,0,1600,2560);ctx.fillStyle=options.foreground;ctx.textAlign='center';
   const wrap=(s:string,n:number)=>{const words=s.split(/\s+/),out:string[]=[];let line='';words.forEach(w=>{if((line+' '+w).trim().length>n){out.push(line.trim());line='';}line+=(line?' ':'')+w;});if(line)out.push(line.trim());return out;};
-  ctx.font='bold 92px Georgia';let y=920;wrap(options.title,28).forEach(t=>{ctx.fillText(t,800,y);y+=105;});ctx.font='44px Georgia';wrap(options.subtitle,48).forEach(t=>{ctx.fillText(t,800,y);y+=62;});ctx.font='38px Arial';ctx.fillText(options.author,800,2260);
+  const fontFamily=options.font==='sans'?'Arial':options.font==='mono'?'monospace':'Georgia';const startY=options.layout==='top'?520:options.layout==='minimal'?1040:920;ctx.font='bold 92px '+fontFamily;let y=startY;wrap(options.title,28).forEach(t=>{ctx.fillText(t,800,y);y+=105;});ctx.font='44px '+fontFamily;wrap(options.subtitle,48).forEach(t=>{ctx.fillText(t,800,y);y+=62;});ctx.font='38px Arial';ctx.fillText(options.author,800,2260);
   return new Promise<Blob>((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Falha ao gerar capa.')),'image/png'));
 }
