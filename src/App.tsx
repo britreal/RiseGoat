@@ -17,6 +17,7 @@ import { CommandCenterPage } from '@/pages/CommandCenterPage';
 import { GoatPage } from '@/pages/GoatPage';
 import { OffersPage, RevenuePage, PartnershipsPage, LaunchesPage, GoalsPage, RadarPage } from '@/pages/BusinessModulesPage';
 import { ActionFlowsPage } from '@/pages/ActionFlowsPage';
+import { ProductPortfolioPage } from '@/pages/ProductPortfolioPage';
 import { SalesBuilderPage } from '@/pages/SalesBuilderPage';
 import { PublicPage } from '@/pages/PublicPage';
 import { PublicMicroblogPage } from '@/pages/PublicMicroblogPage';
@@ -74,6 +75,7 @@ function AppContent() {
     sales: <SalesPagesPage navigate={navigate} />,
     'command-center': <CommandCenterPage />,
     offers: <OffersPage />,
+    'product-portfolio': <ProductPortfolioPage />,
     revenue: <RevenuePage />,
     partnerships: <PartnershipsPage />,
     launches: <LaunchesPage />,
