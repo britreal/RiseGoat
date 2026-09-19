@@ -18,6 +18,7 @@ import { GoatPage } from '@/pages/GoatPage';
 import { OffersPage, RevenuePage, PartnershipsPage, LaunchesPage, GoalsPage, RadarPage } from '@/pages/BusinessModulesPage';
 import { ActionFlowsPage } from '@/pages/ActionFlowsPage';
 import { ProductPortfolioPage } from '@/pages/ProductPortfolioPage';
+import { BookWriterPage } from '@/pages/BookWriterPage';
 import { SalesBuilderPage } from '@/pages/SalesBuilderPage';
 import { PublicPage } from '@/pages/PublicPage';
 import { PublicMicroblogPage } from '@/pages/PublicMicroblogPage';
@@ -43,7 +44,7 @@ function AppContent() {
   if (loading) return <Spinner />;
   if (!session) return <AuthPage />;
 
-  const businessOnly = new Set(['profile','links','microblog','newsletter','posts','leads','analytics','sales','offers','product-portfolio','revenue','command-center','partnerships','launches','radar','sales-editor']);
+  const businessOnly = new Set(['profile','links','microblog','newsletter','posts','drafts','leads','analytics','sales','offers','product-portfolio','book-writer','revenue','command-center','partnerships','launches','radar','sales-editor']);
   if (workspaceMode === 'pessoal' && businessOnly.has(route.name)) {
     navigate('/dashboard');
     return <Spinner />;
@@ -76,6 +77,7 @@ function AppContent() {
     'command-center': <CommandCenterPage />,
     offers: <OffersPage />,
     'product-portfolio': <ProductPortfolioPage />,
+    'book-writer': <BookWriterPage />,
     revenue: <RevenuePage />,
     partnerships: <PartnershipsPage />,
     launches: <LaunchesPage />,
