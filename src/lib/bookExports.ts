@@ -39,7 +39,7 @@ export function buildDocx(book:{title:string;subtitle:string;author_name:string}
   return download(zip([{name:'[Content_Types].xml',data:types},{name:'_rels/.rels',data:rels},{name:'word/document.xml',data:body}]),safeName(book.title)+'.docx','application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 }
 
-function pdfEscape(s:string){return s.replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');}
+function pdfEscape(s:string){return s.normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^\\x20-\\x7E]/g,'?').replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');}
 export function buildPdf(book:{title:string;author_name:string},chapters:{title:string;content:string}[]){
   const pages:string[][]=[];let page:string[]=[];let y=760;
   const line=(s:string)=>{const words=s.split(/\s+/);let cur='';for(const w of words){if((cur+' '+w).trim().length>92){page.push(y+'|'+cur.trim());y-=15;if(y<60){pages.push(page);page=[];y=760;}}cur+=(cur?' ':'')+w;}if(cur){page.push(y+'|'+cur);y-=15;if(y<60){pages.push(page);page=[];y=760;}}};
