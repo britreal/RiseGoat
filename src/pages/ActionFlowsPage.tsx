@@ -109,6 +109,7 @@ const MODULES = {
   'Páginas de Venda': '/sales',
   'Ofertas': '/offers',
   'Portfólio de Produtos': '/product-portfolio',
+  'Escritor de Livros/Ebooks': '/book-writer',
   'Receita': '/revenue',
   'Centro de Comando': '/command-center',
   'GOAT': '/goat',
@@ -163,6 +164,22 @@ const TEMPLATES: Template[] = [
       { label: 'Preparar aquisição', type: 'action' },
       { label: 'Captar interessados', type: 'module', module: 'Leads' },
       { label: 'Registrar primeiras vendas', type: 'module', module: 'Receita' },
+    ],
+  },
+  {
+    key: 'create-book-from-zero', name: 'Criar Livro do Zero', category: 'Negócios',
+    description: 'Conceito, estrutura, escrita, revisão, capa, metadados e exportação de um livro/ebook sem IA.',
+    objective: 'Escrever e preparar um livro para publicação e venda.',
+    goal: 'Livro pronto para exportar',
+    nodes: [
+      { label: 'Definir conceito e público', type: 'action' },
+      { label: 'Estruturar capítulos', type: 'task' },
+      { label: 'Escrever capítulo por capítulo', type: 'module', module: 'Escritor de Livros/Ebooks' },
+      { label: 'Revisar texto e capítulos', type: 'module', module: 'Escritor de Livros/Ebooks' },
+      { label: 'Criar capa', type: 'module', module: 'Escritor de Livros/Ebooks' },
+      { label: 'Completar metadados', type: 'module', module: 'Escritor de Livros/Ebooks' },
+      { label: 'Exportar e vincular produto', type: 'module', module: 'Portfólio de Produtos' },
+      { label: 'Publicar e medir resultado', type: 'module', module: 'Receita' },
     ],
   },
   {
@@ -535,6 +552,13 @@ const TEMPLATE_RESEARCH: Record<string, TemplateResearch> = {
     sources: [{ label: 'SBA — pesquisa e planejamento de negócio', url: 'https://www.sba.gov/counseling/plan-your-business/' }, { label: 'Atlassian — ciclo de vida de projetos', url: 'https://www.atlassian.com/work-management/project-management/phases/' }],
     realPlan: ['Pesquisar mercado e clientes', 'Definir problema e proposta', 'Planejar produto', 'Executar e testar', 'Preparar entrega', 'Lançar', 'Monitorar e revisar'],
     idealPlan: ['Validar demanda em pequena escala', 'Transformar etapas em tarefas verificáveis', 'Conectar oferta e página', 'Registrar feedback', 'Revisar pós-lançamento'],
+  },
+  'create-book-from-zero': {
+    sources: [
+      { label: 'Atlassian — ciclo de vida de projetos', url: 'https://www.atlassian.com/work-management/project-management/phases/' },
+    ],
+    realPlan: ['Definir escopo e resultado', 'Planejar estrutura', 'Executar a escrita', 'Revisar e concluir', 'Preparar entrega', 'Publicar', 'Revisar resultados'],
+    idealPlan: ['Criar conceito antes de escrever', 'Organizar capítulos no Escritor de Livros/Ebooks', 'Salvar versões antes de mudanças importantes', 'Validar metadados e capa antes de exportar', 'Vincular o ebook ao Portfólio de Produtos', 'Registrar vendas e iterar'],
   },
   'create-product-from-zero': {
     sources: [
