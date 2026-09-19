@@ -335,59 +335,36 @@ returns jsonb language sql stable set search_path=public
 as $$
 select jsonb_build_object(
   'products_total',(select count(*) from public.products where user_id=(select auth.uid())),
-  'by_status',coalesce((
-    select jsonb_agg(jsonb_build_object('label',status,'count',cnt) order by cnt desc)
-    from (select status,count(*)::integer cnt from public.products where user_id=(select auth.uid()) group by status) s
-  ),'[]'::jsonb),
-  'by_language',coalesce((
-    select jsonb_agg(jsonb_build_object('label',language,'count',cnt) order by cnt desc)
-    from (select language,count(*)::integer cnt from public.products where user_id=(select auth.uid()) group by language) s
-  ),'[]'::jsonb),
-  'by_platform',coalesce((
-    select jsonb_agg(jsonb_build_object('label',platform,'count',cnt) order by cnt desc)
-    from (select platform,count(*)::integer cnt from public.products where user_id=(select auth.uid()) group by platform) s
-  ),'[]'::jsonb),
-  'current_month_revenue',coalesce((
-    select jsonb_agg(jsonb_build_object('currency',currency,'value',value) order by currency)
-    from (
-      select currency,coalesce(sum(net_revenue),0)::numeric value
-      from public.product_sales
-      where user_id=(select auth.uid()) and date>=date_trunc('month',current_date)::date
-      group by currency
-    ) s
-  ),'[]'::jsonb),
-  'projected_annual',coalesce((
-    select jsonb_agg(jsonb_build_object('currency',currency,'value',value) order by currency)
-    from (
-      select p.currency,coalesce(sum(m.avg_daily_sales*30*p.price*12),0)::numeric value
-      from public.products p join public.product_metrics m on m.product_id=p.id
-      where p.user_id=(select auth.uid())
-      group by p.currency
-    ) s
-  ),'[]'::jsonb),
-  'top_revenue',coalesce((
-    select jsonb_agg(to_jsonb(t)) from (
-      select p.id,p.title,p.currency,m.total_net_revenue,m.total_sales,m.conversion_rate,m.score
-      from public.products p join public.product_metrics m on m.product_id=p.id
-      where p.user_id=(select auth.uid())
-      order by m.total_net_revenue desc limit 10
-    ) t
-  ),'[]'::jsonb),
-  'top_conversion',coalesce((
-    select jsonb_agg(to_jsonb(t)) from (
-      select p.id,p.title,p.currency,m.conversion_rate,m.total_sales,m.total_net_revenue,m.score
-      from public.products p join public.product_metrics m on m.product_id=p.id
-      where p.user_id=(select auth.uid())
-      order by m.conversion_rate desc,m.total_sales desc limit 10
-    ) t
-  ),'[]'::jsonb),
-  'active_alerts_count',(select count(*) from public.product_alerts where user_id=(select auth.uid()) and is_active),
+  'by_status',coalesce((select jsonb_agg(jsonb_build_object('label',status,'count',cnt) order by cnt desc) from (select status,count(*)::integer cnt from public.products where user_id=(select auth.uid()) group by status) s),'[]'::jsonb),
+  'by_language',coalesce((select jsonb_agg(jsonb_build_object('label',language,'count',cnt) order by cnt desc) from (select language,count(*)::integer cnt from public.products where user_id=(select auth.uid()) group by language) s),'[]'::jsonb),
+  'by_platform',coalesce((select jsonb_agg(jsonb_build_object('label',platform,'count',cnt) order by cnt desc) from (select platform,count(*)::integer cnt from public.products where user_id=(select auth.uid()) group by platform) s),'[]'::jsonb),
+  'current_month_revenue',coalesce((select jsonb_agg(jsonb_build_object('currency',currency,'value',value) order by currency) from (select currency,coalesce(sum(net_revenue),0)::numeric value from public.product_sales where user_id=(select auth.uid()) and date>=date_trunc('month',current_date)::date group by currency) s),'[]'::jsonb),
+  'projected_annual',coalesce((select jsonb_agg(jsonb_build_object('currency',currency,'value',value) order by currency) from (select p.currency,coalesce(sum(m.avg_daily_sales*30*p.price*12),0)::numeric value from public.products p join public.product_metrics m on m.product_id=p.id where p.user_id=(select auth.uid()) group by p.currency) s),'[]'::jsonb),
+  'top_revenue',coalesce((select jsonb_agg(to_jsonb(t)) from (select p.id,p.title,p.currency,m.total_net_revenue,m.total_sales,m.conversion_rate,m.score from public.products p join public.product_metrics m on m.product_id=p.id where p.user_id=(select auth.uid()) order by m.total_net_revenue desc limit 10) t),'[]'::jsonb),
+  'top_conversion',coalesce((select jsonb_agg(to_jsonb(t)) from (select p.id,p.title,p.currency,m.conversion_rate,m.total_sales,m.total_net_revenue,m.score from public.products p join public.product_metrics m on m.product_id=p.id where p.user_id=(select auth.uid()) order by m.conversion_rate desc,m.total_sales desc limit 10) t),'[]'::jsonb),
+  'active_alerts_count',
+    (select count(*) from public.product_alerts where user_id=(select auth.uid()) and is_active and alert_type<>'produto_morto')
+    + (select count(*) from public.products p left join public.product_metrics m on m.product_id=p.id where p.user_id=(select auth.uid()) and p.status='Vendendo' and (m.last_sale_date is null or current_date-m.last_sale_date>30)),
   'active_alerts',coalesce((
-    select jsonb_agg(to_jsonb(a)) from (
-      select a.id,a.product_id,a.alert_type,a.title,a.message,a.severity,a.updated_at
-      from public.product_alerts a
-      where a.user_id=(select auth.uid()) and a.is_active
-      order by case a.severity when 'critical' then 1 when 'warning' then 2 else 3 end,a.updated_at desc limit 20
+    select jsonb_agg(to_jsonb(a) order by a.priority, a.updated_at desc)
+    from (
+      select pa.id,pa.product_id,pa.alert_type,pa.title,pa.message,pa.severity,pa.updated_at,
+        case pa.severity when 'critical' then 1 when 'warning' then 2 else 3 end as priority
+      from public.product_alerts pa
+      where pa.user_id=(select auth.uid()) and pa.is_active and pa.alert_type<>'produto_morto'
+      union all
+      select p.id as id,p.id as product_id,'produto_morto'::text as alert_type,
+        'Produto sem vendas recentes'::text as title,
+        'O produto está marcado como Vendendo e está há mais de 30 dias sem venda.'::text as message,
+        'warning'::text as severity,
+        now() as updated_at,
+        2 as priority
+      from public.products p
+      left join public.product_metrics m on m.product_id=p.id
+      where p.user_id=(select auth.uid()) and p.status='Vendendo'
+        and (m.last_sale_date is null or current_date-m.last_sale_date>30)
+      order by priority, updated_at desc
+      limit 20
     ) a
   ),'[]'::jsonb)
 );
