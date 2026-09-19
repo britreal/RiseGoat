@@ -1,15 +1,41 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { PageHeader, Card } from '@/components/ui';
-import { Check, AlertTriangle, Mail, Loader2, ShieldCheck, Database, BookOpen, ArrowRight, Target, Sparkles, Network, BarChart3, Settings2, Layers3, CircleDollarSign, Handshake, CalendarDays, Radar as RadarIcon, UserRound, LockKeyhole, Server, Info, LogOut, ChevronRight } from 'lucide-react';
+import { Check, AlertTriangle, Mail, Loader2, ShieldCheck, Database, BookOpen, ArrowRight, Target, Sparkles, Network, BarChart3, Settings2, Layers3, CircleDollarSign, Handshake, CalendarDays, Radar as RadarIcon, UserRound, LockKeyhole, Server, Info, LogOut, ChevronRight, Eye, EyeOff, RotateCcw, Power } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { navItems } from '@/lib/navigation';
 
 export function SettingsPage() {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, menuVisibility, setMenuVisibility } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [pwError, setPwError] = useState<string | null>(null);
   const [pwSuccess, setPwSuccess] = useState(false);
+
+  const controllableItems = navItems.filter((item) => item.controllable !== false);
+  const controlGroups = ['Núcleo', 'Presença', 'Conteúdo', 'Captação', 'Medição', 'Monetização', 'Estratégia', 'Pessoal'] as const;
+
+  function isMenuVisible(path: string) {
+    return menuVisibility[path] !== false;
+  }
+
+  async function updateMenuVisibility(path: string, visible: boolean) {
+    await setMenuVisibility({ ...menuVisibility, [path]: visible });
+  }
+
+  async function toggleControlGroup(group: string, visible: boolean) {
+    const updates = controllableItems
+      .filter((item) => item.group === group)
+      .reduce<Record<string, boolean>>((acc, item) => {
+        acc[item.path] = visible;
+        return acc;
+      }, {});
+    await setMenuVisibility({ ...menuVisibility, ...updates });
+  }
+
+  function resetMenuVisibility() {
+    return setMenuVisibility({});
+  }
 
   const [smtpHost, setSmtpHost] = useState('');
   const [smtpPort, setSmtpPort] = useState('587');
@@ -110,18 +136,24 @@ export function SettingsPage() {
               <p className="px-3 pt-2 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Configuração</p>
               <div className="space-y-1">
                 {[
-                  { label: 'Sobre o sistema', icon: Info, tone: 'bg-slate-950 text-white' },
-                  { label: 'Conta', icon: UserRound, tone: 'bg-slate-100 text-slate-700' },
-                  { label: 'E-mail', icon: Mail, tone: 'bg-cyan-50 text-cyan-700' },
-                  { label: 'Segurança', icon: LockKeyhole, tone: 'bg-slate-100 text-slate-700' },
+                  { label: 'Sobre o sistema', id: 'settings-system', icon: Info, tone: 'bg-slate-950 text-white' },
+                  { label: 'Controle', id: 'settings-control', icon: Power, tone: 'bg-amber-50 text-amber-700' },
+                  { label: 'Conta', id: 'settings-account', icon: UserRound, tone: 'bg-slate-100 text-slate-700' },
+                  { label: 'E-mail', id: 'settings-email', icon: Mail, tone: 'bg-cyan-50 text-cyan-700' },
+                  { label: 'Segurança', id: 'settings-security', icon: LockKeyhole, tone: 'bg-slate-100 text-slate-700' },
                 ].map(item => {
                   const Icon = item.icon;
                   return (
-                    <div key={item.label} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600">
+                    <button
+                      key={item.label}
+                      type="button"
+                      onClick={() => document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition text-left"
+                    >
                       <span className={`w-8 h-8 rounded-lg flex items-center justify-center ${item.tone}`}><Icon className="w-4 h-4" /></span>
                       <span className="flex-1">{item.label}</span>
                       <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -394,6 +426,109 @@ export function SettingsPage() {
         </div>
         </Card>
 
+        <div id="settings-control" className="scroll-mt-20">
+          <Card className="p-6">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+                    <Power className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.16em] font-bold text-slate-400">Visibilidade da navegação</p>
+                    <h2 className="text-lg font-black tracking-tight text-slate-950 mt-0.5">Controle</h2>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-500 mt-3 max-w-2xl leading-5">
+                  Ative ou desative o que aparece no menu lateral. A preferência é salva na sua conta e respeita o espaço
+                  Pessoal ou Negócios. Os módulos continuam existindo; aqui você controla somente a visibilidade.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void resetMenuVisibility()}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              >
+                <RotateCcw className="w-3.5 h-3.5" /> Restaurar padrão
+              </button>
+            </div>
+
+            <div className="mt-6 space-y-7">
+              {controlGroups.map((group) => {
+                const groupItems = controllableItems.filter((item) => item.group === group);
+                if (groupItems.length === 0) return null;
+                const enabledCount = groupItems.filter((item) => isMenuVisible(item.path)).length;
+                const allEnabled = enabledCount === groupItems.length;
+                const currentModeLabel = group === 'Pessoal' ? 'Pessoal' : group === 'Núcleo' ? 'Pessoal + Negócios' : 'Negócios';
+
+                return (
+                  <div key={group} className="rounded-2xl border border-slate-200 bg-slate-50/70 overflow-hidden">
+                    <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-slate-200 bg-white">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-bold text-slate-900">{group}</h3>
+                          <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-500">{currentModeLabel}</span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 mt-0.5">{enabledCount} de {groupItems.length} visíveis</p>
+                      </div>
+                      <button
+                        type="button"
+                        aria-label={allEnabled ? `Desativar todos de ${group}` : `Ativar todos de ${group}`}
+                        aria-pressed={allEnabled}
+                        onClick={() => void toggleControlGroup(group, !allEnabled)}
+                        className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition ${
+                          allEnabled
+                            ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
+                            : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                        }`}
+                      >
+                        <Power className="w-3.5 h-3.5" />
+                        {allEnabled ? 'Todos ativos' : 'Ativar todos'}
+                      </button>
+                    </div>
+
+                    <div className="divide-y divide-slate-200">
+                      {groupItems.map((item) => {
+                        const visible = isMenuVisible(item.path);
+                        const Icon = item.icon;
+                        return (
+                          <div key={item.path} className="flex items-center gap-3 px-4 py-3 bg-white/80">
+                            <span className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                              visible ? 'bg-slate-100 text-slate-700' : 'bg-slate-50 text-slate-300'
+                            }`}>
+                              <Icon className="w-4 h-4" />
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <p className={`text-sm font-semibold ${visible ? 'text-slate-800' : 'text-slate-400'}`}>{item.label}</p>
+                              <p className="text-[10px] text-slate-400">{item.path}</p>
+                            </div>
+                            <button
+                              type="button"
+                              aria-label={visible ? `Ocultar ${item.label}` : `Mostrar ${item.label}`}
+                              aria-pressed={visible}
+                              onClick={() => void updateMenuVisibility(item.path, !visible)}
+                              className={`shrink-0 w-11 h-7 rounded-full p-1 transition ${visible ? 'bg-slate-950' : 'bg-slate-300'}`}
+                            >
+                              <span className={`block w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${visible ? 'translate-x-4' : 'translate-x-0'}`}>
+                                {visible ? <Eye className="w-3 h-3 text-slate-500 mx-auto mt-1" /> : <EyeOff className="w-3 h-3 text-slate-300 mx-auto mt-1" />}
+                              </span>
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-5 rounded-xl border border-amber-100 bg-amber-50/60 p-3">
+              <p className="text-[11px] text-amber-800 leading-5">
+                <strong>Configurações permanece visível</strong> para que você nunca perca o acesso a este painel de controle.
+              </p>
+            </div>
+          </Card>
+        </div>
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-1"><Database className="w-4 h-4 text-cyan-500" /><h2 className="text-sm font-semibold text-slate-800">Supabase</h2></div>
           <p className="text-xs text-slate-500 mb-4">Banco de dados e autenticação do RiseGoat.</p>
@@ -411,7 +546,7 @@ export function SettingsPage() {
           </div>
         </Card>
 
-        <div className="pt-1">
+        <div id="settings-account" className="pt-1 scroll-mt-20">
           <div className="flex items-center gap-2 mb-3 px-1">
             <UserRound className="w-4 h-4 text-slate-500" />
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Conta e identidade</p>
@@ -425,7 +560,7 @@ export function SettingsPage() {
           </Card>
         </div>
 
-        <div className="pt-1">
+        <div id="settings-email" className="pt-1 scroll-mt-20">
           <div className="flex items-center gap-2 mb-3 px-1">
             <Mail className="w-4 h-4 text-cyan-600" />
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Integrações</p>
@@ -454,7 +589,7 @@ export function SettingsPage() {
           </Card>
         </div>
 
-        <div className="pt-1">
+        <div id="settings-security" className="pt-1 scroll-mt-20">
           <div className="flex items-center gap-2 mb-3 px-1">
             <LockKeyhole className="w-4 h-4 text-slate-500" />
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Segurança</p>
