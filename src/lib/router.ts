@@ -16,6 +16,7 @@ export type Route =
   | { name: 'sales' }
   | { name: 'offers' }
   | { name: 'product-portfolio' }
+  | { name: 'book-writer' }
   | { name: 'revenue' }
   | { name: 'command-center' }
   | { name: 'partnerships' }
@@ -70,6 +71,7 @@ function parseHash(): Route {
   if (parts[0] === 'sales') return { name: 'sales' };
   if (parts[0] === 'offers') return { name: 'offers' };
   if (parts[0] === 'product-portfolio') return { name: 'product-portfolio' };
+  if (parts[0] === 'book-writer') return { name: 'book-writer' };
   if (parts[0] === 'revenue') return { name: 'revenue' };
   if (parts[0] === 'partnerships') return { name: 'partnerships' };
   if (parts[0] === 'launches') return { name: 'launches' };
