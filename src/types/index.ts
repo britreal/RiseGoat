@@ -1,4 +1,30 @@
 export type WorkspaceMode = 'pessoal' | 'negocios';
+export type ProductType = 'PDF' | 'E-book' | 'Audiobook' | 'Curso' | 'Template' | 'Planilha' | 'Software';
+export type ProductLanguage = 'PT' | 'EN' | 'ES' | 'FR' | 'DE' | 'IT' | 'JP' | 'ZH';
+export type ProductPlatform = 'Amazon KDP' | 'Gumroad' | 'Hotmart' | 'Kiwify' | 'Etsy' | 'Payhip' | 'Creative Market' | 'Apple Books' | 'Google Play';
+export type ProductCurrency = 'BRL' | 'USD' | 'EUR' | 'GBP';
+export type ProductStatus = 'Ideia' | 'Em produção' | 'Publicado' | 'Vendendo' | 'Pausado' | 'Descontinuado';
+
+export interface Product {
+  id:string; user_id:string; title:string; slug:string; description:string; type:ProductType; language:ProductLanguage;
+  platform:ProductPlatform; price:number; currency:ProductCurrency; cost:number; total_views:number; margin:number;
+  status:ProductStatus; url:string; cover_image:string; tags:string[]; content_base_id:string|null; parent_id:string|null;
+  created_at:string; published_at:string|null;
+}
+export interface ProductSale {
+  id:string; user_id:string; product_id:string; date:string; quantity:number; revenue:number; platform_fee:number;
+  net_revenue:number; currency:ProductCurrency; customer_country:string; created_at:string;
+}
+export interface ProductMetric {
+  product_id:string; user_id:string; total_views:number; total_sales:number; total_revenue:number;
+  total_net_revenue:number; conversion_rate:number; avg_daily_sales:number; last_sale_date:string|null;
+  days_without_sale:number; roi:number; score:number; updated_at:string;
+}
+export type ProductAlertType = 'produto_morto' | 'produto_campeao' | 'roi_negativo' | 'sem_traducao' | 'sem_capa' | 'preco_fora_faixa';
+export interface ProductAlert {
+  id:string; user_id:string; product_id:string; alert_type:ProductAlertType; title:string; message:string;
+  severity:'info'|'warning'|'critical'; is_active:boolean; created_at:string; updated_at:string;
+}
 export type MenuVisibility = Record<string, boolean>;
 export interface Profile {
   id: string; username: string; display_name: string; bio: string; avatar_url: string; cover_url: string;
@@ -73,13 +99,13 @@ export interface NodeMonetization {
 }
 
 export interface Offer {
-  id:string; user_id:string; sales_page_id:string|null; name:string; type:string; status:string;
+  id:string; user_id:string; sales_page_id:string|null; product_id:string|null; name:string; type:string; status:string;
   price:number; margin:number; commission:number; channel:string; revenue_generated:number;
   needs_audience:string; created_at:string; updated_at:string;
 }
 export interface Revenue {
   id:string; user_id:string; offer_id:string|null; partnership_id:string|null; lead_id:string|null;
-  launch_id:string|null; source:string; value:number; occurred_on:string; customer:string; status:string;
+  launch_id:string|null; product_sale_id:string|null; currency:ProductCurrency|null; source:string; value:number; occurred_on:string; customer:string; status:string;
   created_at:string; updated_at:string;
 }
 export interface Partnership {
