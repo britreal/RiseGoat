@@ -250,7 +250,7 @@ export function SettingsPage() {
                 },
                 {
                   name: 'Negócios',
-                  items: 'Perfil, Links, Microblog, Newsletter, Leads, Analytics, Posts, Rascunhos, Páginas de Venda, Ofertas, Receita, Centro de Comando, Parcerias, Lançamentos e Radar',
+                  items: 'Perfil, Links, Microblog, Newsletter, Leads, Analytics, Posts, Rascunhos, Páginas de Venda, Ofertas, Portfólio de Produtos, Receita, Centro de Comando, Parcerias, Lançamentos e Radar',
                   text: 'Opera a presença pública, aquisição, conteúdo, monetização e camada estratégica.'
                 },
                 {
@@ -299,7 +299,7 @@ export function SettingsPage() {
                 },
                 {
                   title: 'Monetização',
-                  text: 'Foram adicionados Ofertas, Receita, Parcerias, Lançamentos e Metas/resultado-chave, além das relações entre receita, ofertas e lançamentos.',
+                  text: 'Foram adicionados Ofertas, Receita, Portfólio de Produtos, Parcerias, Lançamentos e Metas/resultado-chave, além das relações entre receita, ofertas e lançamentos.',
                 },
                 {
                   title: 'Páginas de Venda',
