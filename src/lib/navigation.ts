@@ -1,0 +1,63 @@
+import type { LucideIcon } from 'lucide-react';
+import {
+  Activity,
+  BarChart3,
+  CalendarDays,
+  CircleDollarSign,
+  FileText,
+  Handshake,
+  LayoutDashboard,
+  Link2,
+  Mail,
+  MessageSquare,
+  Network,
+  PackageOpen,
+  Radar as RadarIcon,
+  Settings,
+  ShoppingBag,
+  Target,
+  Users,
+  Workflow,
+} from 'lucide-react';
+
+export type NavMode = 'shared' | 'pessoal' | 'negocios';
+
+export interface NavItem {
+  label: string;
+  path: string;
+  icon: LucideIcon;
+  group: string;
+  mode: NavMode;
+  controllable?: boolean;
+}
+
+export const navItems: NavItem[] = [
+  { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, group: 'Núcleo', mode: 'shared' },
+  { label: 'Fluxos de Ação', path: '/action-flows', icon: Workflow, group: 'Núcleo', mode: 'shared' },
+  { label: 'Metas', path: '/goals', icon: Target, group: 'Núcleo', mode: 'shared' },
+
+  { label: 'Perfil', path: '/profile', icon: Users, group: 'Presença', mode: 'negocios' },
+  { label: 'Links', path: '/links', icon: Link2, group: 'Presença', mode: 'negocios' },
+
+  { label: 'Posts', path: '/posts', icon: FileText, group: 'Conteúdo', mode: 'negocios' },
+  { label: 'Microblog', path: '/microblog', icon: MessageSquare, group: 'Conteúdo', mode: 'negocios' },
+
+  { label: 'Newsletter', path: '/newsletter', icon: Mail, group: 'Captação', mode: 'negocios' },
+  { label: 'Leads', path: '/leads', icon: Users, group: 'Captação', mode: 'negocios' },
+
+  { label: 'Analytics', path: '/analytics', icon: BarChart3, group: 'Medição', mode: 'negocios' },
+
+  { label: 'Ofertas', path: '/offers', icon: ShoppingBag, group: 'Monetização', mode: 'negocios' },
+  { label: 'Páginas de Venda', path: '/sales', icon: ShoppingBag, group: 'Monetização', mode: 'negocios' },
+  { label: 'Portfólio de Produtos', path: '/product-portfolio', icon: PackageOpen, group: 'Monetização', mode: 'negocios' },
+  { label: 'Receita', path: '/revenue', icon: CircleDollarSign, group: 'Monetização', mode: 'negocios' },
+
+  { label: 'Centro de Comando', path: '/command-center', icon: Network, group: 'Estratégia', mode: 'negocios' },
+  { label: 'Parcerias', path: '/partnerships', icon: Handshake, group: 'Estratégia', mode: 'negocios' },
+  { label: 'Lançamentos', path: '/launches', icon: CalendarDays, group: 'Estratégia', mode: 'negocios' },
+  { label: 'Radar', path: '/radar', icon: RadarIcon, group: 'Estratégia', mode: 'negocios' },
+
+  { label: 'GOAT', path: '/goat', icon: Activity, group: 'Pessoal', mode: 'pessoal' },
+
+  { label: 'Configurações', path: '/settings', icon: Settings, group: 'Conta', mode: 'shared', controllable: false },
+];
