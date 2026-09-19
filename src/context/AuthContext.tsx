@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import type { Profile, WorkspaceMode } from '@/types';
+import type { MenuVisibility, Profile, WorkspaceMode } from '@/types';
 
 interface AuthContextValue {
   session: Session | null;
@@ -14,6 +14,8 @@ interface AuthContextValue {
   refreshProfile: () => Promise<void>;
   workspaceMode: WorkspaceMode;
   setWorkspaceMode: (mode: WorkspaceMode) => Promise<boolean>;
+  menuVisibility: MenuVisibility;
+  setMenuItemVisibility: (path: string, visible: boolean) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -24,6 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [workspaceMode, setWorkspaceModeState] = useState<WorkspaceMode>(() => (localStorage.getItem('risegoat-workspace-mode') as WorkspaceMode) || 'negocios');
+  const [menuVisibility, setMenuVisibilityState] = useState<MenuVisibility>({});
 
   async function loadProfile(userId: string) {
     try {
@@ -43,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // The Profile page can render a recovery state and the user can continue using the app.
       const nextProfile = data as Profile | null;
       setProfile(nextProfile);
+      setMenuVisibilityState((nextProfile?.menu_visibility as MenuVisibility | null) ?? {});
       const mode = nextProfile?.workspace_mode === 'pessoal' ? 'pessoal' : 'negocios';
       setWorkspaceModeState(mode);
       localStorage.setItem('risegoat-workspace-mode', mode);
@@ -105,6 +109,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return true;
   }
 
+  async function setMenuItemVisibility(path: string, visible: boolean) {
+    if (!user) return false;
+    const previous = menuVisibility;
+    const next = { ...previous, [path]: visible };
+    setMenuVisibilityState(next);
+    const { error } = await supabase.from('profiles').update({ menu_visibility: next }).eq('id', user.id);
+    if (error) {
+      setMenuVisibilityState(previous);
+      return false;
+    }
+    setProfile((current) => current ? { ...current, menu_visibility: next } : current);
+    return true;
+  }
+
   async function signIn(email: string, password: string) {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error: error?.message ?? null };
@@ -126,12 +144,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signOut() {
     await supabase.auth.signOut();
     setProfile(null);
+    setMenuVisibilityState({});
     setWorkspaceModeState('negocios');
     localStorage.removeItem('risegoat-workspace-mode');
   }
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, loading, signIn, signUp, signOut, refreshProfile, workspaceMode, setWorkspaceMode }}>
+    <AuthContext.Provider value={{ session, user, profile, loading, signIn, signUp, signOut, refreshProfile, workspaceMode, setWorkspaceMode, menuVisibility, setMenuItemVisibility }}>
       {children}
     </AuthContext.Provider>
   );
