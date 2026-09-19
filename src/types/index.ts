@@ -26,6 +26,27 @@ export interface ProductAlert {
   severity:'info'|'warning'|'critical'; is_active:boolean; created_at:string; updated_at:string;
 }
 export type MenuVisibility = Record<string, boolean>;
+export type BookGenre = 'Ficção' | 'Não-ficção' | 'Autoajuda' | 'Negócios' | 'Filosofia' | 'Poesia';
+export type BookStatus = 'Conceito' | 'Estrutura' | 'Escrita' | 'Revisão' | 'Capa' | 'Metadados' | 'Pronto';
+export type BookChapterStatus = 'Rascunho' | 'Revisão' | 'Finalizado';
+export type BookRights = 'Todos os direitos reservados' | 'Creative Commons' | 'Domínio público';
+export type BookExportFormat = 'EPUB' | 'PDF' | 'DOCX' | 'MOBI' | 'PNG';
+
+export interface Book {
+  id:string; user_id:string; product_id:string|null; title:string; subtitle:string; genre:BookGenre; target_audience:string;
+  promise:string; tone:string; estimated_words:number; language:ProductLanguage; platform:ProductPlatform; status:BookStatus;
+  current_step:number; cover_image:string; description:string; keywords:string[]; categories:string[]; isbn:string; price:number;
+  rights:BookRights; introduction:string; conclusion:string; about_author:string; daily_word_goal:number; author_name:string;
+  review_checklist:{grammar:boolean;cohesion:boolean;clarity:boolean}; created_at:string; updated_at:string;
+}
+export interface BookChapter {
+  id:string; book_id:string; title:string; summary:string; content:string; word_count:number; page_start:number; page_end:number;
+  status:BookChapterStatus; order:number; created_at:string; updated_at:string;
+}
+export interface BookVersion { id:string; book_id:string; chapter_id:string; content:string; created_at:string; }
+export interface BookExport { id:string; book_id:string; format:BookExportFormat; file_url:string; created_at:string; }
+export interface BookComment { id:string; book_id:string; chapter_id:string; paragraph_index:number; comment:string; resolved:boolean; created_at:string; updated_at:string; }
+export interface BookDailyProgress { book_id:string; user_id:string; progress_date:string; start_word_count:number; current_word_count:number; updated_at:string; }
 export interface Profile {
   id: string; username: string; display_name: string; bio: string; avatar_url: string; cover_url: string;
   theme_color: string; theme_font: string; accent_color: string; link_style: string; seo_title: string; seo_description: string; seo_image_url: string; workspace_mode: WorkspaceMode; menu_visibility: MenuVisibility; target_audience: string; business_type: string; created_at: string;
