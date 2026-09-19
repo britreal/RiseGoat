@@ -108,6 +108,7 @@ const MODULES = {
   'Rascunhos': '/drafts',
   'Páginas de Venda': '/sales',
   'Ofertas': '/offers',
+  'Portfólio de Produtos': '/product-portfolio',
   'Receita': '/revenue',
   'Centro de Comando': '/command-center',
   'GOAT': '/goat',
@@ -162,6 +163,23 @@ const TEMPLATES: Template[] = [
       { label: 'Preparar aquisição', type: 'action' },
       { label: 'Captar interessados', type: 'module', module: 'Leads' },
       { label: 'Registrar primeiras vendas', type: 'module', module: 'Receita' },
+    ],
+  },
+  {
+    key: 'create-product-from-zero', name: 'Criar Produto do Zero', category: 'Negócios',
+    description: 'Da pesquisa e estruturação à publicação, primeiras vendas e iteração do produto.',
+    objective: 'Criar e colocar um produto digital em operação.',
+    goal: 'Produto publicado e validado',
+    nodes: [
+      { label: 'Definir problema e público', type: 'action' },
+      { label: 'Pesquisar mercado e concorrentes', type: 'action' },
+      { label: 'Definir formato e idioma', type: 'decision' },
+      { label: 'Estruturar conteúdo e oferta', type: 'task' },
+      { label: 'Cadastrar no Portfólio de Produtos', type: 'module', module: 'Portfólio de Produtos' },
+      { label: 'Preparar capa e página', type: 'module', module: 'Páginas de Venda' },
+      { label: 'Publicar na plataforma', type: 'task', module: 'Portfólio de Produtos' },
+      { label: 'Medir views, vendas e conversão', type: 'module', module: 'Analytics' },
+      { label: 'Registrar receita e revisar', type: 'module', module: 'Receita' },
     ],
   },
   {
@@ -517,6 +535,14 @@ const TEMPLATE_RESEARCH: Record<string, TemplateResearch> = {
     sources: [{ label: 'SBA — pesquisa e planejamento de negócio', url: 'https://www.sba.gov/counseling/plan-your-business/' }, { label: 'Atlassian — ciclo de vida de projetos', url: 'https://www.atlassian.com/work-management/project-management/phases/' }],
     realPlan: ['Pesquisar mercado e clientes', 'Definir problema e proposta', 'Planejar produto', 'Executar e testar', 'Preparar entrega', 'Lançar', 'Monitorar e revisar'],
     idealPlan: ['Validar demanda em pequena escala', 'Transformar etapas em tarefas verificáveis', 'Conectar oferta e página', 'Registrar feedback', 'Revisar pós-lançamento'],
+  },
+  'create-product-from-zero': {
+    sources: [
+      { label: 'SBA — pesquisa e planejamento de negócio', url: 'https://www.sba.gov/counseling/plan-your-business/' },
+      { label: 'Atlassian — ciclo de vida de projetos', url: 'https://www.atlassian.com/work-management/project-management/phases/' },
+    ],
+    realPlan: ['Pesquisar mercado e público', 'Definir problema e proposta', 'Planejar o produto', 'Construir e testar', 'Preparar entrega e publicação', 'Publicar', 'Monitorar resultados e revisar'],
+    idealPlan: ['Cadastrar o produto no Portfólio de Produtos desde o início', 'Registrar custo, preço, moeda e margem', 'Preparar capa e página de venda', 'Medir views, vendas e conversão', 'Conectar vendas à Receita', 'Usar alertas para decidir tradução, variação ou pausa'],
   },
   'clothing-brand': {
     sources: [{ label: 'SBA — planejamento', url: 'https://www.sba.gov/counseling/plan-your-business/' }, { label: 'Shopify — primeiros passos', url: 'https://help.shopify.com/pt-BR/manual/intro-to-shopify/initial-setup/setup-getting-started' }],
