@@ -43,7 +43,7 @@ function AppContent() {
   if (loading) return <Spinner />;
   if (!session) return <AuthPage />;
 
-  const businessOnly = new Set(['profile','links','microblog','newsletter','posts','leads','analytics','sales','offers','revenue','command-center','partnerships','launches','radar','sales-editor']);
+  const businessOnly = new Set(['profile','links','microblog','newsletter','posts','leads','analytics','sales','offers','product-portfolio','revenue','command-center','partnerships','launches','radar','sales-editor']);
   if (workspaceMode === 'pessoal' && businessOnly.has(route.name)) {
     navigate('/dashboard');
     return <Spinner />;
