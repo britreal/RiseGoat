@@ -1,42 +1,15 @@
 import { type ReactNode, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import {
-  Sparkles, LayoutDashboard, Link2, MessageSquare, Mail, FileText, Users,
-  BarChart3, Settings, LogOut, ExternalLink, Menu, X, ShoppingBag, Network, Activity,
-  CircleDollarSign, Handshake, CalendarDays, Radar as RadarIcon, Target, Workflow, UserRound, BriefcaseBusiness,
-} from 'lucide-react';
+import { Sparkles, ExternalLink, LogOut, Menu, X, UserRound, BriefcaseBusiness, Settings } from 'lucide-react';
 
-interface NavItem { label: string; path: string; icon: typeof LayoutDashboard; group: string; mode: 'shared' | 'pessoal' | 'negocios'; }
-
-const navItems: NavItem[] = [
-  { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, group: 'Núcleo', mode: 'shared' },
-  { label: 'Fluxos de Ação', path: '/action-flows', icon: Workflow, group: 'Núcleo', mode: 'shared' },
-  { label: 'Metas', path: '/goals', icon: Target, group: 'Núcleo', mode: 'shared' },
-  { label: 'Perfil', path: '/profile', icon: Users, group: 'Presença', mode: 'negocios' },
-  { label: 'Links', path: '/links', icon: Link2, group: 'Presença', mode: 'negocios' },
-  { label: 'Posts', path: '/posts', icon: FileText, group: 'Conteúdo', mode: 'negocios' },
-  { label: 'Microblog', path: '/microblog', icon: MessageSquare, group: 'Conteúdo', mode: 'negocios' },
-  { label: 'Newsletter', path: '/newsletter', icon: Mail, group: 'Captação', mode: 'negocios' },
-  { label: 'Leads', path: '/leads', icon: Users, group: 'Captação', mode: 'negocios' },
-  { label: 'Analytics', path: '/analytics', icon: BarChart3, group: 'Medição', mode: 'negocios' },
-  { label: 'Ofertas', path: '/offers', icon: ShoppingBag, group: 'Monetização', mode: 'negocios' },
-  { label: 'Páginas de Venda', path: '/sales', icon: ShoppingBag, group: 'Monetização', mode: 'negocios' },
-  { label: 'Receita', path: '/revenue', icon: CircleDollarSign, group: 'Monetização', mode: 'negocios' },
-  { label: 'Centro de Comando', path: '/command-center', icon: Network, group: 'Estratégia', mode: 'negocios' },
-  { label: 'Parcerias', path: '/partnerships', icon: Handshake, group: 'Estratégia', mode: 'negocios' },
-  { label: 'Lançamentos', path: '/launches', icon: CalendarDays, group: 'Estratégia', mode: 'negocios' },
-  { label: 'Radar', path: '/radar', icon: RadarIcon, group: 'Estratégia', mode: 'negocios' },
-  { label: 'GOAT', path: '/goat', icon: Activity, group: 'Pessoal', mode: 'pessoal' },
-  { label: 'Configurações', path: '/settings', icon: Settings, group: 'Conta', mode: 'shared' },
-];
-
+import { navItems } from '@/lib/navigation';
 interface DashboardLayoutProps { children: ReactNode; currentPath: string; navigate: (path: string) => void; }
 
 export function DashboardLayout({ children, currentPath, navigate }: DashboardLayoutProps) {
   const { profile, signOut, workspaceMode, setWorkspaceMode } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const visibleNavItems = navItems.filter((item) => item.mode === 'shared' || item.mode === workspaceMode);
+  const visibleNavItems = navItems.filter((item) => (item.mode === 'shared' || item.mode === workspaceMode) && profile?.menu_visibility?.[item.path] !== false);
   const groups = [...new Set(visibleNavItems.map((n) => n.group))];
   const groupTone: Record<string, string> = {
     'Presença': 'text-blue-700 bg-blue-50',
