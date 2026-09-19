@@ -1,1 +1,0 @@
-CI verification branch for the current main snapshot. This file can be removed after verification.
