@@ -10,8 +10,8 @@ import type {
 } from '@/types';
 import {
   BookOpen, Check, ChevronDown, ChevronLeft, ChevronRight, Clock3, Download, FileText, ImagePlus,
-  Library, MessageSquare, PackageOpen, Pause, Pencil, Plus, RotateCcw, Save, Search, Sparkles,
-  Volume2, WandSparkles, X
+  Library, MessageSquare, PackageOpen, Plus, Save, Search, Sparkles,
+  Volume2, X
 } from 'lucide-react';
 
 type View = 'dashboard' | 'wizard' | 'editor' | 'review' | 'cover' | 'metadata' | 'exports';
@@ -130,13 +130,6 @@ export function BookWriterPage(){
     autosaveRef.current=window.setInterval(()=>{void autosaveChapter();},30000);
     return()=>{if(autosaveRef.current)window.clearInterval(autosaveRef.current);};
   },[view,book?.id,selectedChapter?.id]);
-
-  useEffect(()=>{
-    if(!book||!selectedChapter||view!=='editor')return;
-    const onKey=()=>{ if((window.event as KeyboardEvent|undefined)?.ctrlKey){} };
-    window.addEventListener('beforeunload',onKey);
-    return()=>window.removeEventListener('beforeunload',onKey);
-  },[book?.id,selectedChapter?.id,view]);
 
   async function saveBook(patch:Partial<Book>,showNotice=false){
     if(!user||!book)return false;
@@ -279,6 +272,21 @@ export function BookWriterPage(){
     const ok=await saveBook({product_id:data.id},true);if(ok)setNotice('Livro vinculado ao Portfólio de Produtos.');
   }
 
+  async function exportCoverPng(){
+    if(!book||!user)return;
+    try{
+      const blob=await buildCoverPng({title:book.title||'Título',subtitle:book.subtitle,author:book.author_name||profile?.display_name||'Autor',background:coverBackground,foreground:coverForeground});
+      const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=slug(book.title)+'.png';a.click();URL.revokeObjectURL(url);
+      const path=user.id+'/book-exports/'+slug(book.title)+'-'+Date.now()+'.png';
+      const up=await supabase.storage.from('risegoat-media').upload(path,blob,{upsert:false,contentType:'image/png'});
+      if(up.error)throw up.error;
+      const publicUrl=supabase.storage.from('risegoat-media').getPublicUrl(path).data.publicUrl;
+      const {data:row,error:e}=await supabase.from('book_exports').insert({book_id:book.id,format:'PNG',file_url:publicUrl}).select().single();
+      if(e)throw e;
+      setExports(prev=>[row as BookExport,...prev]);setNotice('Capa PNG exportada.');setView('exports');
+    }catch(e){setError(e instanceof Error?e.message:'Falha ao exportar PNG.');}
+  }
+
   function exportBook(format:BookExportFormat){
     if(!book)return;
     const data=chapters.filter(c=>c.content.trim()).map(c=>({title:c.title,content:c.content}));
@@ -341,7 +349,7 @@ export function BookWriterPage(){
 
       {view==='metadata'&&<div className="grid xl:grid-cols-[1fr_360px] gap-5"><Card className="p-6"><div className="grid md:grid-cols-2 gap-4"><TextArea label="Descrição / Blurb *" value={book.description} onChange={v=>updateBookField('description',v)} rows={7}/><div className="space-y-4"><Input label="ISBN" value={book.isbn} onChange={v=>updateBookField('isbn',v)}/><Input label="Preço *" value={book.price} onChange={v=>updateBookField('price',Math.max(0,Number(v)||0))} type="number"/><Select label="Direitos" value={book.rights} onChange={v=>updateBookField('rights',v as BookRights)} options={RIGHTS}/></div></div><div className="grid md:grid-cols-2 gap-4 mt-4"><TextArea label="Palavras-chave (7 para Amazon)" value={book.keywords.join(', ')} onChange={v=>updateBookField('keywords',v.split(',').map(x=>x.trim()).filter(Boolean).slice(0,7))} placeholder="palavra 1, palavra 2..."/><TextArea label="Categorias (até 3)" value={book.categories.join(', ')} onChange={v=>updateBookField('categories',v.split(',').map(x=>x.trim()).filter(Boolean).slice(0,3))}/></div><div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50/50 p-4 text-xs text-blue-900"><p className="font-black">Validação de metadados</p><p className="mt-1">{book.keywords.length}/7 palavras-chave · {book.categories.length}/3 categorias · {book.cover_image?'capa OK':'capa pendente'} · {book.price>=0?'preço OK':'preço pendente'}</p></div><div className="mt-5 flex flex-wrap gap-2"><button onClick={()=>void saveBook({description:book.description,keywords:book.keywords,categories:book.categories,isbn:book.isbn,price:book.price,rights:book.rights,cover_image:book.cover_image},true)} className="px-4 py-2.5 rounded-xl bg-blue-700 text-white text-xs font-bold"><Save className="inline w-4 h-4 mr-1"/>Salvar metadados</button><button onClick={()=>void linkProduct()} className="px-4 py-2.5 rounded-xl border text-xs font-bold"><PackageOpen className="inline w-4 h-4 mr-1"/>Vincular Portfólio</button></div></Card><Card className="p-5 h-fit"><p className="text-[10px] uppercase tracking-[.16em] font-bold text-slate-400">Preview comercial</p><div className="mt-3 rounded-2xl bg-slate-950 text-white p-5"><p className="text-xs text-blue-300">{book.genre}</p><h3 className="text-lg font-black mt-2">{book.title||'Título'}</h3><p className="text-xs text-slate-300 mt-2">{book.description||'Descrição do livro.'}</p><p className="mt-4 font-black">{book.price.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</p></div></Card></div>}
 
-      {view==='exports'&&<div className="space-y-5"><Card className="p-6"><div className="flex items-start justify-between"><div><p className="text-[10px] uppercase tracking-[.16em] font-bold text-blue-600">Exportação</p><h2 className="text-xl font-black mt-1">Arquivos do livro</h2><p className="text-xs text-slate-400 mt-1">EPUB, PDF e DOCX são gerados no navegador; MOBI requer conversão externa.</p></div><Download className="w-5 h-5 text-blue-600"/></div><div className="grid md:grid-cols-4 gap-3 mt-6">{(['EPUB','PDF','DOCX','MOBI'] as BookExportFormat[]).map(format=><button key={format} onClick={()=>exportBook(format)} disabled={exporting!==null} className="p-4 rounded-2xl border border-slate-200 hover:border-blue-200 text-left disabled:opacity-50"><FileText className="w-5 h-5 text-blue-600"/><p className="text-sm font-black mt-3">{format}</p><p className="text-[11px] text-slate-400 mt-1">{format==='MOBI'?'Abrir conversor externo':'Gerar e registrar arquivo'}</p>{exporting===format&&<p className="text-[10px] text-blue-600 mt-2">Processando...</p>}</button>)}</div>{book.cover_image&&<button onClick={()=>{const a=document.createElement('a');a.href=book.cover_image;a.target='_blank';a.rel='noreferrer';a.click()}} className="mt-4 px-4 py-2.5 border rounded-xl text-xs font-bold">Abrir capa PNG</button>}</Card><Card className="p-5"><h3 className="text-sm font-black">Histórico</h3><div className="mt-3 divide-y">{exports.map(e=><div key={e.id} className="py-3 flex items-center justify-between gap-3"><div><p className="text-xs font-bold">{e.format}</p><p className="text-[10px] text-slate-400">{new Date(e.created_at).toLocaleString('pt-BR')}</p></div>{e.file_url&&<a href={e.file_url} target="_blank" rel="noreferrer" className="text-xs font-bold text-blue-700">Abrir</a>}</div>)}{!exports.length&&<p className="text-xs text-slate-400">Nenhuma exportação ainda.</p>}</div></Card></div>}
+      {view==='exports'&&<div className="space-y-5"><Card className="p-6"><div className="flex items-start justify-between"><div><p className="text-[10px] uppercase tracking-[.16em] font-bold text-blue-600">Exportação</p><h2 className="text-xl font-black mt-1">Arquivos do livro</h2><p className="text-xs text-slate-400 mt-1">EPUB, PDF e DOCX são gerados no navegador; MOBI requer conversão externa.</p></div><Download className="w-5 h-5 text-blue-600"/></div><div className="grid md:grid-cols-4 gap-3 mt-6">{(['EPUB','PDF','DOCX','MOBI'] as BookExportFormat[]).map(format=><button key={format} onClick={()=>exportBook(format)} disabled={exporting!==null} className="p-4 rounded-2xl border border-slate-200 hover:border-blue-200 text-left disabled:opacity-50"><FileText className="w-5 h-5 text-blue-600"/><p className="text-sm font-black mt-3">{format}</p><p className="text-[11px] text-slate-400 mt-1">{format==='MOBI'?'Abrir conversor externo':'Gerar e registrar arquivo'}</p>{exporting===format&&<p className="text-[10px] text-blue-600 mt-2">Processando...</p>}</button>)}</div><button onClick={()=>void exportCoverPng()} className="mt-4 px-4 py-2.5 border rounded-xl text-xs font-bold">Gerar e registrar Capa PNG</button>{book.cover_image&&<button onClick={()=>{const a=document.createElement('a');a.href=book.cover_image;a.target='_blank';a.rel='noreferrer';a.click()}} className="mt-4 ml-2 px-4 py-2.5 border rounded-xl text-xs font-bold">Abrir capa</button>}</Card><Card className="p-5"><h3 className="text-sm font-black">Histórico</h3><div className="mt-3 divide-y">{exports.map(e=><div key={e.id} className="py-3 flex items-center justify-between gap-3"><div><p className="text-xs font-bold">{e.format}</p><p className="text-[10px] text-slate-400">{new Date(e.created_at).toLocaleString('pt-BR')}</p></div>{e.file_url&&<a href={e.file_url} target="_blank" rel="noreferrer" className="text-xs font-bold text-blue-700">Abrir</a>}</div>)}{!exports.length&&<p className="text-xs text-slate-400">Nenhuma exportação ainda.</p>}</div></Card></div>}
     </div>}
 
     {book&&view==='editor'&&selectedChapter&&null}
