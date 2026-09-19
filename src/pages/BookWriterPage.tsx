@@ -274,7 +274,7 @@ export function BookWriterPage(){
 
   async function addComment(paragraphIndex:number){
     if(!user||!book||!selectedChapter)return;
-    const draft=commentDrafts[paragraphIndex]||''; if(!draft.trim())return; const {data,e}=await supabase.from('book_comments').insert({book_id:book.id,chapter_id:selectedChapter.id,paragraph_index:paragraphIndex,comment:draft.trim()}).select().single();
+    const draft=commentDrafts[paragraphIndex]||''; if(!draft.trim())return; const {data,error:e}=await supabase.from('book_comments').insert({book_id:book.id,chapter_id:selectedChapter.id,paragraph_index:paragraphIndex,comment:draft.trim()}).select().single();
     if(e){setError(e.message);return;}
     setComments(prev=>[...prev,data as typeof comments[number]]);setCommentDrafts(prev=>({...prev,[paragraphIndex]:''}));
   }
@@ -299,7 +299,7 @@ export function BookWriterPage(){
     if(!user||!book)return;
     if(book.product_id){setNotice('Livro já vinculado ao Portfólio de Produtos.');return;}
     if(book.price<=0){setError('Defina um preço maior que zero em Metadados antes de criar o produto.');return;}
-    const {data,e}=await supabase.from('products').insert({user_id:user.id,title:book.title,slug:slug(book.title),description:book.description,type:'E-book',language:book.language,platform:book.platform,price:book.price,currency:'BRL',cost:0,total_views:0,status:book.status==='Pronto'?'Publicado':'Ideia',url:'',cover_image:book.cover_image,tags:book.keywords,parent_id:null,content_base_id:null}).select().single();
+    const {data,error:e}=await supabase.from('products').insert({user_id:user.id,title:book.title,slug:slug(book.title),description:book.description,type:'E-book',language:book.language,platform:book.platform,price:book.price,currency:'BRL',cost:0,total_views:0,status:book.status==='Pronto'?'Publicado':'Ideia',url:'',cover_image:book.cover_image,tags:book.keywords,parent_id:null,content_base_id:null}).select().single();
     if(e){setError(e.message);return;}
     const {error:offerError}=await supabase.from('offers').insert({user_id:user.id,product_id:data.id,name:book.title,type:'infoproduto',status:book.status==='Pronto'?'vendendo':'ideia',price:book.price,margin:100,commission:0,channel:book.platform,revenue_generated:0,needs_audience:''});
     if(offerError){setError('Produto criado, mas não foi possível criar a oferta: '+offerError.message);return;}
