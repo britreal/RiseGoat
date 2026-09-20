@@ -7,7 +7,6 @@ import { navItems } from '@/lib/navigation';
 
 export function SettingsPage() {
   const { user, profile, signOut, menuVisibility, setMenuVisibility } = useAuth();
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [pwError, setPwError] = useState<string | null>(null);
   const [pwSuccess, setPwSuccess] = useState(false);
@@ -100,11 +99,11 @@ export function SettingsPage() {
 
   async function updatePassword() {
     setPwError(null); setPwSuccess(false);
-    if (!currentPassword || !newPassword) { setPwError('Preencha ambos os campos'); return; }
+    if (!newPassword) { setPwError('Informe a nova senha'); return; }
     if (newPassword.length < 6) { setPwError('A nova senha deve ter pelo menos 6 caracteres'); return; }
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) setPwError(error.message);
-    else { setPwSuccess(true); setCurrentPassword(''); setNewPassword(''); setTimeout(() => setPwSuccess(false), 2500); }
+    else { setPwSuccess(true); setNewPassword(''); setTimeout(() => setPwSuccess(false), 2500); }
   }
 
   async function deleteAccount() {
@@ -601,7 +600,7 @@ export function SettingsPage() {
             <div><label className="block text-xs font-medium text-slate-500 mb-1">Nova senha</label><input type="password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} placeholder="•••••••" className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg" /></div>
             {pwError && <p className="text-sm text-red-500">{pwError}</p>}
             {pwSuccess && <p className="flex items-center gap-1 text-sm text-green-600"><Check className="w-4 h-4"/> Senha alterada</p>}
-            <button onClick={updatePassword} className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-lg">Alterar senha</button>
+            <button onClick={updatePassword} disabled={!newPassword} className="px-4 py-2.5 bg-slate-950 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl disabled:opacity-40">Alterar senha</button>
           </div>
           </Card>
         </div>
