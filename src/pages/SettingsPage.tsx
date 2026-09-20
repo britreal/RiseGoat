@@ -594,14 +594,22 @@ export function SettingsPage() {
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Segurança</p>
           </div>
           <Card className="p-6">
-          <h2 className="text-sm font-semibold text-slate-800 mb-4">Alterar senha</h2>
-          <div className="space-y-3">
-            <div><label className="block text-xs font-medium text-slate-500 mb-1">Senha atual</label><input type="password" value={currentPassword} onChange={e=>setCurrentPassword(e.target.value)} placeholder="••••••••" className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg" /></div>
-            <div><label className="block text-xs font-medium text-slate-500 mb-1">Nova senha</label><input type="password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} placeholder="•••••••" className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg" /></div>
-            {pwError && <p className="text-sm text-red-500">{pwError}</p>}
-            {pwSuccess && <p className="flex items-center gap-1 text-sm text-green-600"><Check className="w-4 h-4"/> Senha alterada</p>}
-            <button onClick={updatePassword} disabled={!newPassword} className="px-4 py-2.5 bg-slate-950 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl disabled:opacity-40">Alterar senha</button>
-          </div>
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <h2 className="text-sm font-semibold text-slate-800">Alterar senha</h2>
+                <p className="text-xs text-slate-400 mt-1">Sua sessão atual autoriza a alteração. Escolha uma nova senha com pelo menos 6 caracteres.</p>
+              </div>
+              <LockKeyhole className="w-4 h-4 text-slate-400 shrink-0" />
+            </div>
+            <div className="grid sm:grid-cols-[1fr_auto] gap-3 items-end">
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Nova senha</label>
+                <input type="password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} placeholder="••••••••" autoComplete="new-password" className="w-full h-11 px-3.5 text-sm border border-slate-200 rounded-xl" />
+              </div>
+              <button onClick={updatePassword} disabled={!newPassword} className="px-4 py-2.5 bg-slate-950 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl disabled:opacity-40">Alterar senha</button>
+            </div>
+            {pwError && <p role="alert" className="text-sm text-red-500 mt-3">{pwError}</p>}
+            {pwSuccess && <p role="status" className="flex items-center gap-1 text-sm text-emerald-600 mt-3"><Check className="w-4 h-4"/> Senha alterada</p>}
           </Card>
         </div>
 
