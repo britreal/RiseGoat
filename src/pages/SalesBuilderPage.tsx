@@ -39,33 +39,77 @@ function defaults(type: BlockType): { content: string; settings: Settings } {
 export function SalesBuilderPage({ pageId, navigate }: { pageId:string; navigate:(path:string)=>void }) {
   const { user } = useAuth();
   const [page,setPage] = useState<SalesPage|null>(null); const [blocks,setBlocks] = useState<SalesBlock[]>([]);
-  const [selected,setSelected] = useState<string|null>(null); const [previewMode,setPreviewMode] = useState<'desktop'|'iphone'>('desktop'); const [loading,setLoading] = useState(true); const [saving,setSaving] = useState(false); const [saved,setSaved] = useState(false); const [showSettings,setShowSettings] = useState(false); const [showAdd,setShowAdd] = useState(false);
+  const [selected,setSelected] = useState<string|null>(null); const [previewMode,setPreviewMode] = useState<'desktop'|'iphone'>('desktop'); const [loading,setLoading] = useState(true); const [saving,setSaving] = useState(false); const [saved,setSaved] = useState(false); const [showSettings,setShowSettings] = useState(false); const [showAdd,setShowAdd] = useState(false); const [error,setError] = useState('');
   const selectedBlock = useMemo(()=>blocks.find(b=>b.id===selected)||null,[blocks,selected]);
 
-  const load = useCallback(async()=>{ if(!user)return; const [p,b]=await Promise.all([supabase.from('sales_pages').select('*').eq('id',pageId).eq('user_id',user.id).maybeSingle(),supabase.from('sales_blocks').select('*').eq('page_id',pageId).eq('user_id',user.id).order('sort_order')]); setPage(p.data as SalesPage|null); setBlocks((b.data as SalesBlock[])||[]); setLoading(false); },[pageId,user]);
+  const load = useCallback(async()=>{ 
+    if(!user)return; 
+    setError('');
+    const [p,b]=await Promise.all([
+      supabase.from('sales_pages').select('*').eq('id',pageId).eq('user_id',user.id).maybeSingle(),
+      supabase.from('sales_blocks').select('*').eq('page_id',pageId).eq('user_id',user.id).order('sort_order')
+    ]);
+    if(p.error || b.error){ setError(p.error?.message || b.error?.message || 'Não foi possível carregar a página.'); setLoading(false); return; }
+    if(!p.data){ setError('Página de venda não encontrada.'); setLoading(false); return; }
+    setPage(p.data as SalesPage);
+    setBlocks((b.data as SalesBlock[])||[]);
+    setLoading(false); 
+  },[pageId,user]);
   useEffect(()=>{load()},[load]);
 
   async function persistBlock(block: SalesBlock, updates: Partial<SalesBlock>) {
     const next={...block,...updates}; setBlocks(v=>v.map(x=>x.id===block.id?next:x)); setSaving(true);
-    const {error}=await supabase.from('sales_blocks').update({content:next.content,settings:next.settings,sort_order:next.sort_order}).eq('id',block.id).eq('user_id',user?.id||'');
-    setSaving(false); if(!error){setSaved(true);setTimeout(()=>setSaved(false),1200)};
+    const {error: updateError}=await supabase.from('sales_blocks').update({content:next.content,settings:next.settings,sort_order:next.sort_order}).eq('id',block.id).eq('user_id',user?.id||'');
+    setSaving(false);
+    if(updateError){ setError(updateError.message); return; }
+    setSaved(true);setTimeout(()=>setSaved(false),1200);
   }
-  async function add(type:BlockType){ if(!user||!page)return; const d=defaults(type); const {data,error}=await supabase.from('sales_blocks').insert({page_id:page.id,user_id:user.id,block_type:type,content:d.content,settings:d.settings,sort_order:blocks.length}).select().single(); if(!error&&data){setBlocks(v=>[...v,data as SalesBlock]);setSelected((data as SalesBlock).id)} setShowAdd(false); }
-  async function remove(id:string){ await supabase.from('sales_blocks').delete().eq('id',id).eq('user_id',user?.id||''); const next=blocks.filter(b=>b.id!==id).map((b,i)=>({...b,sort_order:i})); setBlocks(next); for(const b of next) await supabase.from('sales_blocks').update({sort_order:b.sort_order}).eq('id',b.id).eq('user_id',user?.id||''); setSelected(null); }
-  async function move(i:number,dir:-1|1){const j=i+dir;if(j<0||j>=blocks.length)return;const next=[...blocks];[next[i],next[j]]=[next[j],next[i]];setBlocks(next);for(let n=0;n<next.length;n++)await supabase.from('sales_blocks').update({sort_order:n}).eq('id',next[n].id).eq('user_id',user?.id||'');}
+  async function add(type:BlockType){ 
+    if(!user||!page)return; 
+    const d=defaults(type); 
+    const {data,error:e}=await supabase.from('sales_blocks').insert({page_id:page.id,user_id:user.id,block_type:type,content:d.content,settings:d.settings,sort_order:blocks.length}).select().single();
+    if(e || !data){ setError(e?.message || 'Não foi possível adicionar o bloco.'); return; }
+    setBlocks(v=>[...v,data as SalesBlock]);setSelected((data as SalesBlock).id);setShowAdd(false); 
+  }
+  async function remove(id:string){ 
+    if(!user)return;
+    const {error:e}=await supabase.from('sales_blocks').delete().eq('id',id).eq('user_id',user.id);
+    if(e){setError(e.message);return;}
+    const next=blocks.filter(b=>b.id!==id).map((b,i)=>({...b,sort_order:i})); 
+    setBlocks(next); 
+    const results=await Promise.all(next.map(b=>supabase.from('sales_blocks').update({sort_order:b.sort_order}).eq('id',b.id).eq('user_id',user.id)));
+    const orderError=results.find(x=>x.error)?.error;
+    if(orderError)setError(orderError.message);
+    setSelected(null); 
+  }
+  async function move(i:number,dir:-1|1){
+    const j=i+dir;if(j<0||j>=blocks.length)return;
+    const next=[...blocks];[next[i],next[j]]=[next[j],next[i]];setBlocks(next);
+    const results=await Promise.all(next.map((b,n)=>supabase.from('sales_blocks').update({sort_order:n}).eq('id',b.id).eq('user_id',user?.id||'')));
+    const moveError=results.find(x=>x.error)?.error;
+    if(moveError)setError(moveError.message);
+  }
   async function duplicate(block:SalesBlock){if(!user||!page)return;const d=await supabase.from('sales_blocks').insert({page_id:page.id,user_id:user.id,block_type:block.block_type,content:block.content,settings:block.settings,sort_order:block.sort_order+1}).select().single();if(d.data){const shifted=blocks.map(b=>b.sort_order>=block.sort_order+1?{...b,sort_order:b.sort_order+1}:b);for(const b of shifted)await supabase.from('sales_blocks').update({sort_order:b.sort_order}).eq('id',b.id).eq('user_id',user.id);setBlocks([...shifted,d.data as SalesBlock].sort((a,b)=>a.sort_order-b.sort_order));}}
-  async function togglePublish(){if(!page)return;const {error}=await supabase.from('sales_pages').update({is_published:!page.is_published,updated_at:new Date().toISOString()}).eq('id',page.id).eq('user_id',user?.id||'');if(!error)setPage({...page,is_published:!page.is_published});}
-  async function savePage(){if(!page)return;setSaving(true);await supabase.from('sales_pages').update({seo_title:page.seo_title,seo_description:page.seo_description,updated_at:new Date().toISOString()}).eq('id',page.id).eq('user_id',user?.id||'');setSaving(false);setSaved(true);setTimeout(()=>setSaved(false),1200)}
+  async function togglePublish(){if(!page)return;const {error:e}=await supabase.from('sales_pages').update({is_published:!page.is_published,updated_at:new Date().toISOString()}).eq('id',page.id).eq('user_id',user?.id||'');if(e)setError(e.message);else setPage({...page,is_published:!page.is_published});}
+  async function savePage(){
+    if(!page)return;setSaving(true);setError('');
+    const {error:e}=await supabase.from('sales_pages').update({seo_title:page.seo_title,seo_description:page.seo_description,updated_at:new Date().toISOString()}).eq('id',page.id).eq('user_id',user?.id||'');
+    setSaving(false);
+    if(e){setError(e.message);return;}
+    setSaved(true);setTimeout(()=>setSaved(false),1200)
+  }
   if(loading)return <Spinner/>;
+  if(!page)return <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6"><div className="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-6 text-center"><p className="text-sm font-semibold text-slate-800">Não foi possível abrir esta página.</p><p className="text-xs text-red-600 mt-2">{error || 'Página não encontrada.'}</p><button onClick={()=>navigate('/sales')} className="mt-5 px-4 py-2.5 rounded-xl bg-slate-950 text-white text-sm font-semibold">Voltar para páginas de venda</button></div></div>;
 
-  return <div className="min-h-screen bg-slate-100 flex flex-col">
+  return <div className="min-h-screen bg-[#f7f7f5] flex flex-col">
     <header className="sticky top-0 z-40 h-14 bg-white border-b border-slate-200 flex items-center justify-between px-3 lg:px-5">
       <div className="flex items-center gap-3 min-w-0"><button onClick={()=>navigate('/sales')} className="p-2 rounded-lg hover:bg-slate-100"><ArrowLeft className="w-4 h-4"/></button><div className="min-w-0"><p className="font-semibold text-sm truncate">{page?.title}</p><p className="text-[11px] text-slate-400">risegoat.com/p/{page?.slug}</p></div></div>
       <div className="flex items-center gap-2"><button onClick={()=>setShowSettings(v=>!v)} className="p-2 rounded-lg hover:bg-slate-100" title="SEO"><Settings2 className="w-4 h-4"/></button>{saved&&<span className="text-xs text-green-600">Salvo</span>}<button onClick={savePage} disabled={saving} className="px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-medium">{saving?<Loader2 className="w-3.5 h-3.5 animate-spin"/>:<Save className="w-3.5 h-3.5 inline mr-1"/>}Salvar</button><button onClick={togglePublish} className={`px-3 py-1.5 rounded-lg text-xs font-medium ${page?.is_published?'bg-amber-50 text-amber-700':'bg-green-50 text-green-700'}`}>{page?.is_published?'Despublicar':'Publicar'}</button></div>
     </header>
+    {error&&<div role="alert" className="bg-red-50 border-b border-red-200 px-4 py-3 text-sm text-red-700 flex items-center justify-between gap-3"><span>{error}</span><button onClick={()=>setError('')} className="text-xs font-semibold">Fechar</button></div>}
     {showSettings&&<div className="bg-white border-b border-slate-200 p-4 grid md:grid-cols-2 gap-3"><input value={page?.seo_title||''} onChange={e=>setPage(p=>p?{...p,seo_title:e.target.value}:p)} placeholder="Título SEO" className="px-3 py-2 border rounded-lg text-sm"/><input value={page?.seo_description||''} onChange={e=>setPage(p=>p?{...p,seo_description:e.target.value}:p)} placeholder="Descrição SEO" className="px-3 py-2 border rounded-lg text-sm"/></div>}
     <div className="flex flex-1 min-h-0">
-      <aside className="hidden xl:block w-56 bg-white border-r border-slate-200 p-4 sticky top-14 h-[calc(100vh-3.5rem)] self-start overflow-y-auto"><p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-3">Blocos</p><div className="grid grid-cols-2 gap-2">{blockTypes.map(b=><button key={b.type} onClick={()=>add(b.type)} className="p-3 rounded-xl border border-slate-200 hover:border-cyan-400 hover:bg-cyan-50 text-xs flex flex-col items-center gap-1.5"><b.icon className="w-4 h-4"/><span>{b.label}</span></button>)}</div></aside>
+      <aside className="hidden xl:block w-60 bg-white border-r border-slate-200/80 p-4 sticky top-14 h-[calc(100vh-3.5rem)] self-start overflow-y-auto"><p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-3">Blocos</p><div className="grid grid-cols-2 gap-2">{blockTypes.map(b=><button key={b.type} onClick={()=>add(b.type)} className="p-3 rounded-xl border border-slate-200 hover:border-cyan-400 hover:bg-cyan-50 text-xs flex flex-col items-center gap-1.5"><b.icon className="w-4 h-4"/><span>{b.label}</span></button>)}</div></aside>
       <main className="flex-1 overflow-y-auto p-3 lg:p-8"><div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-4 bg-white rounded-xl border border-slate-200 p-1.5 shadow-sm">
           <p className="px-2 text-xs font-semibold text-slate-600">Visualização</p>
@@ -80,7 +124,7 @@ export function SalesBuilderPage({ pageId, navigate }: { pageId:string; navigate
         <button onClick={()=>setShowAdd(v=>!v)} className="w-full mt-3 py-3 border-2 border-dashed border-slate-300 rounded-xl bg-white text-slate-500 hover:border-cyan-400 hover:text-cyan-600 text-sm flex justify-center gap-2"><Plus className="w-4 h-4"/>Adicionar bloco</button>
         {showAdd&&<div className="xl:hidden mt-2 p-3 bg-white rounded-xl border grid grid-cols-3 gap-2">{blockTypes.map(b=><button key={b.type} onClick={()=>add(b.type)} className="p-3 border rounded-lg text-xs"><b.icon className="w-4 h-4 mx-auto mb-1"/>{b.label}</button>)}</div>}
       </div></main>
-      <aside className="hidden lg:block w-72 bg-white border-l border-slate-200 p-4 sticky top-14 h-[calc(100vh-3.5rem)] self-start overflow-y-auto">{selectedBlock?<Inspector block={selectedBlock} onUpdate={u=>persistBlock(selectedBlock,u)}/>:<div className="text-center text-slate-400 text-xs pt-16"><Palette className="w-7 h-7 mx-auto mb-2"/>Selecione um bloco para editar</div>}</aside>
+      <aside className="hidden lg:block w-80 bg-white border-l border-slate-200/80 p-4 sticky top-14 h-[calc(100vh-3.5rem)] self-start overflow-y-auto">{selectedBlock?<Inspector block={selectedBlock} onUpdate={u=>persistBlock(selectedBlock,u)}/>:<div className="text-center text-slate-400 text-xs pt-16"><Palette className="w-7 h-7 mx-auto mb-2"/>Selecione um bloco para editar</div>}</aside>
     </div>
   </div>;
 }
