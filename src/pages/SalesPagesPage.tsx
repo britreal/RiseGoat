@@ -108,7 +108,11 @@ export function SalesPagesPage({ navigate }: { navigate: (path: string) => void 
 
     for (const block of (blocks ?? []) as unknown as Array<{ block_type: string; content: string; settings: Record<string, unknown>; sort_order: number }>) {
       const { error: blockError } = await supabase.from('sales_blocks').insert({ page_id: (newPage as SalesPage).id, user_id: user.id, block_type: block.block_type, content: block.content, settings: block.settings, sort_order: block.sort_order });
-      if (blockError) { setErrorMessage(blockError.message); break; }
+      if (blockError) {
+        await supabase.from('sales_pages').delete().eq('id', (newPage as SalesPage).id).eq('user_id', user.id);
+        setErrorMessage('Não foi possível duplicar todos os blocos. A cópia incompleta foi removida.');
+        return;
+      }
     }
     setPages((current) => [newPage as SalesPage, ...current]);
   }
@@ -117,12 +121,12 @@ export function SalesPagesPage({ navigate }: { navigate: (path: string) => void 
 
   return (
     <div className="p-6 lg:p-8 max-w-3xl mx-auto">
-      <PageHeader title="Páginas de Venda" subtitle="Crie páginas de venda com blocos personalizados" action={<button onClick={() => { setShowCreate((v) => !v); setErrorMessage(''); }} className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-xl transition"><Plus className="w-4 h-4" /> Nova página</button>} />
+      <PageHeader title="Páginas de Venda" subtitle="Crie, edite e publique páginas comerciais sem código." action={<button onClick={() => { setShowCreate((v) => !v); setErrorMessage(''); }} className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-xl transition"><Plus className="w-4 h-4" /> Nova página</button>} />
 
       {errorMessage && <div className="mb-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"><AlertCircle className="w-4 h-4 mt-0.5 shrink-0" /><span className="break-words">{errorMessage}</span></div>}
 
       {showCreate && <Card className="p-5 mb-4 space-y-3">
-        <div><label className="block text-xs font-medium text-slate-500 mb-1">Título</label><input autoFocus type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Ex: Curso de Produção Musical" disabled={creating} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 disabled:opacity-60" /></div>
+        <div><label className="block text-xs font-medium text-slate-500 mb-1">Título</label><input autoFocus type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Ex: Curso de Produção Musical" disabled={creating} className="w-full h-11 px-3.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:opacity-60" /></div>
         <div><label className="block text-xs font-medium text-slate-500 mb-1">Slug (URL)</label><div className="flex items-center border border-slate-200 rounded-lg bg-slate-50"><span className="pl-3 pr-1 text-slate-400 text-xs">/p/</span><input type="text" value={newSlug} onChange={(e) => setNewSlug(normalizeSlug(e.target.value))} placeholder="curso-producao" disabled={creating} className="flex-1 py-2 pr-3 bg-transparent text-sm focus:outline-none disabled:opacity-60" /></div><p className="text-[11px] text-slate-400 mt-1">Somente letras, números e hífens.</p></div>
         <div className="flex gap-2"><button onClick={createPage} disabled={creating || !newTitle.trim() || !normalizeSlug(newSlug)} className="flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-medium rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">{creating && <Loader2 className="w-4 h-4 animate-spin" />}{creating ? 'Criando...' : 'Criar página'}</button><button onClick={() => { if (!creating) { setShowCreate(false); setErrorMessage(''); } }} disabled={creating} className="px-4 py-2 text-slate-500 text-sm font-medium rounded-lg hover:bg-slate-100 transition disabled:opacity-50">Cancelar</button></div>
       </Card>}
