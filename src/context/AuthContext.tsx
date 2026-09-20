@@ -51,10 +51,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  async function loadAdminStatus(userId: string) {
+  async function loadAdminStatus(_userId: string) {
     try {
-      const { data, error } = await supabase.from('app_admins').select('user_id').eq('user_id', userId).maybeSingle();
-      setIsAdmin(!error && Boolean(data));
+      const { data, error } = await supabase.rpc('is_admin');
+      setIsAdmin(!error && data === true);
     } catch (error) {
       console.error('Failed to load admin status:', error);
       setIsAdmin(false);
