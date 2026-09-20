@@ -86,7 +86,9 @@ begin
 end;
 $$;
 revoke all on function public.check_api_request() from public, anon, authenticated;
-grant execute on function public.check_api_request() to authenticator;
+-- PostgREST runs db_pre_request under the request role, so anon/authenticated need EXECUTE.
+-- The function remains SECURITY DEFINER and exposes no table privileges to those roles.
+grant execute on function public.check_api_request() to anon, authenticated, authenticator;
 alter role authenticator set pgrst.db_pre_request = 'public.check_api_request';
 
 alter function public.authority_refresh_leverage(uuid) security invoker;
