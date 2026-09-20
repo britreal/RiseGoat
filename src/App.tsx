@@ -30,18 +30,19 @@ function AppContent() {
   const { route, navigate } = useRouter();
   const { session, loading, workspaceMode } = useAuth();
 
+  useEffect(() => {
+    const businessOnly = new Set(['profile','links','microblog','newsletter','posts','drafts','leads','analytics','sales','offers','product-portfolio','book-writer','revenue','command-center','partnerships','launches','radar','sales-editor']);
+    const publicRoute = route.name === 'public' || route.name === 'public-microblog' || route.name === 'public-sales' || route.name === 'unsubscribe';
+    if (!publicRoute && route.name === 'auth' && session) navigate('/dashboard');
+    if (!publicRoute && route.name !== 'auth' && !loading && !session) navigate('/auth');
+    if (!publicRoute && session && workspaceMode === 'pessoal' && businessOnly.has(route.name)) navigate('/dashboard');
+    if (!publicRoute && session && workspaceMode === 'negocios' && route.name === 'goat') navigate('/dashboard');
+  }, [route.name, session, loading, workspaceMode, navigate]);
+
   if (route.name === 'public') return <PublicPage username={route.username} />;
   if (route.name === 'public-microblog') return <PublicMicroblogPage username={route.username} postId={route.postId} />;
   if (route.name === 'public-sales') return <PublicSalesPage slug={route.slug} />;
   if (route.name === 'unsubscribe') return <UnsubscribePage token={route.token} />;
-
-  useEffect(() => {
-    const businessOnly = new Set(['profile','links','microblog','newsletter','posts','drafts','leads','analytics','sales','offers','product-portfolio','book-writer','revenue','command-center','partnerships','launches','radar','sales-editor']);
-    if (route.name === 'auth' && session) navigate('/dashboard');
-    if (route.name !== 'auth' && !loading && !session) navigate('/auth');
-    if (session && workspaceMode === 'pessoal' && businessOnly.has(route.name)) navigate('/dashboard');
-    if (session && workspaceMode === 'negocios' && route.name === 'goat') navigate('/dashboard');
-  }, [route.name, session, loading, workspaceMode, navigate]);
 
   if (route.name === 'auth') {
     if (loading || session) return <Spinner />;
