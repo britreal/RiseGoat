@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
-import { Card, Spinner } from '@/components/ui';
+import { Card, PageHeader, Spinner } from '@/components/ui';
 import { Eye, MousePointerClick, Users, TrendingUp, ExternalLink, ArrowRight } from 'lucide-react';
 import type { PageVisit, LinkClick, NewsletterLead, Link, MicroblogPost } from '@/types';
 import { formatNumber, timeAgo } from '@/lib/utils';
@@ -16,6 +16,7 @@ export function DashboardPage({ navigate }: { navigate: (path: string) => void }
   const [posts, setPosts] = useState<MicroblogPost[]>([]);
   const [goals, setGoals] = useState<any[]>([]);
   const [revenues, setRevenues] = useState<any[]>([]);
+  const [dashboardError, setDashboardError] = useState('');
 
   useEffect(() => {
     if (!user) return;
@@ -28,6 +29,8 @@ export function DashboardPage({ navigate }: { navigate: (path: string) => void }
       supabase.from('goals').select('*').eq('user_id', user.id).order('updated_at', { ascending: false }).limit(3),
       supabase.from('revenues').select('value,status').eq('user_id', user.id),
     ]).then(([v, c, l, ln, p, g, r]) => {
+      const firstError = [v, c, l, ln, p, g, r].find((result) => result.error)?.error;
+      if (firstError) setDashboardError(firstError.message);
       setVisits((v.data as PageVisit[]) ?? []);
       setClicks((c.data as LinkClick[]) ?? []);
       setLeads((l.data as NewsletterLead[]) ?? []);
@@ -64,11 +67,10 @@ export function DashboardPage({ navigate }: { navigate: (path: string) => void }
   if (workspaceMode === 'pessoal') {
     return (
       <div className="p-6 lg:p-8 max-w-5xl mx-auto">
-        <div className="mb-6">
-          <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-slate-400">Pessoal</p>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight mt-1">Olá{profile?.display_name ? ', ' + profile.display_name : ''}!</h1>
-          <p className="text-sm text-slate-500 mt-1">Seu espaço pessoal para executar projetos, acompanhar metas e evoluir com consistência.</p>
-        </div>
+        <PageHeader title={'Olá' + (profile?.display_name ? ', ' + profile.display_name : '') + '!'} subtitle="Seu espaço pessoal para executar projetos, acompanhar metas e evoluir com consistência." />
+        {dashboardError && <div role="alert" className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-center justify-between gap-3"><span>{dashboardError}</span><button onClick={() => setDashboardError('')} className="text-xs font-semibold">Fechar</button></div>}
+
+       </div>
 
         <div className="grid md:grid-cols-3 gap-4 mb-6">
           <button onClick={() => navigate('/action-flows')} className="text-left">
@@ -106,14 +108,12 @@ export function DashboardPage({ navigate }: { navigate: (path: string) => void }
   const publicUrl = `${window.location.origin}/u/${profile?.username}`;
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto">
+    <div className="p-6 lg:p-8 max-w-5xl mx-auto">
       {/* Welcome */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-          Olá{profile?.display_name ? `, ${profile.display_name}` : ''}!
-        </h1>
-        <p className="text-sm text-slate-500 mt-1">Aqui está o resumo da sua página</p>
-      </div>
+      <PageHeader title={'Olá' + (profile?.display_name ? ', ' + profile.display_name : '') + '!'} subtitle="O que merece sua atenção agora." />
+      {dashboardError && <div role="alert" className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-center justify-between gap-3"><span>{dashboardError}</span><button onClick={() => setDashboardError('')} className="text-xs font-semibold">Fechar</button></div>}
+
+div>
 
       {/* Public page banner */}
       <div className="grid md:grid-cols-2 gap-3 mb-6">
