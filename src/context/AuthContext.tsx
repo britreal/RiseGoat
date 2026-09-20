@@ -20,6 +20,8 @@ interface AuthContextValue {
   setMenuItemVisibility: (path: string, visible: boolean) => Promise<boolean>;
 }
 
+const ADMIN_EMAIL = 'ibritreal@gmail.com';
+
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -51,18 +53,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  async function loadAdminStatus(_userId: string) {
+  async function loadAdminStatus(userId: string, email?: string | null) {
+    const emailMatchesAdmin = email?.trim().toLowerCase() === ADMIN_EMAIL;
+    // The email check is only for immediate UI state. Database access is still
+    // protected by the server-side is_admin() RPC and RLS policies.
+    setIsAdmin(emailMatchesAdmin);
+
     try {
       const { data, error } = await supabase.rpc('is_admin');
-      setIsAdmin(!error && data === true);
+      if (error) {
+        console.error('Failed to validate admin status:', error);
+        return;
+      }
+      setIsAdmin(data === true);
     } catch (error) {
-      console.error('Failed to load admin status:', error);
-      setIsAdmin(false);
+      console.error('Unexpected admin validation error:', error);
     }
+
+    void userId;
   }
 
-  async function loadUserContext(userId: string) {
-    await Promise.all([loadProfile(userId), loadAdminStatus(userId)]);
+  async function loadUserContext(currentUser: User) {
+    await Promise.all([
+      loadProfile(currentUser.id),
+      loadAdminStatus(currentUser.id, currentUser.email),
+    ]);
   }
 
   useEffect(() => {
@@ -72,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) await loadUserContext(session.user.id);
+      if (session?.user) await loadUserContext(session.user);
       else setIsAdmin(false);
       if (mounted) setLoading(false);
     }).catch((error) => {
@@ -84,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        void loadUserContext(session.user.id);
+        window.setTimeout(() => { void loadUserContext(session.user); }, 0);
       } else {
         setProfile(null);
         setIsAdmin(false);
@@ -98,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function refreshProfile() {
-    if (user) await loadUserContext(user.id);
+    if (user) await loadUserContext(user);
   }
 
   async function setWorkspaceMode(mode: WorkspaceMode) {
