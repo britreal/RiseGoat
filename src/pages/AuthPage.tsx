@@ -40,21 +40,21 @@ export function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-      <div className="absolute inset-0 overflow-hidden">
+    <div className="min-h-screen bg-[#0b0b0c] flex items-center justify-center p-4 sm:p-6">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full max-w-[420px]">
         <div className="flex items-center justify-center gap-2 mb-8">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
-          <span className="text-2xl font-bold text-white tracking-tight">Simply Connect</span>
+          <span className="text-2xl font-black text-white tracking-[-0.03em]">RiseGoat</span>
         </div>
 
-        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
+        <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-[28px] p-7 sm:p-8 shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
           <h1 className="text-xl font-semibold text-white mb-1">
             {mode === 'signup' ? 'Crie sua conta' : 'Bem-vindo de volta'}
           </h1>
@@ -122,7 +122,7 @@ export function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium rounded-xl transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3 bg-white text-slate-950 hover:bg-slate-100 text-sm font-bold rounded-xl transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {mode === 'signup' ? 'Criar conta' : 'Entrar'}
@@ -136,7 +136,7 @@ export function AuthPage() {
                 setMode(mode === 'signup' ? 'signin' : 'signup');
                 setError(null);
               }}
-              className="text-cyan-400 hover:text-cyan-300 font-medium transition"
+              className="text-white hover:text-slate-300 font-semibold transition"
             >
               {mode === 'signup' ? 'Entrar' : 'Criar conta'}
             </button>
