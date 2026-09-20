@@ -9,7 +9,7 @@ interface AuthContextValue {
   profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string, username: string, displayName: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string, username: string, displayName: string) => Promise<{ error: string | null; needsConfirmation: boolean }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   workspaceMode: WorkspaceMode;
@@ -138,11 +138,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       options: { data: { username: username.toLowerCase().trim(), display_name: displayName.trim() } },
     });
-    if (error) return { error: error.message };
-    if (!data.user) return { error: 'Falha ao criar conta' };
+    if (error) return { error: error.message, needsConfirmation: false };
+    if (!data.user) return { error: 'Falha ao criar conta', needsConfirmation: false };
 
-    // The profile is created by the database trigger so signup also works when email confirmation is enabled.
-    return { error: null };
+    // When email confirmation is enabled Supabase returns a user without an active session.
+    // Keep the user on the auth screen and explain the next step instead of redirecting to a protected route.
+    return { error: null, needsConfirmation: !data.session };
   }
 
   async function signOut() {
