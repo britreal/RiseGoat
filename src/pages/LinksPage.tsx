@@ -54,7 +54,8 @@ export function LinksPage() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from('links').select('*').eq('user_id', user.id).order('sort_order', { ascending: true }).then(({ data }) => {
+    supabase.from('links').select('*').eq('user_id', user.id).order('sort_order', { ascending: true }).then(({ data, error }) => {
+      if (error) setFormError(error.message);
       setLinks((data as Link[]) ?? []);
       setLoading(false);
     });
@@ -122,7 +123,7 @@ export function LinksPage() {
   return (
     <div className="p-6 lg:p-8 max-w-3xl mx-auto">
       <PageHeader title="Links" subtitle="Links, vídeos, cursos e produtos afiliados da sua página." action={
-        <button onClick={() => setAdding(!adding)} className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-xl transition">
+        <button onClick={() => setAdding(!adding)} className="flex items-center gap-2 px-4 py-2.5 bg-slate-950 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl transition shadow-sm">
           <Plus className="w-4 h-4" /> Novo item
         </button>
       } />
@@ -133,7 +134,7 @@ export function LinksPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
             {TYPE_OPTIONS.map((type) => (
               <button key={type.value} onClick={() => setNewType(type.value)}
-                className={'flex items-center gap-2 p-3 rounded-xl border text-left transition ' + (newType === type.value ? 'border-cyan-400 bg-cyan-50 text-cyan-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50')}>
+                className={'flex items-center gap-2 p-3 rounded-xl border text-left transition ' + (newType === type.value ? 'border-slate-900 bg-slate-950 text-white shadow-sm' : 'border-slate-200 text-slate-600 hover:bg-slate-50')}>
                 <type.icon className="w-4 h-4 shrink-0" /><span className="text-xs font-medium">{type.label}</span>
               </button>
             ))}
@@ -142,7 +143,7 @@ export function LinksPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div><label className="block text-xs font-medium text-slate-500 mb-1">Título</label>
-              <input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder={newType === 'affiliate' ? 'Tênis Nike Air Force 1' : newType === 'youtube' ? 'Meu vídeo no YouTube' : newType === 'course' ? 'Meu curso' : 'Instagram'} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg" />
+              <input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder={newType === 'affiliate' ? 'Tênis Nike Air Force 1' : newType === 'youtube' ? 'Meu vídeo no YouTube' : newType === 'course' ? 'Meu curso' : 'Instagram'} className="w-full h-11 px-3.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100" />
             </div>
             <div><label className="block text-xs font-medium text-slate-500 mb-1">URL de destino</label>
               <input type="url" value={newUrl} onChange={(e) => setNewUrl(e.target.value)} placeholder="https://..." className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg" />
@@ -151,7 +152,7 @@ export function LinksPage() {
 
           {(newType === 'affiliate' || newType === 'course') && (
             <div className="mt-3"><label className="block text-xs font-medium text-slate-500 mb-1">Descrição</label>
-              <textarea value={newDescription} onChange={(e) => setNewDescription(e.target.value)} rows={2} placeholder="Descrição curta..." className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg resize-none" />
+              <textarea value={newDescription} onChange={(e) => setNewDescription(e.target.value)} rows={2} placeholder="Descrição curta..." className="w-full px-3.5 py-3 text-sm border border-slate-200 rounded-xl resize-none focus:outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100" />
             </div>
           )}
 
@@ -171,7 +172,7 @@ export function LinksPage() {
               <div className="flex flex-wrap gap-2">
                 {ICON_OPTIONS.map((icon) => (
                   <button key={icon} type="button" onClick={() => setNewIcon(icon)}
-                    className={'px-3 py-1.5 text-xs rounded-lg border transition ' + (newIcon === icon ? 'border-cyan-400 bg-cyan-50 text-cyan-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50')}>
+                    className={'px-3 py-1.5 text-xs rounded-lg border transition ' + (newIcon === icon ? 'border-slate-900 bg-slate-950 text-white' : 'border-slate-200 text-slate-500 hover:bg-slate-50')}>
                     {icon}
                   </button>
                 ))}
@@ -187,8 +188,8 @@ export function LinksPage() {
 
           {formError && <p className="mt-3 text-sm text-red-600">{formError}</p>}
           <div className="flex gap-2 mt-4">
-            <button onClick={addLink} className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-medium rounded-lg">Adicionar</button>
-            <button onClick={() => { resetForm(); setAdding(false); }} className="px-4 py-2 text-slate-500 text-sm font-medium rounded-lg hover:bg-slate-100">Cancelar</button>
+            <button onClick={addLink} className="px-4 py-2.5 bg-slate-950 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl">Adicionar</button>
+            <button onClick={() => { resetForm(); setAdding(false); }} className="px-4 py-2.5 text-slate-600 text-sm font-semibold rounded-xl hover:bg-slate-100">Cancelar</button>
           </div>
         </Card>
       )}
