@@ -41,7 +41,6 @@ export const navItems: NavItem[] = [
   { label: 'Links', path: '/links', icon: Link2, group: 'Presença', mode: 'negocios' },
 
   { label: 'Posts', path: '/posts', icon: FileText, group: 'Conteúdo', mode: 'negocios' },
-  { label: 'Rascunhos', path: '/drafts', icon: FileText, group: 'Conteúdo', mode: 'negocios' },
   { label: 'Microblog', path: '/microblog', icon: MessageSquare, group: 'Conteúdo', mode: 'negocios' },
 
   { label: 'Newsletter', path: '/newsletter', icon: Mail, group: 'Captação', mode: 'negocios' },
