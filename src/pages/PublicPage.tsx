@@ -137,7 +137,7 @@ export function PublicPage({ username }: { username: string }) {
         setPropertyMeta('og:description', seoDescription);
         setPropertyMeta('og:type', 'profile');
         if (seoImage) setPropertyMeta('og:image', seoImage);
-        const canonical = window.location.origin + '/u/' + encodeURIComponent(p.username);
+        const canonical = window.location.origin + '/@' + encodeURIComponent(p.username);
         setPropertyMeta('og:url', canonical);
         setMeta('twitter:card', 'summary_large_image');
         let canonicalTag = document.head.querySelector('link[data-risegoat-canonical]') as HTMLLinkElement | null;
@@ -417,7 +417,7 @@ export function PublicPage({ username }: { username: string }) {
                   {post.title && <h3 className="text-base font-semibold text-white mb-2">{post.title}</h3>}
                   {post.image_url && <img src={post.image_url} alt={post.title || ''} className="w-full rounded-xl mb-3 max-h-64 object-cover" />}
                   <p className="text-sm text-white/90 whitespace-pre-wrap leading-relaxed">{isLong ? post.content.slice(0, 280) + '...' : post.content}</p>
-                  {isLong && <a href={'/u/' + profile?.username + '/microblog/' + post.id} className="inline-flex items-center text-xs font-medium mt-2 transition" style={{ color: accentColor }}>Ler artigo completo →</a>}
+                  {isLong && <a href={'/@' + profile?.username + '/microblog/' + post.id} className="inline-flex items-center text-xs font-medium mt-2 transition" style={{ color: accentColor }}>Ler artigo completo →</a>}
                   <p className="text-xs text-white/30 mt-2">{timeAgo(post.created_at)}</p>
                 </div>
               );
