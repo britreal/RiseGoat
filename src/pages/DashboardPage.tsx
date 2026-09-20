@@ -70,8 +70,6 @@ export function DashboardPage({ navigate }: { navigate: (path: string) => void }
         <PageHeader title={'Olá' + (profile?.display_name ? ', ' + profile.display_name : '') + '!'} subtitle="Seu espaço pessoal para executar projetos, acompanhar metas e evoluir com consistência." />
         {dashboardError && <div role="alert" className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-center justify-between gap-3"><span>{dashboardError}</span><button onClick={() => setDashboardError('')} className="text-xs font-semibold">Fechar</button></div>}
 
-       </div>
-
         <div className="grid md:grid-cols-3 gap-4 mb-6">
           <button onClick={() => navigate('/action-flows')} className="text-left">
             <Card className="p-5 h-full hover:shadow-md transition">
@@ -112,8 +110,6 @@ export function DashboardPage({ navigate }: { navigate: (path: string) => void }
       {/* Welcome */}
       <PageHeader title={'Olá' + (profile?.display_name ? ', ' + profile.display_name : '') + '!'} subtitle="O que merece sua atenção agora." />
       {dashboardError && <div role="alert" className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-center justify-between gap-3"><span>{dashboardError}</span><button onClick={() => setDashboardError('')} className="text-xs font-semibold">Fechar</button></div>}
-
-div>
 
       {/* Public page banner */}
       <div className="grid md:grid-cols-2 gap-3 mb-6">
