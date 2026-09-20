@@ -20,7 +20,7 @@ interface AuthContextValue {
   setMenuItemVisibility: (path: string, visible: boolean) => Promise<boolean>;
 }
 
-const ADMIN_EMAIL = 'ibritreal@gmail.com';
+const ADMIN_EMAIL = 'ibritreal@gmail.com'; // single owner/admin account during waitlist
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
