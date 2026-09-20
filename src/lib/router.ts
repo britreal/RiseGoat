@@ -35,6 +35,12 @@ function parseHash(): Route {
   if (pathParts[0] === 'u' && pathParts[1] && pathParts[2] === 'microblog' && pathParts[3]) {
     return { name: 'public-microblog', username: decodeURIComponent(pathParts[1]), postId: decodeURIComponent(pathParts[3]) };
   }
+  if (pathParts[0]?.startsWith('@') && pathParts[0].length > 1 && pathParts[2] === 'microblog' && pathParts[3]) {
+    return { name: 'public-microblog', username: decodeURIComponent(pathParts[0].slice(1)), postId: decodeURIComponent(pathParts[3]) };
+  }
+  if (pathParts[0]?.startsWith('@') && pathParts[0].length > 1) {
+    return { name: 'public', username: decodeURIComponent(pathParts[0].slice(1)) };
+  }
   if (pathParts[0] === 'u' && pathParts[1]) {
     return { name: 'public', username: decodeURIComponent(pathParts[1]) };
   }
@@ -49,6 +55,8 @@ function parseHash(): Route {
   if (parts.length === 0) return { name: 'dashboard' };
   if (parts[0] === 'auth') return { name: 'auth' };
   if (parts[0] === 'u' && parts[1] && parts[2] === 'microblog' && parts[3]) return { name: 'public-microblog', username: decodeURIComponent(parts[1]), postId: decodeURIComponent(parts[3]) };
+  if (parts[0]?.startsWith('@') && parts[0].length > 1 && parts[2] === 'microblog' && parts[3]) return { name: 'public-microblog', username: decodeURIComponent(parts[0].slice(1)), postId: decodeURIComponent(parts[3]) };
+  if (parts[0]?.startsWith('@') && parts[0].length > 1) return { name: 'public', username: decodeURIComponent(parts[0].slice(1)) };
   if (parts[0] === 'u' && parts[1]) return { name: 'public', username: decodeURIComponent(parts[1]) };
   if (parts[0] === 'p' && parts[1]) return { name: 'public-sales', slug: parts.slice(1).map(decodeURIComponent).join('/') };
   if (parts[0] === 'unsubscribe' && parts[1]) return { name: 'unsubscribe', token: decodeURIComponent(parts[1]) };
