@@ -35,24 +35,21 @@ function AppContent() {
   if (route.name === 'public-sales') return <PublicSalesPage slug={route.slug} />;
   if (route.name === 'unsubscribe') return <UnsubscribePage token={route.token} />;
 
+  useEffect(() => {
+    const businessOnly = new Set(['profile','links','microblog','newsletter','posts','drafts','leads','analytics','sales','offers','product-portfolio','book-writer','revenue','command-center','partnerships','launches','radar','sales-editor']);
+    if (route.name === 'auth' && session) navigate('/dashboard');
+    if (route.name !== 'auth' && !loading && !session) navigate('/auth');
+    if (session && workspaceMode === 'pessoal' && businessOnly.has(route.name)) navigate('/dashboard');
+    if (session && workspaceMode === 'negocios' && route.name === 'goat') navigate('/dashboard');
+  }, [route.name, session, loading, workspaceMode, navigate]);
+
   if (route.name === 'auth') {
-    if (loading) return <Spinner />;
-    if (session) { navigate('/dashboard'); return <Spinner />; }
+    if (loading || session) return <Spinner />;
     return <AuthPage />;
   }
 
   if (loading) return <Spinner />;
-  if (!session) return <AuthPage />;
-
-  const businessOnly = new Set(['profile','links','microblog','newsletter','posts','drafts','leads','analytics','sales','offers','product-portfolio','book-writer','revenue','command-center','partnerships','launches','radar','sales-editor']);
-  if (workspaceMode === 'pessoal' && businessOnly.has(route.name)) {
-    navigate('/dashboard');
-    return <Spinner />;
-  }
-  if (workspaceMode === 'negocios' && route.name === 'goat') {
-    navigate('/dashboard');
-    return <Spinner />;
-  }
+  if (!session) return <Spinner />;
 
   if (route.name === 'goat') return <DashboardLayout currentPath="/goat" navigate={navigate}><GoatPage /></DashboardLayout>;
 
@@ -105,9 +102,7 @@ function hideBoltBadge() {
         aria.includes('made in bolt') ||
         title.includes('made in bolt') ||
         el.hasAttribute('data-bolt') ||
-        el.hasAttribute('data-badge') ||
-        el.className.toString().toLowerCase().includes('badge') ||
-        el.id.toLowerCase().includes('badge');
+        el.hasAttribute('data-badge');
 
       if (isBoltBadge) {
         el.style.setProperty('display', 'none', 'important');
