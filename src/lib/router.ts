@@ -24,6 +24,7 @@ export type Route =
   | { name: 'radar' }
   | { name: 'goals' }
   | { name: 'goat' }
+  | { name: 'admin' }
   | { name: 'sales-editor'; pageId: string }
   | { name: 'public'; username: string }
   | { name: 'public-microblog'; username: string; postId: string }
@@ -32,26 +33,15 @@ export type Route =
 
 function parseHash(): Route {
   const pathParts = window.location.pathname.split('/').filter(Boolean);
-  if (pathParts[0] === 'u' && pathParts[1] && pathParts[2] === 'microblog' && pathParts[3]) {
-    return { name: 'public-microblog', username: decodeURIComponent(pathParts[1]), postId: decodeURIComponent(pathParts[3]) };
-  }
-  if (pathParts[0]?.startsWith('@') && pathParts[0].length > 1 && pathParts[2] === 'microblog' && pathParts[3]) {
-    return { name: 'public-microblog', username: decodeURIComponent(pathParts[0].slice(1)), postId: decodeURIComponent(pathParts[3]) };
-  }
-  if (pathParts[0]?.startsWith('@') && pathParts[0].length > 1) {
-    return { name: 'public', username: decodeURIComponent(pathParts[0].slice(1)) };
-  }
-  if (pathParts[0] === 'u' && pathParts[1]) {
-    return { name: 'public', username: decodeURIComponent(pathParts[1]) };
-  }
-  if (pathParts[0] === 'p' && pathParts[1]) {
-    return { name: 'public-sales', slug: pathParts.slice(1).map(decodeURIComponent).join('/') };
-  }
+  if (pathParts[0] === 'u' && pathParts[1] && pathParts[2] === 'microblog' && pathParts[3]) return { name: 'public-microblog', username: decodeURIComponent(pathParts[1]), postId: decodeURIComponent(pathParts[3]) };
+  if (pathParts[0]?.startsWith('@') && pathParts[0].length > 1 && pathParts[2] === 'microblog' && pathParts[3]) return { name: 'public-microblog', username: decodeURIComponent(pathParts[0].slice(1)), postId: decodeURIComponent(pathParts[3]) };
+  if (pathParts[0]?.startsWith('@') && pathParts[0].length > 1) return { name: 'public', username: decodeURIComponent(pathParts[0].slice(1)) };
+  if (pathParts[0] === 'u' && pathParts[1]) return { name: 'public', username: decodeURIComponent(pathParts[1]) };
+  if (pathParts[0] === 'p' && pathParts[1]) return { name: 'public-sales', slug: pathParts.slice(1).map(decodeURIComponent).join('/') };
   if (pathParts[0] === 'unsubscribe' && pathParts[1]) return { name: 'unsubscribe', token: decodeURIComponent(pathParts[1]) };
 
   const hash = window.location.hash.replace(/^#/, '') || '/';
   const parts = hash.split('/').filter(Boolean);
-
   if (parts.length === 0) return { name: 'dashboard' };
   if (parts[0] === 'auth') return { name: 'auth' };
   if (parts[0] === 'u' && parts[1] && parts[2] === 'microblog' && parts[3]) return { name: 'public-microblog', username: decodeURIComponent(parts[1]), postId: decodeURIComponent(parts[3]) };
@@ -74,7 +64,7 @@ function parseHash(): Route {
   if (parts[0] === 'sales' && parts[1] === 'editor' && parts[2]) return { name: 'sales-editor', pageId: parts[2] };
   if (parts[0] === 'command-center') return { name: 'command-center' };
   if (parts[0] === 'goat') return { name: 'goat' };
-  // Backward-compatible support for the previous editor URL.
+  if (parts[0] === 'admin') return { name: 'admin' };
   if (parts[0] === 'sales-editor' && parts[1]) return { name: 'sales-editor', pageId: parts[1] };
   if (parts[0] === 'sales') return { name: 'sales' };
   if (parts[0] === 'offers') return { name: 'offers' };
@@ -90,7 +80,6 @@ function parseHash(): Route {
 
 export function useRouter() {
   const [route, setRoute] = useState<Route>(parseHash());
-
   useEffect(() => {
     const handler = () => setRoute(parseHash());
     window.addEventListener('hashchange', handler);
@@ -100,10 +89,6 @@ export function useRouter() {
       window.removeEventListener('popstate', handler);
     };
   }, []);
-
-  const navigate = useCallback((path: string) => {
-    window.location.hash = path;
-  }, []);
-
+  const navigate = useCallback((path: string) => { window.location.hash = path; }, []);
   return { route, navigate };
 }
