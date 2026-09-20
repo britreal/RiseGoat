@@ -2,33 +2,23 @@ import { type ReactNode, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { Sparkles, ExternalLink, LogOut, Menu, X, UserRound, BriefcaseBusiness } from 'lucide-react';
-
 import { navItems } from '@/lib/navigation';
+
 interface DashboardLayoutProps { children: ReactNode; currentPath: string; navigate: (path: string) => void; }
 
 export function DashboardLayout({ children, currentPath, navigate }: DashboardLayoutProps) {
-  const { profile, signOut, workspaceMode, setWorkspaceMode, menuVisibility } = useAuth();
+  const { profile, signOut, workspaceMode, setWorkspaceMode, menuVisibility, isAdmin } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const visibleNavItems = navItems.filter((item) => {
     const modeVisible = item.mode === 'shared' || item.mode === workspaceMode;
     const visibilityAllowed = item.controllable === false || menuVisibility[item.path] !== false;
-    return modeVisible && visibilityAllowed;
+    const adminVisible = !item.adminOnly || isAdmin;
+    return modeVisible && visibilityAllowed && adminVisible;
   });
   const groups = [...new Set(visibleNavItems.map((n) => n.group))];
-  const groupTone: Record<string, string> = {
-    'Presença': 'text-blue-700 bg-blue-50',
-    'Captação': 'text-emerald-700 bg-emerald-50',
-    'Conteúdo': 'text-violet-700 bg-violet-50',
-    'Medição': 'text-cyan-700 bg-cyan-50',
-    'Monetização': 'text-amber-700 bg-amber-50',
-    'Núcleo': 'text-slate-700 bg-slate-100',
-    'Execução': 'text-indigo-700 bg-indigo-50',
-    'Estratégia': 'text-red-700 bg-red-50',
-    'Pessoal': 'text-slate-700 bg-slate-100',
-    'Conta': 'text-slate-600 bg-slate-100',
-    'Início': 'text-slate-700 bg-slate-100',
-  };
+
   function handleNav(path: string) { navigate(path); setMobileOpen(false); }
+
   async function handleWorkspaceMode(mode: 'pessoal' | 'negocios') {
     const saved = await setWorkspaceMode(mode);
     if (!saved) return;
@@ -54,16 +44,9 @@ export function DashboardLayout({ children, currentPath, navigate }: DashboardLa
               <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">{group}</p>
               <div className="space-y-0.5">
                 {visibleNavItems.filter((n) => n.group === group).map((item) => (
-                  <button
-                    key={item.path}
-                    onClick={() => handleNav(item.path)}
-                    className={cn(
-                      'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all',
-                      currentPath === item.path
-                        ? 'bg-slate-950 text-white shadow-sm'
-                        : 'text-slate-500 hover:bg-slate-100 hover:text-slate-950'
-                    )}
-                  >
+                  <button key={item.path} onClick={() => handleNav(item.path)}
+                    className={cn('w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all',
+                      currentPath === item.path ? 'bg-slate-950 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-950')}>
                     <item.icon className="w-[17px] h-[17px] shrink-0" />
                     <span className="truncate">{item.label}</span>
                   </button>
