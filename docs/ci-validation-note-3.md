@@ -1,0 +1,1 @@
+Temporary validation marker for the waitlist/auth CI run.
