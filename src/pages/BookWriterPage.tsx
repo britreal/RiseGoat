@@ -356,18 +356,83 @@ export function BookWriterPage(){
     {error&&<div className="mb-4 px-4 py-3 rounded-xl border border-red-200 bg-red-50 text-xs text-red-700 flex justify-between gap-3">{error}<button onClick={()=>setError('')}><X className="w-4 h-4"/></button></div>}
     {notice&&<div className="mb-4 px-4 py-3 rounded-xl border border-emerald-200 bg-emerald-50 text-xs text-emerald-700 flex justify-between gap-3">{notice}<button onClick={()=>setNotice('')}><X className="w-4 h-4"/></button></div>}
 
-    {view==='dashboard'&&<div className="space-y-5">
-      <div className="grid md:grid-cols-4 gap-3">{[['Livros',books.length],['Em andamento',books.filter(b=>b.status!=='Pronto').length],['Prontos',books.filter(b=>b.status==='Pronto').length],['Palavras',books.reduce((s,b)=>s+b.word_count,0).toLocaleString('pt-BR')]].map(x=><Card key={String(x[0])} className="p-4"><span className="text-[10px] uppercase tracking-[.15em] font-bold text-slate-400">{x[0]}</span><p className="text-xl font-black mt-2">{x[1]}</p></Card>)}</div>
-      <Card className="p-4"><div className="grid lg:grid-cols-[2fr_1fr_1fr] gap-2"><div className="relative"><Search className="absolute left-3 top-3 w-4 h-4 text-slate-300"/><input value={search} onChange={e=>setSearch(e.target.value)} className="w-full h-10 rounded-xl border border-slate-200 pl-9 text-sm" placeholder="Buscar livro..."/></div><select value={filter.status} onChange={e=>setFilter({...filter,status:e.target.value})} className="h-10 rounded-xl border px-3 text-sm"><option value="">Todos os status</option>{STATUSES.map(s=><option key={s}>{s}</option>)}</select><select value={filter.genre} onChange={e=>setFilter({...filter,genre:e.target.value})} className="h-10 rounded-xl border px-3 text-sm"><option value="">Todos os gêneros</option>{GENRES.map(g=><option key={g}>{g}</option>)}</select><input type="date" value={dateFrom} onChange={e=>setDateFrom(e.target.value)} className="h-10 rounded-xl border px-3 text-sm" title="Criados a partir de"/></div></Card>
-      {!filtered.length&&<Card className="p-12 text-center"><BookOpen className="w-10 h-10 mx-auto text-blue-200"/><p className="text-sm font-bold text-slate-700 mt-3">Nenhum livro cadastrado.</p><button onClick={()=>void createBook()} className="mt-3 px-4 py-2.5 rounded-xl bg-blue-700 text-white text-xs font-bold">Criar primeiro livro</button></Card>}
-      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">{filtered.map(b=><Card key={b.id} className="overflow-hidden hover:border-blue-200 transition"><div className="aspect-[16/7] bg-slate-950 relative overflow-hidden">{b.cover_image?<img src={b.cover_image} alt="" className="w-full h-full object-cover"/>:<div className="h-full flex items-center justify-center"><BookOpen className="w-10 h-10 text-blue-300"/></div>}<div className="absolute left-3 bottom-3"><StatusPill status={b.status}/></div></div><div className="p-4"><h3 className="font-black text-slate-900 truncate">{b.title}</h3><p className="text-xs text-slate-400 mt-1">{b.genre} · {b.chapter_count} capítulos · {b.word_count.toLocaleString('pt-BR')} palavras</p><div className="mt-4 flex items-center justify-between text-[11px] font-bold text-slate-500"><span>{b.progress}%</span><span>{b.estimated_words.toLocaleString('pt-BR')} meta</span></div><Progress value={b.progress}/><button onClick={()=>void loadBook(b.id,'wizard')} className="mt-4 w-full px-3 py-2.5 rounded-xl bg-slate-950 text-white text-xs font-bold">Continuar</button></div></Card>)}</div>
-    </div>}
+    {view==='dashboard'&&<div className="space-y-6">
+      <div className="rounded-3xl bg-slate-950 text-white p-6 lg:p-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+        <div>
+          <p className="text-[10px] uppercase tracking-[.2em] text-blue-300 font-bold">Biblioteca</p>
+          <h2 className="text-2xl lg:text-3xl font-black tracking-tight mt-2">Transforme uma ideia em livro.</h2>
+          <p className="text-sm text-slate-400 mt-2 max-w-xl">Um espaço simples para planejar, escrever, revisar e exportar seus livros.</p>
+        </div>
+        <button onClick={()=>void createBook()} className="shrink-0 px-4 py-3 rounded-xl bg-white text-slate-950 text-sm font-bold"><Plus className="inline w-4 h-4 mr-1"/>Novo livro</button>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[['Livros',books.length],['Em andamento',books.filter(b=>b.status!=='Pronto').length],['Prontos',books.filter(b=>b.status==='Pronto').length],['Palavras',books.reduce((s,b)=>s+b.word_count,0).toLocaleString('pt-BR')]].map(x=>
+          <Card key={String(x[0])} className="p-4">
+            <span className="text-[10px] uppercase tracking-[.14em] font-bold text-slate-400">{x[0]}</span>
+            <p className="text-2xl font-black mt-1">{x[1]}</p>
+          </Card>
+        )}
+      </div>
+
+      <Card className="p-3">
+        <div className="flex flex-col lg:flex-row gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 w-4 h-4 text-slate-300"/>
+            <input value={search} onChange={e=>setSearch(e.target.value)} className="w-full h-10 rounded-xl border border-slate-200 pl-9 text-sm outline-none focus:border-blue-500" placeholder="Buscar livro..."/>
+          </div>
+          <select value={filter.status} onChange={e=>setFilter({...filter,status:e.target.value})} className="h-10 rounded-xl border border-slate-200 px-3 text-sm"><option value="">Status</option>{STATUSES.map(s=><option key={s}>{s}</option>)}</select>
+          <select value={filter.genre} onChange={e=>setFilter({...filter,genre:e.target.value})} className="h-10 rounded-xl border border-slate-200 px-3 text-sm"><option value="">Gênero</option>{GENRES.map(g=><option key={g}>{g}</option>)}</select>
+        </div>
+      </Card>
+
+      {!filtered.length&&<Card className="p-12 text-center">
+        <BookOpen className="w-10 h-10 mx-auto text-slate-300"/>
+        <p className="text-base font-bold text-slate-700 mt-3">Sua biblioteca está vazia.</p>
+        <p className="text-xs text-slate-400 mt-1">Comece pelo primeiro livro.</p>
+        <button onClick={()=>void createBook()} className="mt-4 px-4 py-2.5 rounded-xl bg-slate-950 text-white text-xs font-bold">Criar livro</button>
+      </Card>}
+
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {filtered.map(b=><Card key={b.id} className="overflow-hidden border-slate-200 hover:-translate-y-0.5 hover:shadow-lg transition">
+          <div className="aspect-[5/3] bg-slate-100 relative overflow-hidden">
+         <Card className="p-3">
+        <div className="flex items-center gap-1 overflow-x-auto pb-1">
+          {STEP_NAMES.map((name,i)=>{const n=i+1;return <button key={name} onClick={()=>setView(n===3?'editor':n===4?'review':n===5?'cover':n===6?'metadata':n===7?'exports':'wizard')} className={`shrink-0 px-3 py-2 rounded-xl text-xs font-bold transition ${activeStep===n?'bg-slate-950 text-white':'text-slate-500 hover:bg-slate-100'}`}><span className="mr-1.5 opacity-60">{String(n).padStart(2,'0')}</span>{name}</button>})}
+        </div>
+        <div className="mt-2"><Progress value={activeStep/7*100}/></div>
+      </Card>-500"><span>{b.word_count.toLocaleString('pt-BR')} palavras</span><span>{b.progress}%</span></div>
+            <div className="mt-2"><Progress value={b.progress}/></div>
+            <button onClick={()=>void loadBook(b.id,'wizard')} className="mt-4 w-full px-3 py-2.5 rounded-xl bg-slate-950 text-white text-xs font-bold">Abrir livro</button>
+          </div>
+        </Card>)}
+      </div>
+    </div>
 
     {book&&view!=='dashboard'&&<div className="space-y-5">
       <Card className="p-4"><div className="flex flex-wrap items-center gap-2">{STEP_NAMES.map((name,i)=>{const n=i+1;return <button key={name} onClick={()=>setView(n===3?'editor':n===4?'review':n===5?'cover':n===6?'metadata':n===7?'exports':'wizard')} className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold ${activeStep===n?'bg-blue-700 text-white':'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}><span className="w-5 h-5 rounded-full border border-current flex items-center justify-center text-[10px]">{n}</span>{name}</button>})}</div><div className="mt-4"><Progress value={activeStep/7*100}/></div></Card>
 
       {(view==='wizard')&&<Card className="p-6"><div className="flex items-center gap-3 mb-6"><span className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center"><BookOpen className="w-5 h-5"/></span><div><p className="text-[10px] uppercase tracking-[.18em] text-blue-600 font-bold">Passo {activeStep}</p><h2 className="text-xl font-black">{STEP_NAMES[activeStep-1]}</h2></div></div>
-        {activeStep===1&&<div className="grid md:grid-cols-2 gap-4"><Input label="Título provisório *" value={book.title} onChange={v=>updateBookField('title',v)}/><Input label="Subtítulo" value={book.subtitle} onChange={v=>updateBookField('subtitle',v)}/><Select label="Gênero *" value={book.genre} onChange={v=>updateBookField('genre',v as BookGenre)} options={GENRES}/><Input label="Público-alvo" value={book.target_audience} onChange={v=>updateBookField('target_audience',v)}/><TextArea label="Promessa central" value={book.promise} onChange={v=>updateBookField('promise',v)}/><Input label="Tom de voz" value={book.tone} onChange={v=>updateBookField('tone',v)} placeholder="Ex.: direto, didático, contemplativo"/><Input label="Extensão estimada (palavras)" value={book.estimated_words} onChange={v=>updateBookField('estimated_words',Math.max(1,Number(v)||1))} type="number"/><Input label="Meta diária de palavras" value={book.daily_word_goal} onChange={v=>updateBookField('daily_word_goal',Math.max(1,Number(v)||1))} type="number"/><Select label="Idioma" value={book.language} onChange={v=>updateBookField('language',v as ProductLanguage)} options={LANGUAGES}/><Select label="Plataforma principal" value={book.platform} onChange={v=>updateBookField('platform',v as ProductPlatform)} options={PLATFORMS}/></div>}
+        {activeStep===1&&<div className="space-y-5">
+          <div><p className="text-[10px] uppercase tracking-[.18em] text-blue-600 font-bold">Comece pelo essencial</p><h2 className="text-xl font-black mt-1">Qual é o livro?</h2><p className="text-xs text-slate-400 mt-1">Defina apenas a direção. O restante pode ser ajustado depois.</p></div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Input label="Título *" value={book.title} onChange={v=>updateBookField('title',v)}/>
+            <Input label="Subtítulo" value={book.subtitle} onChange={v=>updateBookField('subtitle',v)}/>
+            <Select label="Gênero *" value={book.genre} onChange={v=>updateBookField('genre',v as BookGenre)} options={GENRES}/>
+            <TextArea label="Promessa central" value={book.promise} onChange={v=>updateBookField('promise',v)} rows={3} placeholder="O que o leitor vai levar deste livro?"/>
+          </div>
+          <details className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <summary className="cursor-pointer text-xs font-bold text-slate-700">Configurações avançadas</summary>
+            <div className="grid md:grid-cols-2 gap-4 mt-4">
+              <Input label="Público-alvo" value={book.target_audience} onChange={v=>updateBookField('target_audience',v)}/>
+              <Input label="Tom de voz" value={book.tone} onChange={v=>updateBookField('tone',v)} placeholder="Ex.: direto, didático, contemplativo"/>
+              <Input label="Extensão estimada" value={book.estimated_words} onChange={v=>updateBookField('estimated_words',Math.max(1,Number(v)||1))} type="number"/>
+              <Input label="Meta diária de palavras" value={book.daily_word_goal} onChange={v=>updateBookField('daily_word_goal',Math.max(1,Number(v)||1))} type="number"/>
+              <Select label="Idioma" value={book.language} onChange={v=>updateBookField('language',v as ProductLanguage)} options={LANGUAGES}/>
+              <Select label="Plataforma principal" value={book.platform} onChange={v=>updateBookField('platform',v as ProductPlatform)} options={PLATFORMS}/>
+            </div>
+          </details>
+        </div>
         {activeStep===2&&<div className="space-y-4"><div className="grid md:grid-cols-2 gap-3">{chapters.map((ch,i)=><div key={ch.id} className="rounded-2xl border border-slate-200 p-4 flex items-start gap-3" draggable onDragStart={()=>setReorderFrom(ch.id)} onDragOver={e=>e.preventDefault()} onDrop={()=>{if(!reorderFrom||reorderFrom===ch.id)return;const from=chapters.findIndex(x=>x.id===reorderFrom);const to=chapters.findIndex(x=>x.id===ch.id);const arr=[...chapters];const [m]=arr.splice(from,1);arr.splice(to,0,m);const normalized=arr.map((x,j)=>({...x,order:j}));setChapters(normalized);setReorderFrom(null);void Promise.all(normalized.map(x=>supabase.from('book_chapters').update({order:x.order}).eq('id',x.id)));}}><div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-black text-xs">{i+1}</div><div className="min-w-0 flex-1"><p className="font-bold text-sm">{ch.title}</p><p className="text-xs text-slate-400 mt-1">{ch.summary||'Sem resumo'}</p></div><button onClick={()=>{setSelectedChapter(ch);setView('editor');void loadChapterSideData(ch.id)}} className="text-xs font-bold text-blue-700">Editar</button></div>)}</div><div className="grid md:grid-cols-2 gap-3 rounded-2xl bg-slate-50 p-4"><Input label="Novo capítulo" value={newChapterTitle} onChange={setNewChapterTitle} placeholder="Título"/><Input label="Resumo" value={newChapterSummary} onChange={setNewChapterSummary}/><div className="md:col-span-2 flex gap-2"><button onClick={()=>void addChapter()} className="px-3 py-2.5 rounded-xl bg-blue-700 text-white text-xs font-bold"><Plus className="inline w-4 h-4 mr-1"/>Adicionar capítulo</button></div></div><div className="grid md:grid-cols-3 gap-3"><TextArea label="Introdução" value={book.introduction} onChange={v=>updateBookField('introduction',v)} rows={3}/><TextArea label="Conclusão" value={book.conclusion} onChange={v=>updateBookField('conclusion',v)} rows={3}/><TextArea label="Sobre o autor" value={book.about_author} onChange={v=>updateBookField('about_author',v)} rows={3}/></div></div>}
         {(activeStep===3||activeStep===4||activeStep===5||activeStep===6||activeStep===7)&&<div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center"><p className="text-sm font-bold text-slate-700">{STEP_NAMES[activeStep-1]} tem uma área dedicada no menu acima.</p><button onClick={()=>setView(activeStep===3?'editor':activeStep===4?'review':activeStep===5?'cover':activeStep===6?'metadata':'exports')} className="mt-3 px-4 py-2.5 rounded-xl bg-blue-700 text-white text-xs font-bold">Abrir {STEP_NAMES[activeStep-1]}</button></div>}
         <div className="flex justify-between gap-2 mt-6 pt-4 border-t border-slate-100"><button disabled={activeStep===1} onClick={()=>void saveWizardStep(activeStep-1)} className="px-4 py-2.5 rounded-xl border text-sm font-semibold disabled:opacity-40"><ChevronLeft className="inline w-4 h-4 mr-1"/>Anterior</button><button onClick={()=>void saveWizardStep(Math.min(7,activeStep+1))} className="px-4 py-2.5 rounded-xl bg-blue-700 text-white text-sm font-bold">{saving?'Salvando...':'Salvar e Avançar'}<ChevronRight className="inline w-4 h-4 ml-1"/></button></div>
