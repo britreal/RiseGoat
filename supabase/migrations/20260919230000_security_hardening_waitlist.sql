@@ -103,16 +103,15 @@ revoke all on function public.handle_new_user() from public, anon, authenticated
 notify pgrst, 'reload schema';
 
 -- Cleanup: make the admin check invoker-safe and keep only the public unsubscribe RPC as a definer.
-alter function public.is_admin() security invoker;
 create or replace function public.is_admin()
 returns boolean
 language sql
 stable
-security invoker
-set search_path = pg_catalog
-as $$
+security definer
+set search_path = pg_catalog, public
+as $
   select exists (select 1 from public.app_admins where user_id = auth.uid());
-$$;
+$;
 revoke all on function public.is_admin() from public, anon, authenticated;
 grant execute on function public.is_admin() to authenticated;
 
