@@ -101,3 +101,51 @@ revoke all on function public.authority_property_refresh_leverage() from public,
 revoke all on function public.handle_new_user() from public, anon, authenticated;
 
 notify pgrst, 'reload schema';
+
+-- Cleanup: make the admin check invoker-safe and keep only the public unsubscribe RPC as a definer.
+alter function public.is_admin() security invoker;
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security invoker
+set search_path = pg_catalog
+as $$
+  select exists (select 1 from public.app_admins where user_id = auth.uid());
+$$;
+revoke all on function public.is_admin() from public, anon, authenticated;
+grant execute on function public.is_admin() to authenticated;
+
+create or replace function public.unsubscribe_newsletter(p_token uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  changed integer := 0;
+begin
+  update public.newsletter_leads
+  set unsubscribed_at = now()
+  where unsubscribe_token = p_token
+    and unsubscribed_at is null;
+  get diagnostics changed = row_count;
+  return jsonb_build_object('ok', true, 'changed', changed);
+end;
+$$;
+revoke all on function public.unsubscribe_newsletter(uuid) from public, anon, authenticated;
+grant execute on function public.unsubscribe_newsletter(uuid) to anon;
+
+-- Defense-in-depth: functions used only as auth/data triggers must not be API-callable.
+alter function public.authority_refresh_leverage(uuid) security invoker;
+alter function public.authority_run_radar(uuid) security invoker;
+revoke all on function public.authority_refresh_leverage(uuid) from public, anon, authenticated;
+grant execute on function public.authority_refresh_leverage(uuid) to authenticated;
+revoke all on function public.authority_run_radar(uuid) from public, anon, authenticated;
+grant execute on function public.authority_run_radar(uuid) to authenticated;
+revoke all on function public.authority_connections_refresh_leverage() from public, anon, authenticated;
+revoke all on function public.authority_contact_refresh_leverage() from public, anon, authenticated;
+revoke all on function public.authority_property_refresh_leverage() from public, anon, authenticated;
+revoke all on function public.handle_new_user() from public, anon, authenticated;
+
+notify pgrst, 'reload schema';
