@@ -157,7 +157,7 @@ export function ProfilePage() {
     );
   }
 
-  const publicUrl = `${window.location.origin}/u/${profile?.username}`;
+  const publicUrl = `${window.location.origin}/@${profile?.username}`;
 
   function applyPreset(preset: typeof THEME_PRESETS[0]) {
     setThemeColor(preset.bg);
