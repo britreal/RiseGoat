@@ -10,11 +10,13 @@ export function AuthPage() {
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setInfo(null);
     setLoading(true);
 
     if (mode === 'signup') {
@@ -28,8 +30,9 @@ export function AuthPage() {
         setLoading(false);
         return;
       }
-      const { error } = await signUp(email, password, username, displayName);
+      const { error, needsConfirmation } = await signUp(email, password, username, displayName);
       if (error) setError(error);
+      else if (needsConfirmation) setInfo('Conta criada. Confira seu e-mail para confirmar o endereço antes de entrar.');
       else window.location.hash = '/dashboard';
     } else {
       const { error } = await signIn(email, password);
@@ -114,8 +117,13 @@ export function AuthPage() {
             </div>
 
             {error && (
-              <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+              <div role="alert" className="text-sm text-red-300 bg-red-500/10 border border-red-500/20 rounded-xl px-3.5 py-3">
                 {error}
+              </div>
+            )}
+            {info && (
+              <div role="status" className="text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3.5 py-3">
+                {info}
               </div>
             )}
 
@@ -135,6 +143,7 @@ export function AuthPage() {
               onClick={() => {
                 setMode(mode === 'signup' ? 'signin' : 'signup');
                 setError(null);
+                setInfo(null);
               }}
               className="text-white hover:text-slate-300 font-semibold transition"
             >
