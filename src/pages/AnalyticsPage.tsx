@@ -17,6 +17,7 @@ export function AnalyticsPage() {
   const [links, setLinks] = useState<Link[]>([]);
   const [revenueRows, setRevenueRows] = useState<any[]>([]);
   const [range, setRange] = useState<7 | 30 | 90>(30);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!user) return;
@@ -28,6 +29,8 @@ export function AnalyticsPage() {
 
       supabase.from('links').select('*').eq('user_id', user.id).order('clicks', { ascending: false }),
     ]).then(([v, c, l, r, ln]) => {
+      const firstError = [v, c, l, r, ln].find((result) => result.error)?.error;
+      if (firstError) setError(firstError.message);
       setVisits((v.data as PageVisit[]) ?? []);
       setClicks((c.data as LinkClick[]) ?? []);
       setLeads((l.data as NewsletterLead[]) ?? []);
@@ -96,7 +99,7 @@ export function AnalyticsPage() {
     <div className="p-6 lg:p-8 max-w-4xl mx-auto">
       <PageHeader
         title="Analytics"
-        subtitle="Desempenho da sua página"
+        subtitle="Veja o que está acontecendo e de onde vem sua receita"
         action={
           <div className="flex gap-1 bg-white border border-slate-200 rounded-lg p-1">
             {([7, 30, 90] as const).map((r) => (
@@ -113,6 +116,13 @@ export function AnalyticsPage() {
           </div>
         }
       />
+
+      {error && (
+        <div role="alert" className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-start justify-between gap-3">
+          <span>{error}</span>
+          <button onClick={() => setError('')} className="text-xs font-semibold">Fechar</button>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
@@ -146,9 +156,14 @@ export function AnalyticsPage() {
                   title={`${day.visits} visitas`}
                 />
                 <div
-                  className="w-full max-w-[20px] bg-gradient-to-t from-blue-500 to-blue-300 rounded-sm transition-all group-hover:from-blue-600 group-hover:to-blue-400"
+                  className="w-full max-w-[20px] bg-slate-400 rounded-sm transition-all"
                   style={{ height: `${(day.clicks / maxVal) * 100}%`, minHeight: day.clicks > 0 ? '4px' : '0' }}
                   title={`${day.clicks} cliques`}
+                />
+                <div
+                  className="w-full max-w-[20px] bg-slate-900 rounded-sm transition-all"
+                  style={{ height: `${(day.leads / maxVal) * 100}%`, minHeight: day.leads > 0 ? '4px' : '0' }}
+                  title={`${day.leads} leads`}
                 />
               </div>
               {i % Math.ceil(days.length / 6) === 0 && (
@@ -157,13 +172,10 @@ export function AnalyticsPage() {
             </div>
           ))}
         </div>
-        <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 bg-cyan-400 rounded-sm" /> Visitas
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 bg-blue-400 rounded-sm" /> Cliques
-          </span>
+        <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-slate-500">
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-cyan-400 rounded-sm" /> Visitas</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-slate-400 rounded-sm" /> Cliques</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-slate-900 rounded-sm" /> Leads</span>
         </div>
       </Card>
 
