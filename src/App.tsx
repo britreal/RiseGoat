@@ -20,6 +20,7 @@ import { ActionFlowsPage } from '@/pages/ActionFlowsPage';
 import { ProductPortfolioPage } from '@/pages/ProductPortfolioPage';
 import { BookWriterPage } from '@/pages/BookWriterPage';
 import { SalesBuilderPage } from '@/pages/SalesBuilderPage';
+import { AdminPage } from '@/pages/AdminPage';
 import { PublicPage } from '@/pages/PublicPage';
 import { PublicMicroblogPage } from '@/pages/PublicMicroblogPage';
 import { PublicSalesPage } from '@/pages/PublicSalesPage';
@@ -39,6 +40,9 @@ function AppContent() {
     if (!publicRoute && session && workspaceMode === 'negocios' && route.name === 'goat') navigate('/dashboard');
   }, [route.name, session, loading, workspaceMode, navigate]);
 
+  const gatedPublicRoute = route.name === 'public' || route.name === 'public-microblog' || route.name === 'public-sales';
+
+  if (gatedPublicRoute && !loading && !session) return <AuthPage />;
   if (route.name === 'public') return <PublicPage username={route.username} />;
   if (route.name === 'public-microblog') return <PublicMicroblogPage username={route.username} postId={route.postId} />;
   if (route.name === 'public-sales') return <PublicSalesPage slug={route.slug} />;
@@ -52,11 +56,9 @@ function AppContent() {
   if (loading) return <Spinner />;
   if (!session) return <Spinner />;
 
+  if (route.name === 'admin') return <DashboardLayout currentPath="/admin" navigate={navigate}><AdminPage /></DashboardLayout>;
   if (route.name === 'goat') return <DashboardLayout currentPath="/goat" navigate={navigate}><GoatPage /></DashboardLayout>;
-
-  if (route.name === 'sales-editor') {
-    return <SalesBuilderPage pageId={route.pageId} navigate={navigate} />;
-  }
+  if (route.name === 'sales-editor') return <SalesBuilderPage pageId={route.pageId} navigate={navigate} />;
 
   const currentPath = `/${route.name}`;
   const pageMap: Record<string, React.ReactNode> = {
@@ -91,20 +93,12 @@ function hideBoltBadge() {
     const candidates = document.querySelectorAll<HTMLElement>(
       'a, button, [role="button"], [data-bolt], [data-badge], [class*="bolt" i], [id*="bolt" i], [class*="badge" i], [id*="badge" i]'
     );
-
     candidates.forEach((el) => {
       const text = (el.textContent || '').trim().toLowerCase();
       const href = (el.getAttribute('href') || '').toLowerCase();
       const aria = (el.getAttribute('aria-label') || '').toLowerCase();
       const title = (el.getAttribute('title') || '').toLowerCase();
-      const isBoltBadge =
-        text.includes('made in bolt') ||
-        href.includes('bolt.new') ||
-        aria.includes('made in bolt') ||
-        title.includes('made in bolt') ||
-        el.hasAttribute('data-bolt') ||
-        el.hasAttribute('data-badge');
-
+      const isBoltBadge = text.includes('made in bolt') || href.includes('bolt.new') || aria.includes('made in bolt') || title.includes('made in bolt') || el.hasAttribute('data-bolt') || el.hasAttribute('data-badge');
       if (isBoltBadge) {
         el.style.setProperty('display', 'none', 'important');
         el.style.setProperty('visibility', 'hidden', 'important');
@@ -113,7 +107,6 @@ function hideBoltBadge() {
       }
     });
   };
-
   hide();
   const observer = new MutationObserver(hide);
   observer.observe(document.body, { childList: true, subtree: true, characterData: true });
