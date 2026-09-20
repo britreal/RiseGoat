@@ -1,6 +1,7 @@
 {
   "rewrites": [
-    { "source": "/@:path*", "destination": "/index.html" },
+    { "source": "/@:username/microblog/:path*", "destination": "/index.html" },
+    { "source": "/@:username", "destination": "/index.html" },
     { "source": "/u/:path*", "destination": "/index.html" },
     { "source": "/p/:path*", "destination": "/index.html" },
     { "source": "/unsubscribe/:path*", "destination": "/index.html" }
