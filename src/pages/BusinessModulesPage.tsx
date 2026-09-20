@@ -11,9 +11,9 @@ import {
 type Tone = 'gold' | 'green' | 'red' | 'gray';
 
 const toneMap: Record<Tone, { badge: string; button: string; icon: string; soft: string }> = {
-  gold: { badge: 'bg-amber-50 text-amber-700 border-amber-200', button: 'bg-amber-500 hover:bg-amber-400', icon: 'bg-amber-50 text-amber-700', soft: 'bg-amber-50/60' },
-  green: { badge: 'bg-emerald-50 text-emerald-700 border-emerald-200', button: 'bg-emerald-600 hover:bg-emerald-500', icon: 'bg-emerald-50 text-emerald-700', soft: 'bg-emerald-50/60' },
-  red: { badge: 'bg-red-50 text-red-700 border-red-200', button: 'bg-red-600 hover:bg-red-500', icon: 'bg-red-50 text-red-700', soft: 'bg-red-50/60' },
+  gold: { badge: 'bg-amber-50 text-amber-700 border-amber-200', button: 'bg-slate-950 hover:bg-slate-800', icon: 'bg-amber-50 text-amber-700', soft: 'bg-amber-50/60' },
+  green: { badge: 'bg-emerald-50 text-emerald-700 border-emerald-200', button: 'bg-slate-950 hover:bg-slate-800', icon: 'bg-emerald-50 text-emerald-700', soft: 'bg-emerald-50/60' },
+  red: { badge: 'bg-red-50 text-red-700 border-red-200', button: 'bg-slate-950 hover:bg-slate-800', icon: 'bg-red-50 text-red-700', soft: 'bg-red-50/60' },
   gray: { badge: 'bg-slate-100 text-slate-700 border-slate-200', button: 'bg-slate-950 hover:bg-slate-800', icon: 'bg-slate-100 text-slate-700', soft: 'bg-slate-50' },
 };
 
@@ -143,7 +143,7 @@ export function OffersPage() {
   const ranking = [...items].map(x => ({ ...x, profit: Number(x.revenue_generated || 0) * (Number(x.margin || 0) - Number(x.commission || 0)) / 100 })).sort((a,b) => b.profit-a.profit);
   if (loading) return <Spinner />;
   return (
-    <div className="p-5 lg:p-8 max-w-7xl mx-auto">
+    <div className="p-5 lg:p-8 max-w-6xl mx-auto">
       <PageHeader title="Ofertas" subtitle="Transforme produtos, serviços e assinaturas em unidades de monetização." action={<Button tone="gold" onClick={() => setModal(true)}><Plus className="w-4 h-4" /> Nova oferta</Button>} />
       <ErrorNotice message={error} onClose={() => setError('')} />
       <div className="grid md:grid-cols-3 gap-4 mb-5">
@@ -153,7 +153,7 @@ export function OffersPage() {
           { label: 'Receita gerada', value: shortMoney(items.reduce((s,x)=>s+Number(x.revenue_generated||0),0)), Icon: CircleDollarSign },
         ].map(({ label, value, Icon }) => <Card className="p-5" key={label}><div className="flex justify-between items-center"><span className="text-[10px] uppercase tracking-[.16em] font-bold text-slate-400">{label}</span><Icon className="w-4 h-4 text-amber-500" /></div><p className="text-3xl font-black text-slate-950 mt-2">{String(value)}</p></Card>)}
       </div>
-      <div className="grid xl:grid-cols-[1.5fr_.5fr] gap-5">
+      <div className="grid xl:grid-cols-[1.4fr_.6fr] gap-5">
         <Card className="overflow-hidden">
           <div className="p-5 border-b border-slate-100"><Section title="Tabela de ofertas" subtitle="Preço, margem, comissão, canal e vínculo comercial." icon={CircleDollarSign} tone="gold" /></div>
           <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="bg-slate-50 text-[10px] uppercase tracking-wide text-slate-400"><tr>{['Oferta','Tipo','Status','Preço','Margem','Receita','Página',''].map(h=><th key={h} className="px-4 py-3">{h}</th>)}</tr></thead><tbody className="divide-y divide-slate-100">
