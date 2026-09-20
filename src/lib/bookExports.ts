@@ -14,7 +14,10 @@ function zip(entries:Array<{name:string;data:string|Uint8Array}>){
   const local=join(locals),central=join(centrals),end=join([u32(0x06054b50),u16(0),u16(0),u16(entries.length),u16(entries.length),u32(central.length),u32(local.length),u16(0)]);return join([local,central,end]);
 }
 function xml(s:string){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');}
-function safeName(s:string){return s.replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'')||'livro';}
+function safeName(s:string){
+  const normalized=s.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  return normalized.replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'')||'livro';
+}
 function toBlob(data:Uint8Array|Blob,type:string){return data instanceof Blob?data:new Blob([data],{type});}
 export function downloadBookFile(blob:Blob,name:string){
   const url=URL.createObjectURL(blob);
