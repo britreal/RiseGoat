@@ -137,9 +137,9 @@ export function PostsPage({ initialView = 'all' }: { initialView?: 'all' | 'draf
   return (
     <div className="p-6 lg:p-8 max-w-3xl mx-auto">
       <PageHeader title="Posts" subtitle="Publicações e rascunhos em um só lugar" />
-      <div className="flex gap-2 mb-4">
-        <button onClick={() => setView('all')} className={'px-3 py-1.5 rounded-lg text-xs font-medium ' + (view==='all' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-500')}>Publicados ({posts.length})</button>
-        <button onClick={() => setView('drafts')} className={'px-3 py-1.5 rounded-lg text-xs font-medium ' + (view==='drafts' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-500')}>Rascunhos ({drafts.length})</button>
+      <div className="inline-flex items-center gap-1 p-1 mb-4 rounded-2xl bg-slate-100 border border-slate-200">
+        <button onClick={() => setView('all')} aria-pressed={view==='all'} className={'px-4 py-2 rounded-xl text-xs font-semibold transition ' + (view==='all' ? 'bg-white text-slate-950 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-800')}>Publicados <span className="ml-1 text-slate-400">{posts.length}</span></button>
+        <button onClick={() => setView('drafts')} aria-pressed={view==='drafts'} className={'px-4 py-2 rounded-xl text-xs font-semibold transition ' + (view==='drafts' ? 'bg-white text-slate-950 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-800')}>Rascunhos <span className="ml-1 text-slate-400">{drafts.length}</span></button>
       </div>
 
       <Card className="p-4 mb-6">
@@ -148,14 +148,14 @@ export function PostsPage({ initialView = 'all' }: { initialView?: 'all' | 'draf
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Título (opcional)"
-          className="w-full px-3 py-2 text-sm font-medium border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 mb-3"
+          className="w-full h-11 px-3.5 text-sm font-medium border border-slate-200 rounded-xl focus:outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 mb-3"
         />
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Escreva uma nova postagem..."
           rows={3}
-          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 resize-none mb-3"
+          className="w-full px-3.5 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 resize-none mb-3"
         />
         <label className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-sm text-slate-600 mb-3">
           <ImageIcon className="w-4 h-4" /> {imageFile?.name || 'Adicionar imagem do PC ou celular (opcional)'}
