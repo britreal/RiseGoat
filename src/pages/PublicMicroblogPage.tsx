@@ -72,7 +72,7 @@ export function PublicMicroblogPage({ username, postId }: { username: string; po
         }
         ogImage.content = seoImage;
       }
-      const canonical = window.location.origin + '/u/' + encodeURIComponent(p.username) + '/microblog/' + encodeURIComponent(postData.id);
+      const canonical = window.location.origin + '/@' + encodeURIComponent(p.username) + '/microblog/' + encodeURIComponent(postData.id);
       let canonicalTag = document.head.querySelector('link[data-risegoat-canonical]') as HTMLLinkElement | null;
       if (!canonicalTag) {
         canonicalTag = document.createElement('link');
@@ -124,7 +124,7 @@ export function PublicMicroblogPage({ username, postId }: { username: string; po
 
         <article className="rounded-2xl border p-5 sm:p-8" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
           <div className="flex items-center justify-between gap-3 mb-5">
-            <a href={`/u/${profile.username}`} className="inline-flex items-center gap-1.5 text-xs font-medium text-white/50 hover:text-white transition"><ArrowLeft className="w-3.5 h-3.5" /> Voltar ao perfil</a>
+            <a href={`/@${profile.username}`} className="inline-flex items-center gap-1.5 text-xs font-medium text-white/50 hover:text-white transition"><ArrowLeft className="w-3.5 h-3.5" /> Voltar ao perfil</a>
             <span className="text-xs text-white/30">{timeAgo(post.created_at)}</span>
           </div>
           {post.title && <h2 className="text-2xl sm:text-3xl font-bold text-white leading-tight mb-5">{post.title}</h2>}
@@ -133,7 +133,7 @@ export function PublicMicroblogPage({ username, postId }: { username: string; po
           {post.button_text && post.button_url && <div className="pt-7 mt-7 border-t border-white/10"><a href={post.button_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm font-semibold text-white transition hover:opacity-90" style={{ backgroundColor: accentColor }}>{post.button_text}</a></div>}
         </article>
 
-        <div className="text-center mt-8"><a href={`#/u/${profile.username}`} className="text-xs text-white/30 hover:text-white/50 transition"><Sparkles className="w-3 h-3 inline mr-1" />{profile.display_name || profile.username}</a></div>
+        <div className="text-center mt-8"><a href={`/@${profile.username}`} className="text-xs text-white/30 hover:text-white/50 transition"><Sparkles className="w-3 h-3 inline mr-1" />{profile.display_name || profile.username}</a></div>
       </main>
     </div>
   );
