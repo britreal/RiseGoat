@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/u/:path*", "destination": "/index.html" },
-    { "source": "/p/:path*", "destination": "/index.html" }
+    { "source": "/p/:path*", "destination": "/index.html" },
+    { "source": "/unsubscribe/:path*", "destination": "/index.html" }
   ]
 }
