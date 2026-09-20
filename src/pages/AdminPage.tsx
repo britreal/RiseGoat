@@ -144,7 +144,7 @@ export function AdminPage() {
         ) : error ? (
           <div className="p-8 text-sm text-red-600">{error}</div>
         ) : items.length === 0 ? (
-          <EmptyState title="Ainda não há inscritos" description="Os primeiros nomes adicionados à lista aparecerão aqui." icon={Inbox} />
+          <EmptyState title="Ainda não há inscritos" subtitle="Os primeiros nomes adicionados à lista aparecerão aqui." icon={Inbox} />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
