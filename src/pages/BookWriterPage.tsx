@@ -365,43 +365,29 @@ export function BookWriterPage(){
         </div>
         <button onClick={()=>void createBook()} className="shrink-0 px-4 py-3 rounded-xl bg-white text-slate-950 text-sm font-bold"><Plus className="inline w-4 h-4 mr-1"/>Novo livro</button>
       </div>
-
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[['Livros',books.length],['Em andamento',books.filter(b=>b.status!=='Pronto').length],['Prontos',books.filter(b=>b.status==='Pronto').length],['Palavras',books.reduce((s,b)=>s+b.word_count,0).toLocaleString('pt-BR')]].map(x=>
-          <Card key={String(x[0])} className="p-4">
-            <span className="text-[10px] uppercase tracking-[.14em] font-bold text-slate-400">{x[0]}</span>
-            <p className="text-2xl font-black mt-1">{x[1]}</p>
-          </Card>
+          <Card key={String(x[0])} className="p-4"><span className="text-[10px] uppercase tracking-[.14em] font-bold text-slate-400">{x[0]}</span><p className="text-2xl font-black mt-1">{x[1]}</p></Card>
         )}
       </div>
-
       <Card className="p-3">
         <div className="flex flex-col lg:flex-row gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 w-4 h-4 text-slate-300"/>
-            <input value={search} onChange={e=>setSearch(e.target.value)} className="w-full h-10 rounded-xl border border-slate-200 pl-9 text-sm outline-none focus:border-blue-500" placeholder="Buscar livro..."/>
-          </div>
+          <div className="relative flex-1"><Search className="absolute left-3 top-3 w-4 h-4 text-slate-300"/><input value={search} onChange={e=>setSearch(e.target.value)} className="w-full h-10 rounded-xl border border-slate-200 pl-9 text-sm outline-none focus:border-blue-500" placeholder="Buscar livro..."/></div>
           <select value={filter.status} onChange={e=>setFilter({...filter,status:e.target.value})} className="h-10 rounded-xl border border-slate-200 px-3 text-sm"><option value="">Status</option>{STATUSES.map(s=><option key={s}>{s}</option>)}</select>
           <select value={filter.genre} onChange={e=>setFilter({...filter,genre:e.target.value})} className="h-10 rounded-xl border border-slate-200 px-3 text-sm"><option value="">Gênero</option>{GENRES.map(g=><option key={g}>{g}</option>)}</select>
         </div>
       </Card>
-
-      {!filtered.length&&<Card className="p-12 text-center">
-        <BookOpen className="w-10 h-10 mx-auto text-slate-300"/>
-        <p className="text-base font-bold text-slate-700 mt-3">Sua biblioteca está vazia.</p>
-        <p className="text-xs text-slate-400 mt-1">Comece pelo primeiro livro.</p>
-        <button onClick={()=>void createBook()} className="mt-4 px-4 py-2.5 rounded-xl bg-slate-950 text-white text-xs font-bold">Criar livro</button>
-      </Card>}
-
+      {!filtered.length&&<Card className="p-12 text-center"><BookOpen className="w-10 h-10 mx-auto text-slate-300"/><p className="text-base font-bold text-slate-700 mt-3">Sua biblioteca está vazia.</p><p className="text-xs text-slate-400 mt-1">Comece pelo primeiro livro.</p><button onClick={()=>void createBook()} className="mt-4 px-4 py-2.5 rounded-xl bg-slate-950 text-white text-xs font-bold">Criar livro</button></Card>}
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filtered.map(b=><Card key={b.id} className="overflow-hidden border-slate-200 hover:-translate-y-0.5 hover:shadow-lg transition">
           <div className="aspect-[5/3] bg-slate-100 relative overflow-hidden">
-         <Card className="p-3">
-        <div className="flex items-center gap-1 overflow-x-auto pb-1">
-          {STEP_NAMES.map((name,i)=>{const n=i+1;return <button key={name} onClick={()=>setView(n===3?'editor':n===4?'review':n===5?'cover':n===6?'metadata':n===7?'exports':'wizard')} className={`shrink-0 px-3 py-2 rounded-xl text-xs font-bold transition ${activeStep===n?'bg-slate-950 text-white':'text-slate-500 hover:bg-slate-100'}`}><span className="mr-1.5 opacity-60">{String(n).padStart(2,'0')}</span>{name}</button>})}
-        </div>
-        <div className="mt-2"><Progress value={activeStep/7*100}/></div>
-      </Card>-500"><span>{b.word_count.toLocaleString('pt-BR')} palavras</span><span>{b.progress}%</span></div>
+            {b.cover_image?<img src={b.cover_image} alt="" className="w-full h-full object-cover"/>:<div className="h-full flex items-center justify-center"><BookOpen className="w-9 h-9 text-slate-300"/></div>}
+            <div className="absolute top-3 left-3"><StatusPill status={b.status}/></div>
+          </div>
+          <div className="p-5">
+            <p className="text-[10px] uppercase tracking-[.14em] font-bold text-slate-400">{b.genre}</p>
+            <h3 className="font-black text-slate-900 text-base mt-1 truncate">{b.title}</h3>
+            <div className="mt-4 flex items-center justify-between text-[11px] text-slate-500"><span>{b.word_count.toLocaleString('pt-BR')} palavras</span><span>{b.progress}%</span></div>
             <div className="mt-2"><Progress value={b.progress}/></div>
             <button onClick={()=>void loadBook(b.id,'wizard')} className="mt-4 w-full px-3 py-2.5 rounded-xl bg-slate-950 text-white text-xs font-bold">Abrir livro</button>
           </div>
