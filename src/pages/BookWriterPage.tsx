@@ -3,7 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Card, PageHeader, Spinner } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
 import { uploadUserImage } from '@/lib/storage';
-import { buildCoverPng, buildDocx, buildEpub, buildPdf } from '@/lib/bookExports';
+import { buildCoverPng, buildDocx, buildEpub, buildPdf, downloadBookFile } from '@/lib/bookExports';
 import type {
   Book, BookChapter, BookChapterStatus, BookExport, BookExportFormat, BookGenre, BookRights, BookStatus,
   ProductLanguage, ProductPlatform,
@@ -331,6 +331,8 @@ export function BookWriterPage(){
     window.setTimeout(async()=>{
       try{
         const blob=format==='EPUB'?buildEpub(book,data):format==='DOCX'?buildDocx(book,data):buildPdf(book,data);
+        if(blob.size<100){throw new Error('O arquivo gerado parece estar vazio.');}
+        downloadBookFile(blob,slug(book.title)+'.'+format.toLowerCase());
         if(user){
           const ext=format.toLowerCase();const path=user.id+'/book-exports/'+slug(book.title)+'-'+Date.now()+'.'+ext;
           const up=await supabase.storage.from('risegoat-media').upload(path,blob,{upsert:false,contentType:blob.type});
