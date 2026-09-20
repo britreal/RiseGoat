@@ -149,3 +149,29 @@ revoke all on function public.authority_property_refresh_leverage() from public,
 revoke all on function public.handle_new_user() from public, anon, authenticated;
 
 notify pgrst, 'reload schema';
+
+
+-- Least privilege for database views and future objects.
+alter view public.authority_contact_intelligence set (security_invoker = true);
+alter view public.product_catalog set (security_invoker = true);
+revoke all on public.authority_contact_intelligence from anon, public;
+revoke all on public.product_catalog from anon, public;
+grant select on public.authority_contact_intelligence to authenticated;
+grant select on public.product_catalog to authenticated;
+
+do $$
+declare r record;
+begin
+  for r in select tablename from pg_tables where schemaname='public'
+  loop
+    execute format('revoke truncate, references, trigger on table public.%I from authenticated', r.tablename);
+  end loop;
+end
+$$;
+
+alter default privileges for role postgres in schema public revoke select, insert, update, delete, truncate, references, trigger on tables from anon, authenticated;
+alter default privileges for role postgres in schema public revoke execute on functions from anon, authenticated;
+alter default privileges for role postgres in schema public revoke usage, select on sequences from anon;
+alter default privileges for role postgres in schema public revoke execute on functions from public;
+
+notify pgrst, 'reload schema';
