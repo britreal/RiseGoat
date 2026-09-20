@@ -8,6 +8,7 @@ interface AuthContextValue {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
+  isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (email: string, password: string, username: string, displayName: string) => Promise<{ error: string | null; needsConfirmation: boolean }>;
   signOut: () => Promise<void>;
@@ -26,25 +27,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [workspaceMode, setWorkspaceModeState] = useState<WorkspaceMode>(() => (localStorage.getItem('risegoat-workspace-mode') as WorkspaceMode) || 'negocios');
   const [menuVisibility, setMenuVisibilityState] = useState<MenuVisibility>({});
 
   async function loadProfile(userId: string) {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
-
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
       if (error) {
         console.error('Failed to load profile:', error);
         setProfile(null);
         return;
       }
-
-      // A missing profile should never block the entire application.
-      // The Profile page can render a recovery state and the user can continue using the app.
       const nextProfile = data as Profile | null;
       setProfile(nextProfile);
       setMenuVisibilityState((nextProfile?.menu_visibility as MenuVisibility | null) ?? {});
@@ -57,6 +51,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  async function loadAdminStatus(userId: string) {
+    try {
+      const { data, error } = await supabase.from('app_admins').select('user_id').eq('user_id', userId).maybeSingle();
+      setIsAdmin(!error && Boolean(data));
+    } catch (error) {
+      console.error('Failed to load admin status:', error);
+      setIsAdmin(false);
+    }
+  }
+
+  async function loadUserContext(userId: string) {
+    await Promise.all([loadProfile(userId), loadAdminStatus(userId)]);
+  }
+
   useEffect(() => {
     let mounted = true;
 
@@ -64,9 +72,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) {
-        await loadProfile(session.user.id);
-      }
+      if (session?.user) await loadUserContext(session.user.id);
+      else setIsAdmin(false);
       if (mounted) setLoading(false);
     }).catch((error) => {
       console.error('Failed to initialize authentication:', error);
@@ -77,11 +84,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        (async () => {
-          await loadProfile(session.user.id);
-        })();
+        void loadUserContext(session.user.id);
       } else {
         setProfile(null);
+        setIsAdmin(false);
       }
     });
 
@@ -92,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function refreshProfile() {
-    if (user) await loadProfile(user.id);
+    if (user) await loadUserContext(user.id);
   }
 
   async function setWorkspaceMode(mode: WorkspaceMode) {
@@ -140,25 +146,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     if (error) return { error: error.message, needsConfirmation: false };
     if (!data.user) return { error: 'Falha ao criar conta', needsConfirmation: false };
-
-    // When email confirmation is enabled Supabase returns a user without an active session.
-    // Keep the user on the auth screen and explain the next step instead of redirecting to a protected route.
     return { error: null, needsConfirmation: !data.session };
   }
 
   async function signOut() {
     await supabase.auth.signOut();
     setProfile(null);
+    setIsAdmin(false);
     setMenuVisibilityState({});
     setWorkspaceModeState('negocios');
     localStorage.removeItem('risegoat-workspace-mode');
   }
 
-  return (
-    <AuthContext.Provider value={{ session, user, profile, loading, signIn, signUp, signOut, refreshProfile, workspaceMode, setWorkspaceMode, menuVisibility, setMenuVisibility, setMenuItemVisibility }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ session, user, profile, loading, isAdmin, signIn, signUp, signOut, refreshProfile, workspaceMode, setWorkspaceMode, menuVisibility, setMenuVisibility, setMenuItemVisibility }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
