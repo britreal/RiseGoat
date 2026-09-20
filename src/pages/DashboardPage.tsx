@@ -103,7 +103,7 @@ export function DashboardPage({ navigate }: { navigate: (path: string) => void }
     );
   }
 
-  const publicUrl = `${window.location.origin}/u/${profile?.username}`;
+  const publicUrl = `${window.location.origin}/@${profile?.username}`;
 
   return (
     <div className="p-6 lg:p-8 max-w-5xl mx-auto">
@@ -142,7 +142,7 @@ export function DashboardPage({ navigate }: { navigate: (path: string) => void }
               Copiar
             </button>
             <button
-              onClick={() => window.open(`/u/${profile?.username}`, '_blank')}
+              onClick={() => window.open(`/@${profile?.username}`, '_blank')}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-white/10 hover:bg-white/20 text-white rounded-lg transition"
             >
               <ExternalLink className="w-3.5 h-3.5" /> Abrir
