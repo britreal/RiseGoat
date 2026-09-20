@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Download, Loader2, RefreshCw, ShieldCheck, Users } from 'lucide-react';
+import { Download, Inbox, Loader2, RefreshCw, ShieldCheck, Users } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Card, EmptyState, PageHeader } from '@/components/ui';
@@ -85,10 +85,9 @@ export function AdminPage() {
   return (
     <div className="p-5 lg:p-8 max-w-5xl mx-auto">
       <PageHeader
-        eyebrow="Administração"
         title="Lista de espera"
         subtitle="Acompanhe quem deixou nome e email enquanto o cadastro permanece fechado."
-        actions={
+        action={
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -145,7 +144,7 @@ export function AdminPage() {
         ) : error ? (
           <div className="p-8 text-sm text-red-600">{error}</div>
         ) : items.length === 0 ? (
-          <EmptyState title="Ainda não há inscritos" description="Os primeiros nomes adicionados à lista aparecerão aqui." icon={<Users className="w-5 h-5" />} />
+          <EmptyState title="Ainda não há inscritos" description="Os primeiros nomes adicionados à lista aparecerão aqui." icon={Inbox} />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
