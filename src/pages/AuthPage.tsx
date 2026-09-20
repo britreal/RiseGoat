@@ -87,12 +87,12 @@ export function AuthPage() {
 
             <div className="mt-8 grid sm:grid-cols-2 gap-3 max-w-xl">
               {[
-                ['Execução', 'Fluxos, metas e organização para transformar plano em ação.', Zap],
-                ['Audiência', 'Conteúdo, leads e presença reunidos no mesmo lugar.', Users],
-                ['Produtos', 'Ideias, ofertas e livros preparados para virar ativos.', Sparkles],
-                ['Receita', 'Conecte sua operação de conteúdo à parte comercial.', ArrowRight],
-              ].map(([title, description, Icon]) => (
-                <div key={String(title)} className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+                { title: 'Execução', description: 'Fluxos, metas e organização para transformar plano em ação.', Icon: Zap },
+                { title: 'Audiência', description: 'Conteúdo, leads e presença reunidos no mesmo lugar.', Icon: Users },
+                { title: 'Produtos', description: 'Ideias, ofertas e livros preparados para virar ativos.', Icon: Sparkles },
+                { title: 'Receita', description: 'Conecte sua operação de conteúdo à parte comercial.', Icon: ArrowRight },
+              ].map(({ title, description, Icon }) => (
+                <div key={title} className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
                   <Icon className="w-4 h-4 text-white/80" />
                   <p className="mt-3 text-sm font-bold">{title}</p>
                   <p className="mt-1 text-xs leading-relaxed text-white/40">{description}</p>
