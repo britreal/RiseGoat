@@ -519,15 +519,15 @@ export function CommandCenterPage() {
   if (loading) return <Spinner />;
 
   return (
-    <div className="min-h-full bg-gradient-to-br from-slate-50 via-white to-cyan-50/30 p-4 sm:p-6 lg:p-8 max-w-[1500px] mx-auto">
+    <div className="min-h-full bg-[#f7f7f5] p-4 sm:p-6 lg:p-8 max-w-[1500px] mx-auto">
       <div className="mb-7 rounded-3xl border border-slate-200/80 bg-white/85 backdrop-blur-sm shadow-[0_12px_40px_rgba(15,23,42,0.06)] p-5 lg:p-6"><div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-100 bg-cyan-50 px-2.5 py-1"><span className="h-1.5 w-1.5 rounded-full bg-cyan-500" /><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-700">Centro de Comando</p></div>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">Teia de Autoridade</h1>
+          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1"><span className="h-1.5 w-1.5 rounded-full bg-slate-900" /><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-700">Centro de Comando</p></div>
+          <h1 className="mt-3 text-[30px] font-black tracking-[-0.03em] text-slate-950">Teia de Autoridade</h1>
           <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">Conecte propriedades, pessoas, conteúdo, tarefas e oportunidades em uma visão única.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={syncRiseGoatData} className="flex items-center gap-2 px-3.5 py-2.5 border border-cyan-200 bg-cyan-50 text-cyan-700 rounded-xl text-xs font-semibold hover:bg-cyan-100 transition shadow-sm">
+          <button onClick={syncRiseGoatData} className="flex items-center gap-2 px-3.5 py-2.5 border border-slate-900 bg-slate-950 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 transition shadow-sm">
             <RefreshCw className="w-4 h-4" /> Sincronizar RiseGoat
           </button>
           <button onClick={runRadar} className="flex items-center gap-2 px-3.5 py-2.5 border border-slate-200/80 bg-white rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm">
