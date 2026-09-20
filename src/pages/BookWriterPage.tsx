@@ -393,7 +393,7 @@ export function BookWriterPage(){
           </div>
         </Card>)}
       </div>
-    </div>
+    </div>}
 
     {book&&view!=='dashboard'&&<div className="space-y-5">
       <Card className="p-4"><div className="flex flex-wrap items-center gap-2">{STEP_NAMES.map((name,i)=>{const n=i+1;return <button key={name} onClick={()=>setView(n===3?'editor':n===4?'review':n===5?'cover':n===6?'metadata':n===7?'exports':'wizard')} className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold ${activeStep===n?'bg-blue-700 text-white':'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}><span className="w-5 h-5 rounded-full border border-current flex items-center justify-center text-[10px]">{n}</span>{name}</button>})}</div><div className="mt-4"><Progress value={activeStep/7*100}/></div></Card>
