@@ -24,7 +24,7 @@ export function PublicMicroblogPage({ username, postId }: { username: string; po
       if (!alive) return;
       setTarget({ slug: blog.slug, postSlug: post.slug });
       setLoading(false);
-    }).catch(() => { if (alive) { setMissing(true); setLoading(false); } });
+    });
     return () => { alive = false; };
   }, [username, postId]);
 
