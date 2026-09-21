@@ -103,7 +103,7 @@ export function SalesPagesPage({ navigate }: { navigate: (path: string) => void 
     let suffix = 2;
     while (used.has(slug)) slug = `${baseSlug || 'pagina-copy'}-${suffix++}`;
 
-    const { data: newPage, error } = await supabase.from('sales_pages').insert({ user_id: user.id, title: `${page.title} (cópia)`, slug }).select().single();
+    const { data: newPage, error } = await supabase.from('sales_pages').insert({ user_id: user.id, title: `${page.title} (cópia)`, slug, settings: page.settings || {} }).select().single();
     if (error || !newPage) { setErrorMessage(error?.message ?? 'Não foi possível duplicar a página.'); return; }
 
     for (const block of (blocks ?? []) as unknown as Array<{ block_type: string; content: string; settings: Record<string, unknown>; sort_order: number }>) {

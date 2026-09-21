@@ -73,7 +73,7 @@ export function LinksPage() {
   }, [user]);
 
   function resetForm() {
-    setNewType('link'); setNewLabel(''); setNewUrl(''); setNewDescription(''); setSelectedBlogId(blogs[0]?.id || '');
+    setNewType('link'); setNewLabel(''); setNewUrl(''); setNewDescription(''); setSelectedBlogId('');
     setNewThumbnail(''); setNewThumbnailFile(null); setNewPrice(''); setNewSensitive(false); setNewIcon('link'); setFormError('');
   }
 
@@ -105,7 +105,7 @@ export function LinksPage() {
       blog_id: selectedBlog?.id || null,
       description: newDescription.trim(),
       thumbnail_url: thumbnailUrl,
-      sensitive: newSensitive,
+      sensitive: newType === 'link' ? newSensitive : false,
       product_price: newPrice.trim(),
       product_currency: 'BRL',
       sort_order: links.length,
@@ -144,7 +144,7 @@ export function LinksPage() {
   return (
     <div className="p-6 lg:p-8 max-w-3xl mx-auto">
       <PageHeader title="Links" subtitle="Links, vídeos, cursos e produtos afiliados da sua página." action={
-        <button onClick={() => setAdding(!adding)} className="flex items-center gap-2 px-4 py-2.5 bg-slate-950 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl transition shadow-sm">
+        <button onClick={() => { setAdding((value) => !value); resetForm(); }} className="flex items-center gap-2 px-4 py-2.5 bg-slate-950 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl transition shadow-sm">
           <Plus className="w-4 h-4" /> Novo item
         </button>
       } />
@@ -232,11 +232,13 @@ export function LinksPage() {
             </div>
           )}
 
-          <label className="flex items-start gap-3 p-3 mt-4 rounded-xl border border-slate-200 cursor-pointer">
-            <input type="checkbox" checked={newSensitive} onChange={(e) => setNewSensitive(e.target.checked)} className="mt-0.5" />
-            <span><span className="flex items-center gap-1.5 text-sm font-medium text-slate-700"><ShieldAlert className="w-4 h-4 text-slate-500" /> Conteúdo sensível / 18+</span>
-            <span className="block text-[11px] text-slate-400 mt-0.5">O visitante precisará confirmar que é maior de 18 antes de abrir.</span></span>
-          </label>
+          {newType === 'link' && (
+            <label className="flex items-start gap-3 p-3 mt-4 rounded-xl border border-slate-200 cursor-pointer">
+              <input type="checkbox" checked={newSensitive} onChange={(e) => setNewSensitive(e.target.checked)} className="mt-0.5" />
+              <span><span className="flex items-center gap-1.5 text-sm font-medium text-slate-700"><ShieldAlert className="w-4 h-4 text-slate-500" /> Conteúdo sensível / 18+</span>
+              <span className="block text-[11px] text-slate-400 mt-0.5">O visitante precisará confirmar que é maior de 18 antes de abrir.</span></span>
+            </label>
+          )}
 
           {formError && <p className="mt-3 text-sm text-red-600">{formError}</p>}
           <div className="flex gap-2 mt-4">
@@ -263,7 +265,7 @@ export function LinksPage() {
                 <p className="text-sm font-medium text-slate-800 truncate">{link.label}</p>
                 <p className="text-xs text-slate-400 truncate">{link.link_type === 'affiliate' ? (link.description || 'Produto') + (link.product_price ? ' · ' + link.product_price : '') : link.link_type === 'blog' ? 'Blog vinculado' : link.url}</p>
               </div>
-              {link.sensitive && <ShieldAlert className="w-4 h-4 text-slate-400 shrink-0" aria-label="18+" />}
+              {link.link_type === 'link' && link.sensitive && <ShieldAlert className="w-4 h-4 text-slate-400 shrink-0" aria-label="18+" />}
               <span className="text-xs text-slate-400 hidden sm:block">{link.clicks} cliques</span>
               <div className="flex items-center gap-1">
                 <button onClick={() => toggleActive(link)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 transition" title={link.is_active ? 'Ocultar' : 'Mostrar'}>{link.is_active ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}</button>
