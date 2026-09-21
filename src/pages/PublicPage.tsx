@@ -419,7 +419,7 @@ export function PublicPage({ username }: { username: string }) {
           </div>
         )}
 
-        {/* Microblog */
+        {/* Microblog */}
         {posts.length > 0 && (
           <div className="space-y-3">
             {posts.map((post) => {
