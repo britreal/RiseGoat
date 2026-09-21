@@ -3,16 +3,17 @@ import { supabase } from '@/lib/supabase';
 import { uploadUserImage } from '@/lib/storage';
 import { useAuth } from '@/context/AuthContext';
 import { PageHeader, Card, Spinner, EmptyState } from '@/components/ui';
-import { Plus, Trash2, GripVertical, Eye, EyeOff, ExternalLink, Link2, Youtube, GraduationCap, ShoppingBag, Image as ImageIcon, ShieldAlert, Upload } from 'lucide-react';
-import type { Link } from '@/types';
+import { Plus, Trash2, GripVertical, Eye, EyeOff, ExternalLink, Link2, Youtube, GraduationCap, ShoppingBag, Image as ImageIcon, ShieldAlert, Upload, BookOpen } from 'lucide-react';
+import type { Link, Blog } from '@/types';
 
-type LinkType = 'link' | 'youtube' | 'course' | 'affiliate';
+type LinkType = 'link' | 'youtube' | 'course' | 'affiliate' | 'blog';
 
 const TYPE_OPTIONS: Array<{ value: LinkType; label: string; icon: typeof Link2; help: string }> = [
   { value: 'link', label: 'Link', icon: Link2, help: 'Instagram, WhatsApp, site...' },
   { value: 'youtube', label: 'YouTube', icon: Youtube, help: 'Exibe o vídeo na página' },
   { value: 'course', label: 'Curso', icon: GraduationCap, help: 'Link de curso ou aula' },
   { value: 'affiliate', label: 'Afiliado', icon: ShoppingBag, help: 'Produto com imagem e compra' },
+  { value: 'blog', label: 'Blog', icon: BookOpen, help: 'Vincula um Blog do RiseGoat ao seu perfil' },
 ];
 
 const ICON_OPTIONS = ['link', 'instagram', 'spotify', 'soundcloud', 'youtube', 'twitter', 'github', 'globe', 'mail', 'phone', 'music', 'mic', 'headphones', 'camera', 'shopping-bag', 'calendar', 'map-pin', 'star', 'heart'];
@@ -39,6 +40,8 @@ function youtubeId(url: string): string | null {
 export function LinksPage() {
   const { user } = useAuth();
   const [links, setLinks] = useState<Link[]>([]);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [selectedBlogId, setSelectedBlogId] = useState('');
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
   const [newType, setNewType] = useState<LinkType>('link');
@@ -54,21 +57,33 @@ export function LinksPage() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from('links').select('*').eq('user_id', user.id).order('sort_order', { ascending: true }).then(({ data, error }) => {
+    Promise.all([
+      supabase.from('links').select('*').eq('user_id', user.id).order('sort_order', { ascending: true }),
+      supabase.from('blogs').select('id,user_id,slug,name,is_published').eq('user_id', user.id).eq('is_published', true).order('created_at', { ascending: true }),
+    ]).then(([linksRes, blogsRes]) => {
+      const data = linksRes.data;
+      const error = linksRes.error;
+      setBlogs((blogsRes.data as Blog[]) ?? []);
       if (error) setFormError(error.message);
       setLinks((data as Link[]) ?? []);
+      const firstBlog = (blogsRes.data as Blog[] | null)?.[0];
+      if (firstBlog) setSelectedBlogId(firstBlog.id);
       setLoading(false);
     });
   }, [user]);
 
   function resetForm() {
-    setNewType('link'); setNewLabel(''); setNewUrl(''); setNewDescription('');
+    setNewType('link'); setNewLabel(''); setNewUrl(''); setNewDescription(''); setSelectedBlogId(blogs[0]?.id || '');
     setNewThumbnail(''); setNewThumbnailFile(null); setNewPrice(''); setNewSensitive(false); setNewIcon('link'); setFormError('');
   }
 
   async function addLink() {
     setFormError('');
     if (!user || !newLabel.trim() || !newUrl.trim()) return setFormError('Preencha título e URL.');
+    if (newType === 'blog') {
+      const blog = blogs.find((item) => item.id === selectedBlogId);
+      if (!blog) return setFormError('Selecione um Blog publicado.');
+    }
     if (newType === 'youtube' && !youtubeId(newUrl.trim())) return setFormError('Cole uma URL válida do YouTube.');
     if (newType === 'affiliate' && !newThumbnailFile && !newThumbnail.trim()) return setFormError('Produtos afiliados precisam de uma imagem.');
     let thumbnailUrl = newThumbnail.trim();
@@ -76,12 +91,15 @@ export function LinksPage() {
       if (newThumbnailFile) thumbnailUrl = await uploadUserImage(user.id, newThumbnailFile, 'links');
     } catch (error: any) { return setFormError(error?.message || 'Não foi possível enviar a imagem.'); }
 
+    const selectedBlog = newType === 'blog' ? blogs.find((item) => item.id === selectedBlogId) : null;
+    const linkUrl = selectedBlog ? '/' + selectedBlog.slug : newUrl.trim();
     const { data, error } = await supabase.from('links').insert({
       user_id: user.id,
-      label: newLabel.trim(),
-      url: newUrl.trim(),
-      icon: newType === 'youtube' ? 'youtube' : newType === 'course' ? 'book' : newType === 'affiliate' ? 'shopping-bag' : newIcon,
+      label: newType === 'blog' && selectedBlog ? (newLabel.trim() || selectedBlog.name) : newLabel.trim(),
+      url: linkUrl,
+      icon: newType === 'youtube' ? 'youtube' : newType === 'course' ? 'book' : newType === 'affiliate' ? 'shopping-bag' : newType === 'blog' ? 'book' : newIcon,
       link_type: newType,
+      blog_id: selectedBlog?.id || null,
       description: newDescription.trim(),
       thumbnail_url: thumbnailUrl,
       sensitive: newSensitive,
@@ -146,9 +164,30 @@ export function LinksPage() {
               <input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder={newType === 'affiliate' ? 'Tênis Nike Air Force 1' : newType === 'youtube' ? 'Meu vídeo no YouTube' : newType === 'course' ? 'Meu curso' : 'Instagram'} className="w-full h-11 px-3.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100" />
             </div>
             <div><label className="block text-xs font-medium text-slate-500 mb-1">URL de destino</label>
-              <input type="url" value={newUrl} onChange={(e) => setNewUrl(e.target.value)} placeholder="https://..." className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg" />
+              <input type="url" value={newUrl} onChange={(e) => setNewUrl(e.target.value)} placeholder="https://..." disabled={newType === 'blog'} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg disabled:bg-slate-50 disabled:text-slate-400" />
             </div>
           </div>
+
+          {newType === 'blog' && (
+            <div className="mt-3 space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Blog publicado</label>
+                <select value={selectedBlogId} onChange={(e) => {
+                  const id = e.target.value;
+                  setSelectedBlogId(id);
+                  const blog = blogs.find((item) => item.id === id);
+                  if (blog) {
+                    setNewLabel(blog.name);
+                    setNewUrl('/' + blog.slug);
+                  }
+                }} className="w-full h-11 px-3.5 text-sm border border-slate-200 rounded-xl bg-white">
+                  <option value="">Selecione um Blog</option>
+                  {blogs.map((blog) => <option key={blog.id} value={blog.id}>{blog.name} — /{blog.slug}</option>)}
+                </select>
+              </div>
+              <p className="text-[11px] text-slate-400">Esse link fica vinculado ao Blog. A URL é preenchida automaticamente e aparecerá no seu Perfil como um link normal.</p>
+            </div>
+          )}
 
           {(newType === 'affiliate' || newType === 'course') && (
             <div className="mt-3"><label className="block text-xs font-medium text-slate-500 mb-1">Descrição</label>
@@ -205,11 +244,11 @@ export function LinksPage() {
                 <button onClick={() => moveLink(index, 1)} disabled={index === links.length - 1} className="text-slate-300 hover:text-slate-600 disabled:opacity-30"><GripVertical className="w-4 h-4" /></button>
               </div>
               <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
-                {link.link_type === 'youtube' ? <Youtube className="w-4 h-4 text-slate-500" /> : link.link_type === 'course' ? <GraduationCap className="w-4 h-4 text-slate-500" /> : link.link_type === 'affiliate' ? <ShoppingBag className="w-4 h-4 text-slate-500" /> : <Link2 className="w-4 h-4 text-slate-500" />}
+                {link.link_type === 'youtube' ? <Youtube className="w-4 h-4 text-slate-500" /> : link.link_type === 'course' ? <GraduationCap className="w-4 h-4 text-slate-500" /> : link.link_type === 'affiliate' ? <ShoppingBag className="w-4 h-4 text-slate-500" /> : link.link_type === 'blog' ? <BookOpen className="w-4 h-4 text-slate-500" /> : <Link2 className="w-4 h-4 text-slate-500" />}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-slate-800 truncate">{link.label}</p>
-                <p className="text-xs text-slate-400 truncate">{link.link_type === 'affiliate' ? (link.description || 'Produto') + (link.product_price ? ' · ' + link.product_price : '') : link.url}</p>
+                <p className="text-xs text-slate-400 truncate">{link.link_type === 'affiliate' ? (link.description || 'Produto') + (link.product_price ? ' · ' + link.product_price : '') : link.link_type === 'blog' ? 'Blog vinculado' : link.url}</p>
               </div>
               {link.sensitive && <ShieldAlert className="w-4 h-4 text-slate-400 shrink-0" aria-label="18+" />}
               <span className="text-xs text-slate-400 hidden sm:block">{link.clicks} cliques</span>
