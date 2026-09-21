@@ -14,16 +14,16 @@ export function PublicBlogPage({ slug }: { slug: string }) {
   const [posts, setPosts] = useState<MicroblogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [page, setPage] = useState(() => Math.max(1, Number(new URLSearchParams(window.location.search).get('page') || '1') || 1));
   const [totalPosts, setTotalPosts] = useState(0);
 
   const PAGE_SIZE = 12;
+  const page = Math.max(1, Number(new URLSearchParams(window.location.search).get('page') || '1') || 1);
 
   useEffect(() => {
     let alive = true;
     setLoading(true);
+    setNotFound(false);
     const pageFromUrl = Math.max(1, Number(new URLSearchParams(window.location.search).get('page') || '1') || 1);
-    setPage(pageFromUrl);
     supabase.from('blogs').select('*').eq('slug', slug.toLowerCase()).eq('is_published', true).maybeSingle().then(async ({ data }) => {
       if (!alive) return;
       if (!data) { setNotFound(true); setLoading(false); return; }
@@ -56,7 +56,7 @@ export function PublicBlogPage({ slug }: { slug: string }) {
       setLoading(false);
     });
     return () => { alive = false; };
-  }, [slug, page]);
+  }, [slug]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="w-7 h-7 text-white/50 animate-spin" /></div>;
   if (notFound || !blog) return <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-white"><Sparkles className="w-8 h-8 text-white/30 mb-3" /><h1 className="text-xl font-bold">Blog não encontrado</h1><p className="text-sm text-white/40 mt-1">O endereço /{slug} não existe ou não está publicado.</p></div>;
