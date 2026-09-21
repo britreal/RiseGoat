@@ -49,7 +49,7 @@ export function PublicBlogPostPage({ slug, postSlug }: { slug: string; postSlug:
       s.textContent = JSON.stringify({ '@context':'https://schema.org','@type':'Article',headline:title,description,image:image||undefined,datePublished:p.published_at||p.created_at,dateModified:p.updated_at||p.created_at,author:{'@type':'Person',name:prof?.display_name||prof?.username||b.name},mainEntityOfPage:canonical });
       document.head.appendChild(s);
       setLoading(false);
-    }).catch(() => { if (alive) { setNotFound(true); setLoading(false); } });
+    });
     return () => { alive = false; };
   }, [slug, postSlug]);
 
