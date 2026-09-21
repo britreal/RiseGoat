@@ -47,7 +47,7 @@ export function PublicBlogPage({ slug }: { slug: string }) {
       schema.textContent = JSON.stringify({ '@context': 'https://schema.org', '@type': 'Blog', name: b.name, description, url: canonical, image: image || undefined, author: { '@type': 'Person', name: p?.display_name || p?.username || b.name } });
       document.head.appendChild(schema);
       setLoading(false);
-    }).catch(() => { if (alive) { setNotFound(true); setLoading(false); } });
+    });
     return () => { alive = false; };
   }, [slug]);
 
