@@ -40,9 +40,9 @@ function AppContent() {
     if (!publicRoute && session && workspaceMode === 'negocios' && route.name === 'goat') navigate('/dashboard');
   }, [route.name, session, loading, workspaceMode, navigate]);
 
-  const gatedPublicRoute = route.name === 'public' || route.name === 'public-microblog' || route.name === 'public-sales';
+  // Public profiles, articles and published sales pages remain accessible
+  // without an account. The waitlist blocks account creation, not public content.
 
-  if (gatedPublicRoute && !loading && !session) return <AuthPage />;
   if (route.name === 'public') return <PublicPage username={route.username} />;
   if (route.name === 'public-microblog') return <PublicMicroblogPage username={route.username} postId={route.postId} />;
   if (route.name === 'public-sales') return <PublicSalesPage slug={route.slug} />;
