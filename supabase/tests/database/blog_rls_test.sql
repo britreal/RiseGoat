@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(8);
+select plan(9);
 
 select ok(
   (select relrowsecurity from pg_class where oid='public.blogs'::regclass),
@@ -39,6 +39,16 @@ select ok(
       and policyname='select_microblog_posts'
   ),
   'microblog_posts uses a single combined select policy'
+);
+
+select ok(
+  not coalesce(
+    (select prosecdef from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+      where n.nspname='public' and p.proname='set_blog_post_pinned'
+        and pg_get_function_identity_arguments(p.oid)='p_post_id uuid, p_is_pinned boolean'),
+    true
+  ),
+  'blog pinning function is not SECURITY DEFINER'
 );
 
 select * from finish();
