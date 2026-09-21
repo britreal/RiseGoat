@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Sparkles, Loader2, Gift, Check, Youtube, GraduationCap, ShieldAlert, X, BookOpen } from 'lucide-react';
-import type { Profile, Link, MicroblogPost } from '@/types';
+import type { Profile, Link } from '@/types';
 import { timeAgo } from '@/lib/utils';
 
 const ICON_MAP: Record<string, string> = {
@@ -100,7 +100,6 @@ function setPropertyMeta(property: string, content: string) {
 export function PublicPage({ username }: { username: string }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [links, setLinks] = useState<Link[]>([]);
-  const [posts, setPosts] = useState<MicroblogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -182,12 +181,8 @@ export function PublicPage({ username }: { username: string }) {
           utm_term: attribution.utm_term,
         }).then();
 
-        Promise.all([
-          supabase.from('links').select('*').eq('user_id', p.id).eq('is_active', true).order('sort_order'),
-          supabase.from('microblog_posts').select('*').eq('user_id', p.id).eq('status', 'published').order('is_pinned', { ascending: false }).order('created_at', { ascending: false }).limit(20),
-        ]).then(([l, m]) => {
-          setLinks((l.data as Link[]) ?? []);
-          setPosts((m.data as MicroblogPost[]) ?? []);
+        supabase.from('links').select('*').eq('user_id', p.id).eq('is_active', true).order('sort_order').then(({ data }) => {
+          setLinks((data as Link[]) ?? []);
           setLoading(false);
         });
       });
@@ -399,42 +394,6 @@ export function PublicPage({ username }: { username: string }) {
             })}
           </div>
         )}
-        {/* Divider */}
-        {links.length > 0 && posts.length > 0 && (
-          <div className="flex items-center gap-3 my-8">
-            <div className="flex-1 h-px bg-white/10" />
-            <span className="text-xs font-semibold text-white/40 uppercase tracking-wider">Publicações</span>
-            <div className="flex-1 h-px bg-white/10" />
-          </div>
-        )}
-
-        {/* Microblog */}
-        {posts.length > 0 && (
-          <div className="space-y-3">
-            {posts.map((post) => {
-              const isLong = post.content.length > 280;
-              return (
-                <div key={post.id} className="px-5 py-4 backdrop-blur-sm border rounded-2xl" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
-                  {post.title && <h3 className="text-base font-semibold text-white mb-2">{post.title}</h3>}
-                  {post.image_url && <img src={post.image_url} alt={post.title || ''} className="w-full rounded-xl mb-3 max-h-64 object-cover" />}
-                  <p className="text-sm text-white/90 whitespace-pre-wrap leading-relaxed">{isLong ? post.content.slice(0, 280) + '...' : post.content}</p>
-                  {isLong && (() => {
-                    const linkedBlog = links.find((link) => link.link_type === 'blog' && link.blog_id === post.blog_id && link.is_active);
-                    return linkedBlog ? <a href={linkedBlog.url + '/' + post.slug} className="inline-flex items-center text-xs font-medium mt-2 transition" style={{ color: accentColor }}>Ler artigo completo →</a> : null;
-                  })()}
-                  <p className="text-xs text-white/30 mt-2">{timeAgo(post.created_at)}</p>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Divider */}
-        <div className="flex items-center gap-3 my-8">
-          <div className="flex-1 h-px bg-white/10" />
-          <div className="flex-1 h-px bg-white/10" />
-        </div>
-
         {/* Newsletter */}
         <div className="px-5 py-6 backdrop-blur-sm border rounded-2xl" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
           <div className="flex items-center gap-2 mb-1">
