@@ -409,7 +409,15 @@ function BlockPreview({block}:{block:SalesBlock}){
   const font=sizeClass[s.fontSize||'base']||'text-base';
   const base={fontFamily:s.fontFamily||'Inter',color:s.color||'#0f172a',backgroundColor:s.bgColor||'transparent',paddingTop:s.paddingY??10,paddingBottom:s.paddingY??10};
   const button=(text:string,url:string)=> <a href={url||'#'} onClick={e=>e.preventDefault()} className="inline-block px-7 py-3 font-semibold transition hover:opacity-90" style={{fontFamily:s.fontFamily||'Inter',borderRadius:s.buttonRadius??12,backgroundColor:s.buttonBg||'#0f172a',color:s.buttonColor||'#fff'}}>{text||'Clique aqui'}</a>;
-  if(block.block_type==='hero')return <section className={'px-6 '+wrap} style={{...base,paddingTop:s.paddingY??32,paddingBottom:s.paddingY??32}}><p className="text-xs uppercase tracking-[0.2em] opacity-60 mb-3">{s.title||'Oferta'}</p><h1 className={(font==='text-base'?'text-5xl':font)+' font-black leading-tight'}>{block.content}</h1>{s.subheading&&<p className="max-w-2xl mx-auto mt-4 text-lg leading-7 opacity-75">{s.subheading}</p>}<div className="mt-6">{button(s.buttonText||'Quero começar',s.buttonUrl||'#')}</div>{s.imageUrl&&<img src={s.imageUrl} alt="" className="max-w-full max-h-80 object-contain mx-auto mt-8 rounded-2xl"/></section>;
+  if(block.block_type==='hero')return (
+    <section className={'px-6 '+wrap} style={{...base,paddingTop:s.paddingY??32,paddingBottom:s.paddingY??32}}>
+      <p className="text-xs uppercase tracking-[0.2em] opacity-60 mb-3">{s.title||'Oferta'}</p>
+      <h1 className={(font==='text-base'?'text-5xl':font)+' font-black leading-tight'}>{block.content}</h1>
+      {s.subheading&&<p className="max-w-2xl mx-auto mt-4 text-lg leading-7 opacity-75">{s.subheading}</p>}
+      <div className="mt-6">{button(s.buttonText||'Quero começar',s.buttonUrl||'#')}</div>
+      {s.imageUrl ? <img src={s.imageUrl} alt="" className="max-w-full max-h-80 object-contain mx-auto mt-8 rounded-2xl"/> : null}
+    </section>
+  );
   if(block.block_type==='heading'||block.block_type==='text')return <div className={'px-6 '+wrap} style={base}><p className={font+' leading-relaxed '+(s.fontWeight==='bold'?'font-bold':'')+' whitespace-pre-wrap'}>{block.content}</p></div>;
   if(block.block_type==='image')return <div className={'px-6 flex '+(align==='center'?'justify-center':align==='right'?'justify-end':'justify-start')} style={{paddingTop:s.paddingY??12,paddingBottom:s.paddingY??12,backgroundColor:s.bgColor||'transparent'}}>{block.content?<img src={block.content} alt="" style={{width:`${s.imageWidth||100}%`}} className={'max-w-full object-contain '+(s.imageRounded===false?'':'rounded-xl')}/>:<div className="h-40 w-full bg-slate-100 rounded-xl flex items-center justify-center text-slate-400"><ImageIcon/></div>}</div>;
   if(block.block_type==='button')return <div className={'px-6 flex '+(align==='center'?'justify-center':align==='right'?'justify-end':'justify-start')} style={{paddingTop:s.paddingY??12,paddingBottom:s.paddingY??12,backgroundColor:s.bgColor||'transparent'}}>{button(block.content,s.buttonUrl||'#')}</div>;
