@@ -154,7 +154,17 @@ export function LinksPage() {
           <p className="text-sm font-semibold text-slate-800 mb-2">O que você quer adicionar?</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-4">
             {TYPE_OPTIONS.map((type) => (
-              <button key={type.value} onClick={() => setNewType(type.value)}
+              <button key={type.value} onClick={() => {
+                setNewType(type.value);
+                if (type.value === 'blog') {
+                  const blog = blogs.find((item) => item.id === selectedBlogId) || blogs[0];
+                  if (blog) {
+                    setSelectedBlogId(blog.id);
+                    setNewLabel(blog.name);
+                    setNewUrl('/' + blog.slug);
+                  }
+                }
+              }}
                 className={'flex items-center gap-2 p-3 rounded-xl border text-left transition ' + (newType === type.value ? 'border-slate-900 bg-slate-950 text-white shadow-sm' : 'border-slate-200 text-slate-600 hover:bg-slate-50')}>
                 <type.icon className="w-4 h-4 shrink-0" /><span className="text-xs font-medium">{type.label}</span>
               </button>
