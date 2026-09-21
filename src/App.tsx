@@ -43,6 +43,12 @@ function AppContent() {
     route.name === 'public-blog-post' || route.name === 'public-sales' || route.name === 'unsubscribe';
 
   useEffect(() => {
+    let tag = document.head.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
+    if (!tag) { tag = document.createElement('meta'); tag.name = 'robots'; document.head.appendChild(tag); }
+    tag.content = isPublic ? 'index,follow' : 'noindex,nofollow,noarchive';
+  }, [isPublic]);
+
+  useEffect(() => {
     const businessOnly = new Set(['profile','links','microblog','newsletter','posts','drafts','leads','analytics','sales','offers','product-portfolio','book-writer','revenue','command-center','partnerships','launches','radar','sales-editor']);
     if (!isPublic && route.name === 'auth' && session) navigate('/dashboard');
     if (!isPublic && route.name !== 'auth' && !loading && !session) navigate('/auth');
