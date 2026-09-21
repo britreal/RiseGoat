@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Sparkles, Loader2, Gift, Check, Youtube, GraduationCap, ShieldAlert, X } from 'lucide-react';
+import { Sparkles, Loader2, Gift, Check, Youtube, GraduationCap, ShieldAlert, X, BookOpen } from 'lucide-react';
 import type { Profile, Link, MicroblogPost } from '@/types';
 import { timeAgo } from '@/lib/utils';
 
@@ -325,6 +325,7 @@ export function PublicPage({ username }: { username: string }) {
               const videoId = link.link_type === 'youtube' ? youtubeId(link.url) : null;
               const isAffiliate = link.link_type === 'affiliate';
               const isCourse = link.link_type === 'course';
+              const isBlog = link.link_type === 'blog';
 
               if (videoId) {
                 return (
@@ -383,7 +384,7 @@ export function PublicPage({ username }: { username: string }) {
                   className="flex items-center gap-3 px-5 py-3.5 backdrop-blur-sm border text-white transition-all hover:scale-[1.02] active:scale-[0.98] group"
                   style={{ backgroundColor: accentColor + '15', borderColor: accentColor + '30', borderRadius: radius }}>
                   <div className="w-9 h-9 flex items-center justify-center shrink-0" style={{ backgroundColor: accentColor + '20', borderRadius: radius === '9999px' ? '9999px' : '10px' }}>
-                    {isCourse ? <GraduationCap className="w-4 h-4 text-white/80" /> : <span className="text-xs font-bold text-white/80 uppercase">{(ICON_MAP[link.icon] || link.label).slice(0, 2)}</span>}
+                    {isCourse ? <GraduationCap className="w-4 h-4 text-white/80" /> : isBlog ? <BookOpen className="w-4 h-4 text-white/80" /> : <span className="text-xs font-bold text-white/80 uppercase">{(ICON_MAP[link.icon] || link.label).slice(0, 2)}</span>}
                   </div>
                   <span className="flex-1 min-w-0">
                     <span className="block text-sm font-medium truncate">{link.label}</span>
