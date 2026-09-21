@@ -1,13 +1,13 @@
 import { type ReactNode, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import { Sparkles, ExternalLink, LogOut, Menu, X, UserRound, BriefcaseBusiness } from 'lucide-react';
+import { Sparkles, LogOut, Menu, X, UserRound, BriefcaseBusiness } from 'lucide-react';
 import { navItems } from '@/lib/navigation';
 
 interface DashboardLayoutProps { children: ReactNode; currentPath: string; navigate: (path: string) => void; }
 
 export function DashboardLayout({ children, currentPath, navigate }: DashboardLayoutProps) {
-  const { profile, signOut, workspaceMode, setWorkspaceMode, menuVisibility, isAdmin } = useAuth();
+  const { signOut, workspaceMode, setWorkspaceMode, menuVisibility, isAdmin } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const visibleNavItems = navItems.filter((item) => {
     const modeVisible = item.mode === 'shared' || item.mode === workspaceMode;
@@ -22,7 +22,7 @@ export function DashboardLayout({ children, currentPath, navigate }: DashboardLa
   async function handleWorkspaceMode(mode: 'pessoal' | 'negocios') {
     const saved = await setWorkspaceMode(mode);
     if (!saved) return;
-    const businessPaths = ['/profile','/links','/microblog','/newsletter','/leads','/analytics','/posts','/drafts','/sales','/offers','/product-portfolio','/book-writer','/revenue','/command-center','/partnerships','/launches','/radar'];
+    const businessPaths = ['/action-flows','/goals','/profile','/links','/microblog','/newsletter','/leads','/analytics','/posts','/drafts','/sales','/offers','/product-portfolio','/book-writer','/revenue','/command-center','/partnerships','/launches','/radar'];
     if (mode === 'pessoal' && businessPaths.includes(currentPath)) navigate('/dashboard');
     if (mode === 'negocios' && currentPath === '/goat') navigate('/dashboard');
     setMobileOpen(false);
@@ -56,7 +56,6 @@ export function DashboardLayout({ children, currentPath, navigate }: DashboardLa
           ))}
         </nav>
         <div className="border-t border-slate-200/80 p-3 space-y-1 bg-slate-50/40">
-          {profile && <button onClick={() => window.open(`/@${profile.username}`, '_blank')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition"><ExternalLink className="w-4 h-4 shrink-0" />Ver minha página</button>}
           <button onClick={() => signOut()} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition"><LogOut className="w-4 h-4 shrink-0" />Sair</button>
         </div>
       </aside>
