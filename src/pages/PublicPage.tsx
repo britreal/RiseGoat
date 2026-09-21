@@ -331,7 +331,7 @@ export function PublicPage({ username }: { username: string }) {
                       <span className="text-sm font-semibold flex-1">{link.label}</span>
                       {isSensitiveLink && <ShieldAlert className="w-4 h-4 text-white/40" />}
                     </div>
-                    {link.sensitive ? (
+                    {isSensitiveLink ? (
                       <button onClick={() => setAgeGateLink(link)} className="relative w-full aspect-video bg-black/60 flex items-center justify-center text-center px-6">
                         <div>
                           <ShieldAlert className="w-8 h-8 text-white/70 mx-auto mb-2" />
@@ -365,7 +365,7 @@ export function PublicPage({ username }: { username: string }) {
                           {link.description && <p className="text-sm text-white/60 mt-1 leading-relaxed">{link.description}</p>}
                           {link.product_price && <p className="text-lg font-bold text-white mt-3">{link.product_price}</p>}
                         </div>
-                        {link.link_type === 'link' && isSensitiveLink && <ShieldAlert className="w-4 h-4 text-white/40 shrink-0" />}
+                        {isSensitiveLink && <ShieldAlert className="w-4 h-4 text-white/40 shrink-0" />}
                       </div>
                       <a href={link.url} target="_blank" rel="noopener noreferrer" onClick={(e) => openLink(link, e)} className="mt-4 flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white text-slate-900 text-sm font-semibold hover:opacity-90 transition">
                         Ver produto →
