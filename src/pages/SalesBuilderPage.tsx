@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 import { uploadUserImage } from '@/lib/storage';
 import { useAuth } from '@/context/AuthContext';
@@ -432,7 +433,7 @@ function BlockPreview({block}:{block:SalesBlock}){
 
 function toEmbedUrl(url:string){try{const u=new URL(url);if(u.hostname.includes('youtube.com')){if(u.pathname.includes('/embed/'))return url;const v=u.searchParams.get('v');if(v)return 'https://www.youtube.com/embed/'+v;const parts=u.pathname.split('/').filter(Boolean);const idx=parts.indexOf('shorts');if(idx>=0&&parts[idx+1])return 'https://www.youtube.com/embed/'+parts[idx+1];}if(u.hostname.includes('youtu.be'))return 'https://www.youtube.com/embed/'+u.pathname.slice(1);return url}catch{return url}}
 
-function Field({label,children}:{label:string;children:React.ReactNode}){return <label className="text-xs text-slate-500 space-y-1 block">{label}{children}</label>}
+function Field({label,children}:{label:string;children:ReactNode}){return <label className="text-xs text-slate-500 space-y-1 block">{label}{children}</label>}
 function TextInput({value,onChange,placeholder}:{value:string;onChange:(v:string)=>void;placeholder?:string}){return <input value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} className="w-full border rounded-lg p-2 text-sm bg-white"/>}
 
 function Inspector({block,onUpdate}:{block:SalesBlock;onUpdate:(u:Partial<SalesBlock>)=>void}){
