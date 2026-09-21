@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Sparkles, Loader2, Gift, Check, Youtube, GraduationCap, ShieldAlert, X } from 'lucide-react';
-import type { Profile, Link, MicroblogPost } from '@/types';
+import type { Profile, Link, MicroblogPost, Blog } from '@/types';
 import { timeAgo } from '@/lib/utils';
 
 const ICON_MAP: Record<string, string> = {
@@ -99,6 +99,7 @@ function setPropertyMeta(property: string, content: string) {
 
 export function PublicPage({ username }: { username: string }) {
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [primaryBlog, setPrimaryBlog] = useState<Blog | null>(null);
   const [links, setLinks] = useState<Link[]>([]);
   const [posts, setPosts] = useState<MicroblogPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -183,9 +184,11 @@ export function PublicPage({ username }: { username: string }) {
         }).then();
 
         Promise.all([
+          supabase.from('blogs').select('*').eq('user_id', p.id).eq('is_published', true).order('created_at', { ascending: true }).limit(1).maybeSingle(),
           supabase.from('links').select('*').eq('user_id', p.id).eq('is_active', true).order('sort_order'),
-          supabase.from('microblog_posts').select('*').eq('user_id', p.id).order('is_pinned', { ascending: false }).order('created_at', { ascending: false }).limit(20),
-        ]).then(([l, m]) => {
+          supabase.from('microblog_posts').select('*').eq('user_id', p.id).eq('status', 'published').order('is_pinned', { ascending: false }).order('created_at', { ascending: false }).limit(20),
+        ]).then(([b, l, m]) => {
+          setPrimaryBlog((b.data as Blog | null) ?? null);
           setLinks((l.data as Link[]) ?? []);
           setPosts((m.data as MicroblogPost[]) ?? []);
           setLoading(false);
@@ -407,7 +410,16 @@ export function PublicPage({ username }: { username: string }) {
           </div>
         )}
 
-        {/* Microblog */}
+        {primaryBlog && (
+          <div className="mb-5">
+            <a href={'/' + primaryBlog.slug} className="flex items-center justify-between px-5 py-4 rounded-2xl border text-white hover:bg-white/10 transition" style={{ backgroundColor: accentColor + '12', borderColor: accentColor + '35' }}>
+              <span><span className="block text-xs font-bold uppercase tracking-wider text-white/40">Blog</span><span className="block text-sm font-semibold mt-1">{primaryBlog.name}</span></span>
+              <span className="text-xs font-semibold" style={{ color: accentColor }}>Ver blog →</span>
+            </a>
+          </div>
+        )}
+
+        {/* Microblog */
         {posts.length > 0 && (
           <div className="space-y-3">
             {posts.map((post) => {
@@ -417,7 +429,7 @@ export function PublicPage({ username }: { username: string }) {
                   {post.title && <h3 className="text-base font-semibold text-white mb-2">{post.title}</h3>}
                   {post.image_url && <img src={post.image_url} alt={post.title || ''} className="w-full rounded-xl mb-3 max-h-64 object-cover" />}
                   <p className="text-sm text-white/90 whitespace-pre-wrap leading-relaxed">{isLong ? post.content.slice(0, 280) + '...' : post.content}</p>
-                  {isLong && <a href={'/@' + profile?.username + '/microblog/' + post.id} className="inline-flex items-center text-xs font-medium mt-2 transition" style={{ color: accentColor }}>Ler artigo completo →</a>}
+                  {isLong && <a href={primaryBlog && post.slug ? '/' + primaryBlog.slug + '/' + post.slug : '/@' + profile?.username + '/microblog/' + post.id} className="inline-flex items-center text-xs font-medium mt-2 transition" style={{ color: accentColor }}>Ler artigo completo →</a>}
                   <p className="text-xs text-white/30 mt-2">{timeAgo(post.created_at)}</p>
                 </div>
               );
