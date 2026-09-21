@@ -18,7 +18,7 @@ type PostForm = {
 const inputClass = 'w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-white focus:outline-none focus:border-slate-400';
 const labelClass = 'block text-xs font-semibold text-slate-500 mb-1.5';
 const slugify = (value: string) => value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70);
-const RESERVED = new Set(['auth','dashboard','profile','links','microblog','newsletter','posts','drafts','leads','analytics','settings','sales','offers','product-portfolio','book-writer','revenue','command-center','partnerships','launches','radar','goals','goat','admin','u','p','unsubscribe','assets','api']);
+const RESERVED = new Set(['auth','dashboard','action-flows','profile','links','microblog','newsletter','posts','drafts','leads','analytics','settings','sales','offers','product-portfolio','book-writer','revenue','command-center','partnerships','launches','radar','goals','goat','admin','sales-editor','u','p','unsubscribe','assets','api']);
 
 const emptyBlog = (): BlogForm => ({
   slug: '', name: 'Meu Blog', description: '', avatar_url: '', cover_url: '', theme_color: '#0f172a', accent_color: '#06b6d4',
@@ -90,7 +90,7 @@ export function MicroblogPage() {
     setEditingBlogId(activeBlog.id);
   }, [activeBlog?.id]);
 
-  function resetPost() { setEditingPostId(null); setPostForm(emptyPost()); }
+  function resetPost() { const input = document.getElementById('microblog-image-file') as HTMLInputElement | null; if (input) input.value = ''; setEditingPostId(null); setPostForm(emptyPost()); }
   function editPost(post: MicroblogPost) {
     setEditingPostId(post.id);
     setPostForm({
