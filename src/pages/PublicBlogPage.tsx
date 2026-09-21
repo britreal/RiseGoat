@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Loader2, Sparkles, ArrowRight, UserRound } from 'lucide-react';
+import { Loader2, Sparkles, ArrowRight, UserRound, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Blog, MicroblogPost, Profile } from '@/types';
 import { timeAgo } from '@/lib/utils';
 
@@ -14,25 +14,32 @@ export function PublicBlogPage({ slug }: { slug: string }) {
   const [posts, setPosts] = useState<MicroblogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [totalPosts, setTotalPosts] = useState(0);
+
+  const PAGE_SIZE = 12;
+  const page = Math.max(1, Number(new URLSearchParams(window.location.search).get('page') || '1') || 1);
 
   useEffect(() => {
     let alive = true;
+    setLoading(true);
+    setNotFound(false);
+    const pageFromUrl = Math.max(1, Number(new URLSearchParams(window.location.search).get('page') || '1') || 1);
     supabase.from('blogs').select('*').eq('slug', slug.toLowerCase()).eq('is_published', true).maybeSingle().then(async ({ data }) => {
       if (!alive) return;
       if (!data) { setNotFound(true); setLoading(false); return; }
       const b = data as Blog;
       const [profileRes, postsRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', b.user_id).maybeSingle(),
-        supabase.from('microblog_posts').select('*').eq('blog_id', b.id).eq('status', 'published').order('is_pinned', { ascending: false }).order('published_at', { ascending: false }).order('created_at', { ascending: false }),
+        supabase.from('microblog_posts').select('*', { count: 'exact' }).eq('blog_id', b.id).eq('status', 'published').order('is_pinned', { ascending: false }).order('published_at', { ascending: false }).order('created_at', { ascending: false }).range((pageFromUrl - 1) * PAGE_SIZE, pageFromUrl * PAGE_SIZE - 1),
       ]);
       if (!alive) return;
       const p = profileRes.data as Profile | null;
-      setBlog(b); setProfile(p); setPosts((postsRes.data as MicroblogPost[]) || []);
+      setBlog(b); setProfile(p); setPosts((postsRes.data as MicroblogPost[]) || []); setTotalPosts(postsRes.count || 0);
 
       const title = b.seo_title || b.name + ' — RiseGoat';
       const description = b.seo_description || b.description || 'Blog de ' + b.name;
       const image = b.seo_image_url || b.cover_url || b.avatar_url;
-      const canonical = window.location.origin + '/' + b.slug;
+      const canonical = window.location.origin + '/' + b.slug + (pageFromUrl > 1 ? '?page=' + pageFromUrl : '');
       document.title = title;
       setMeta('description', description);
       setMeta('robots', 'index,follow');
@@ -82,6 +89,13 @@ export function PublicBlogPage({ slug }: { slug: string }) {
           </article>;
         })}
       </div>
+      {totalPosts > PAGE_SIZE && (
+        <nav aria-label="Paginação do blog" className="flex items-center justify-between gap-4 pt-8">
+          {page > 1 ? <a href={'/' + blog.slug + (page === 2 ? '' : '?page=' + (page - 1))} className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: accent }}><ChevronLeft className="w-4 h-4" />Mais recentes</a> : <span />}
+          <span className="text-xs text-white/35">Página {page} de {Math.ceil(totalPosts / PAGE_SIZE)}</span>
+          {page < Math.ceil(totalPosts / PAGE_SIZE) ? <a href={'/' + blog.slug + '?page=' + (page + 1)} className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: accent }}>Mais antigas<ChevronRight className="w-4 h-4" /></a> : <span />}
+        </nav>
+      )}
       <footer className="text-center pt-12"><a href="/auth" className="inline-flex items-center gap-1 text-xs text-white/25"><Sparkles className="w-3 h-3" />Powered by risegoat</a></footer>
     </main>
   </div>;

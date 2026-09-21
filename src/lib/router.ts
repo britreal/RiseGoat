@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { isReservedRootSegment } from '@/lib/publicRoutes';
 
 export type Route =
   | { name: 'auth' } | { name: 'dashboard' } | { name: 'action-flows' } | { name: 'profile' } | { name: 'links' }
@@ -14,16 +15,10 @@ export type Route =
   | { name: 'public-sales'; slug: string }
   | { name: 'unsubscribe'; token: string };
 
-const reserved = new Set([
-  'auth','dashboard','action-flows','profile','links','microblog','newsletter','posts','drafts','leads','analytics',
-  'settings','sales','offers','product-portfolio','book-writer','revenue','command-center','partnerships','launches',
-  'radar','goals','goat','admin','u','p','unsubscribe','assets','src','favicon.ico','robots.txt','sitemap.xml','api'
-]);
-
 function getBlogRoute(path: string): Route | null {
   const parts = path.split('?')[0].split('/').filter(Boolean);
   if (parts.length < 1 || parts.length > 2) return null;
-  if (parts[0].startsWith('@') || reserved.has(parts[0].toLowerCase()) || parts[0].includes('.')) return null;
+  if (parts[0].startsWith('@') || isReservedRootSegment(parts[0]) || parts[0].includes('.')) return null;
   if (parts.some((part) => part.includes('.'))) return null;
   if (parts.length === 1) return { name: 'public-blog', slug: decodeURIComponent(parts[0]) };
   return { name: 'public-blog-post', slug: decodeURIComponent(parts[0]), postSlug: decodeURIComponent(parts[1]) };

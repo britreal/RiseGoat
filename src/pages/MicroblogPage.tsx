@@ -137,11 +137,11 @@ export function MicroblogPage() {
 
   async function togglePin(post: MicroblogPost) {
     if (!user || !activeBlog) return;
-    if (post.is_pinned) await supabase.from('microblog_posts').update({ is_pinned: false }).eq('id', post.id).eq('user_id', user.id);
-    else {
-      await supabase.from('microblog_posts').update({ is_pinned: false }).eq('blog_id', activeBlog.id).eq('user_id', user.id);
-      await supabase.from('microblog_posts').update({ is_pinned: true }).eq('id', post.id).eq('user_id', user.id);
-    }
+    const { error } = await supabase.rpc('set_blog_post_pinned', {
+      p_post_id: post.id,
+      p_is_pinned: !post.is_pinned,
+    });
+    if (error) return;
     await loadPosts(activeBlog.id);
   }
 
