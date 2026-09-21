@@ -226,7 +226,7 @@ export function PublicPage({ username }: { username: string }) {
   }
 
   function openLink(link: Link, event?: React.MouseEvent<HTMLAnchorElement>) {
-    if (link.sensitive) {
+    if (link.link_type === 'link' && link.sensitive) {
       event?.preventDefault();
       setAgeGateLink(link);
       return;
@@ -364,7 +364,7 @@ export function PublicPage({ username }: { username: string }) {
                           {link.description && <p className="text-sm text-white/60 mt-1 leading-relaxed">{link.description}</p>}
                           {link.product_price && <p className="text-lg font-bold text-white mt-3">{link.product_price}</p>}
                         </div>
-                        {link.sensitive && <ShieldAlert className="w-4 h-4 text-white/40 shrink-0" />}
+                        {link.link_type === 'link' && link.sensitive && <ShieldAlert className="w-4 h-4 text-white/40 shrink-0" />}
                       </div>
                       <a href={link.url} target="_blank" rel="noopener noreferrer" onClick={(e) => openLink(link, e)} className="mt-4 flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white text-slate-900 text-sm font-semibold hover:opacity-90 transition">
                         Ver produto →
