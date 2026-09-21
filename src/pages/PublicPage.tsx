@@ -321,6 +321,7 @@ export function PublicPage({ username }: { username: string }) {
               const isAffiliate = link.link_type === 'affiliate';
               const isCourse = link.link_type === 'course';
               const isBlog = link.link_type === 'blog';
+              const isSensitiveLink = link.link_type === 'link' && link.sensitive;
 
               if (videoId) {
                 return (
@@ -328,7 +329,7 @@ export function PublicPage({ username }: { username: string }) {
                     <div className="px-5 py-3 flex items-center gap-2 text-white">
                       <Youtube className="w-5 h-5" style={{ color: accentColor }} />
                       <span className="text-sm font-semibold flex-1">{link.label}</span>
-                      {link.sensitive && <ShieldAlert className="w-4 h-4 text-white/40" />}
+                      {isSensitiveLink && <ShieldAlert className="w-4 h-4 text-white/40" />}
                     </div>
                     {link.sensitive ? (
                       <button onClick={() => setAgeGateLink(link)} className="relative w-full aspect-video bg-black/60 flex items-center justify-center text-center px-6">
@@ -364,7 +365,7 @@ export function PublicPage({ username }: { username: string }) {
                           {link.description && <p className="text-sm text-white/60 mt-1 leading-relaxed">{link.description}</p>}
                           {link.product_price && <p className="text-lg font-bold text-white mt-3">{link.product_price}</p>}
                         </div>
-                        {link.link_type === 'link' && link.sensitive && <ShieldAlert className="w-4 h-4 text-white/40 shrink-0" />}
+                        {link.link_type === 'link' && isSensitiveLink && <ShieldAlert className="w-4 h-4 text-white/40 shrink-0" />}
                       </div>
                       <a href={link.url} target="_blank" rel="noopener noreferrer" onClick={(e) => openLink(link, e)} className="mt-4 flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white text-slate-900 text-sm font-semibold hover:opacity-90 transition">
                         Ver produto →
@@ -385,7 +386,7 @@ export function PublicPage({ username }: { username: string }) {
                     <span className="block text-sm font-medium truncate">{link.label}</span>
                     {isCourse && link.description && <span className="block text-xs text-white/50 truncate mt-0.5">{link.description}</span>}
                   </span>
-                  {link.sensitive && <ShieldAlert className="w-4 h-4 text-white/40 shrink-0" />}
+                  {isSensitiveLink && <ShieldAlert className="w-4 h-4 text-white/40 shrink-0" />}
                   <svg className="w-4 h-4 text-white/40 group-hover:text-white/70 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>
