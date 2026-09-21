@@ -79,10 +79,14 @@ export function LinksPage() {
 
   async function addLink() {
     setFormError('');
-    if (!user || !newLabel.trim() || !newUrl.trim()) return setFormError('Preencha título e URL.');
+    if (!user) return;
+    const selectedBlog = newType === 'blog' ? blogs.find((item) => item.id === selectedBlogId) : null;
     if (newType === 'blog') {
-      const blog = blogs.find((item) => item.id === selectedBlogId);
-      if (!blog) return setFormError('Selecione um Blog publicado.');
+      if (!selectedBlog) return setFormError('Selecione um Blog publicado.');
+      if (links.some((link) => link.blog_id === selectedBlog.id && link.is_active)) return setFormError('Esse Blog já está ativo nos seus Links.');
+      if (!newLabel.trim()) setNewLabel(selectedBlog.name);
+    } else if (!newLabel.trim() || !newUrl.trim()) {
+      return setFormError('Preencha título e URL.');
     }
     if (newType === 'youtube' && !youtubeId(newUrl.trim())) return setFormError('Cole uma URL válida do YouTube.');
     if (newType === 'affiliate' && !newThumbnailFile && !newThumbnail.trim()) return setFormError('Produtos afiliados precisam de uma imagem.');
@@ -91,7 +95,6 @@ export function LinksPage() {
       if (newThumbnailFile) thumbnailUrl = await uploadUserImage(user.id, newThumbnailFile, 'links');
     } catch (error: any) { return setFormError(error?.message || 'Não foi possível enviar a imagem.'); }
 
-    const selectedBlog = newType === 'blog' ? blogs.find((item) => item.id === selectedBlogId) : null;
     const linkUrl = selectedBlog ? '/' + selectedBlog.slug : newUrl.trim();
     const { data, error } = await supabase.from('links').insert({
       user_id: user.id,
@@ -149,7 +152,7 @@ export function LinksPage() {
       {adding && (
         <Card className="p-5 mb-5">
           <p className="text-sm font-semibold text-slate-800 mb-2">O que você quer adicionar?</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-4">
             {TYPE_OPTIONS.map((type) => (
               <button key={type.value} onClick={() => setNewType(type.value)}
                 className={'flex items-center gap-2 p-3 rounded-xl border text-left transition ' + (newType === type.value ? 'border-slate-900 bg-slate-950 text-white shadow-sm' : 'border-slate-200 text-slate-600 hover:bg-slate-50')}>
