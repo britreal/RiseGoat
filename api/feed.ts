@@ -5,7 +5,17 @@ function escapeXml(value: string) {
 }
 
 function stripMarkup(value: string) {
-  return value.replace(/https?:\\/\\/[^\\s]+/g, '').trim();
+  return value.replace(/https?:\/\/[^\s]+/g, '').trim();
+}
+
+interface FeedPost {
+  slug: string;
+  title: string | null;
+  excerpt: string | null;
+  content: string | null;
+  published_at: string | null;
+  updated_at: string | null;
+  blogs: { slug: string; name: string };
 }
 
 export default async function handler(request: Request) {
@@ -23,7 +33,7 @@ export default async function handler(request: Request) {
     return new Response('Feed unavailable', { status: 500 });
   }
 
-  const items = (posts ?? []).map((post: any) => {
+  const items = (posts as FeedPost[] ?? []).map((post) => {
     const blog = post.blogs;
     const title = post.title || post.excerpt || 'Publicação';
     const description = post.excerpt || stripMarkup(post.content || '').slice(0, 300);
