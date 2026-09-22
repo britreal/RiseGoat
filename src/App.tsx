@@ -17,7 +17,6 @@ const SettingsPage = lazy(() => import('@/pages/SettingsPage').then((m) => ({ de
 const SalesPagesPage = lazy(() => import('@/pages/SalesPagesPage').then((m) => ({ default: m.SalesPagesPage })));
 const CommandCenterPage = lazy(() => import('@/pages/CommandCenterPage').then((m) => ({ default: m.CommandCenterPage })));
 const GoatPage = lazy(() => import('@/pages/GoatPage').then((m) => ({ default: m.GoatPage })));
-const AnkiPage = lazy(() => import('@/pages/AnkiPage').then((m) => ({ default: m.AnkiPage })));
 const ActionFlowsPage = lazy(() => import('@/pages/ActionFlowsPage').then((m) => ({ default: m.ActionFlowsPage })));
 const ProductPortfolioPage = lazy(() => import('@/pages/ProductPortfolioPage').then((m) => ({ default: m.ProductPortfolioPage })));
 const BookWriterPage = lazy(() => import('@/pages/BookWriterPage').then((m) => ({ default: m.BookWriterPage })));
@@ -54,7 +53,7 @@ function AppContent() {
     if (!isPublic && route.name === 'auth' && session) navigate('/dashboard');
     if (!isPublic && route.name !== 'auth' && !loading && !session) navigate('/auth');
     if (!isPublic && session && workspaceMode === 'pessoal' && businessOnly.has(route.name)) navigate('/dashboard');
-    if (!isPublic && session && workspaceMode === 'negocios' && (route.name === 'goat' || route.name === 'anki')) navigate('/dashboard');
+    if (!isPublic && session && workspaceMode === 'negocios' && (route.name === 'goat')) navigate('/dashboard');
   }, [route.name, session, loading, workspaceMode, navigate, isPublic]);
 
   let page: React.ReactNode = <DashboardPage navigate={navigate} />;
