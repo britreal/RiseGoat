@@ -74,7 +74,8 @@ async function post<T>(baseUrl: string, body: Record<string, unknown>, timeoutMs
 export function normalizeAnkiUrl(url: string) {
   const trimmed = url.trim();
   if (!trimmed) return DEFAULT_ANKI_CONNECT_URL;
-  return trimmed.replace(/\\/+$|\\/+$/g, '').replace(/\\/+$/, '');
+  const value = /^[a-z][a-z0-9+.-]*:\/\//i.test(trimmed) ? trimmed : `http://${trimmed}`;
+  return value.replace(/\/+$/, '');
 }
 
 export async function requestPermission(url: string): Promise<AnkiConnection> {
@@ -110,15 +111,30 @@ export async function invokeAnkiMulti<T extends unknown[]>(
       version: 6,
       params: item.params || {},
     };
-    if (apiKey.trim()) body.key = apiKey.trim();
     return body;
   });
-  return invokeAnki<T>(url, 'multi', { actions: nested }, '');
+
+  const raw = await post<unknown[]>(normalizeAnkiUrl(url), {
+    action: 'multi',
+    version: 6,
+    params: { actions: nested.map(item => apiKey.trim() ? { ...item, key: apiKey.trim() } : item) },
+    ...(apiKey.trim() ? { key: apiKey.trim() } : {}),
+  });
+
+  return raw.map((item) => {
+    if (item && typeof item === 'object' && 'error' in item) {
+      const reply = item as { result?: unknown; error?: string | null };
+      if (reply.error) throw new Error(reply.error);
+      return reply.result;
+    }
+    return item;
+  }) as T;
 }
 
 export function deckQuery(deckName: string, suffix = '') {
   const safe = deckName.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-  return `deck:"${safe}"${suffix ? ` ${suffix}` : ''}`;
+  const exactDeck = `deck:"${safe}" -deck:"${safe}::*"`;
+  return suffix ? `${exactDeck} ${suffix}` : exactDeck;
 }
 
 export function dayKey(date = new Date()) {
