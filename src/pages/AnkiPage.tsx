@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   AlertCircle, BarChart3, Brain, Check, ChevronDown, CircleHelp, ExternalLink,
   Flame, KeyRound, Link2, Loader2, RefreshCw, Server, Sparkles, Wifi, X,
 } from 'lucide-react';
 import { Card, PageHeader, Spinner } from '@/components/ui';
-import { DEFAULT_ANKI_CONNECT_URL, calculateReviewStreak, dayKey, deckQuery, invokeAnki, invokeAnkiMulti, normalizeAnkiUrl, previousDayKey, requestPermission, type AnkiConnection, type AnkiDeckStats } from '@/lib/anki';
+import { DEFAULT_ANKI_CONNECT_URL, calculateReviewStreak, dayKey, deckQuery, invokeAnkiMulti, normalizeAnkiUrl, requestPermission, type AnkiConnection, type AnkiDeckStats } from '@/lib/anki';
 
 interface DashboardData {
   reviewedToday: number;
@@ -22,11 +22,6 @@ const STORAGE_KEY = 'risegoat-anki-connect-url';
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat('pt-BR').format(value);
-}
-
-function dateLabel(value: string) {
-  const date = new Date(`${value}T12:00:00`);
-  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 }
 
 function lastSevenDays(series: Array<[string, number]>) {
