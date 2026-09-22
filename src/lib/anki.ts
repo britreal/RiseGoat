@@ -156,7 +156,7 @@ export function dayKey(date = new Date()) {
 
 export function calculateReviewStreak(days: Array<[string, number]>) {
   const positive = new Set(days.filter(([, count]) => Number(count) > 0).map(([date]) => date));
-  let cursor = new Date();
+  const cursor = new Date();
   let streak = 0;
 
   if (!positive.has(dayKey(cursor))) {
