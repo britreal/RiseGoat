@@ -325,7 +325,7 @@ export function AnkiPage() {
               <StatCard icon={Check} label="Revisões hoje" value={formatNumber(data.reviewedToday)} note="cards revisados hoje" />
               <StatCard icon={Flame} label="Sequência" value={`${summary?.streak || 0} dias`} note="dias consecutivos com revisão" />
               <StatCard icon={AlertCircle} label="Pendentes" value={formatNumber(data.due)} note="cards marcados como due" />
-              <StatCard icon={Brain} label="Cards na coleção" value={formatNumber(summary?.total || 0)} note={`${data.decks.length} decks carregados`} />
+              <StatCard icon={Brain} label="Cards analisados" value={formatNumber(summary?.total || 0)} note={`${data.decks.length} decks detalhados`} />
             </div>
 
             <div className="grid xl:grid-cols-[1.35fr_0.65fr] gap-5 mb-5">
