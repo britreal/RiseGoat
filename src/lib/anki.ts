@@ -128,12 +128,6 @@ export function dayKey(date = new Date()) {
   return `${y}-${m}-${d}`;
 }
 
-export function previousDayKey(date = new Date()) {
-  const next = new Date(date);
-  next.setDate(next.getDate() - 1);
-  return dayKey(next);
-}
-
 export function calculateReviewStreak(days: Array<[string, number]>) {
   const positive = new Set(days.filter(([, count]) => Number(count) > 0).map(([date]) => date));
   let cursor = new Date();
