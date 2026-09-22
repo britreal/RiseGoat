@@ -39,7 +39,17 @@ function targetAddressSpace(url: string): FetchInit['targetAddressSpace'] {
   try {
     const host = new URL(url).hostname.toLowerCase();
     if (host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '::1') return 'loopback';
-    if (/^(10|127)\\./.test(host) || /^192\\.168\\./.test(host) || /^172\\.(1[6-9]|2\\d|3[0-1])\\./.test(host)) return 'local';
+
+    const octets = host.split('.').map(Number);
+    if (
+      octets.length === 4 &&
+      octets.every(value => Number.isInteger(value) && value >= 0 && value <= 255) &&
+      (octets[0] === 10 ||
+        (octets[0] === 192 && octets[1] === 168) ||
+        (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31))
+    ) {
+      return 'local';
+    }
   } catch {
     return undefined;
   }
