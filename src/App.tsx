@@ -53,7 +53,7 @@ function AppContent() {
     if (!isPublic && route.name === 'auth' && session) navigate('/dashboard');
     if (!isPublic && route.name !== 'auth' && !loading && !session) navigate('/auth');
     if (!isPublic && session && workspaceMode === 'pessoal' && businessOnly.has(route.name)) navigate('/dashboard');
-    if (!isPublic && session && workspaceMode === 'negocios' && route.name === 'goat') navigate('/dashboard');
+    if (!isPublic && session && workspaceMode === 'negocios' && (route.name === 'goat' || route.name === 'anki')) navigate('/dashboard');
   }, [route.name, session, loading, workspaceMode, navigate, isPublic]);
 
   let page: React.ReactNode = <DashboardPage navigate={navigate} />;
