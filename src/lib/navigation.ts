@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 import {
-  Activity, BarChart3, BookOpen, CalendarDays, CircleDollarSign, FileText, Handshake,
+  Activity, BarChart3, BookOpen, Brain, CalendarDays, CircleDollarSign, FileText, Handshake,
   LayoutDashboard, Link2, Mail, MessageSquare, Network, PackageOpen, Radar as RadarIcon,
   Settings, ShieldCheck, ShoppingBag, Target, Users, Workflow,
 } from 'lucide-react';
@@ -38,6 +38,7 @@ export const navItems: NavItem[] = [
   { label: 'Lançamentos', path: '/launches', icon: CalendarDays, group: 'Estratégia', mode: 'negocios' },
   { label: 'Radar', path: '/radar', icon: RadarIcon, group: 'Estratégia', mode: 'negocios' },
   { label: 'GOAT', path: '/goat', icon: Activity, group: 'Pessoal', mode: 'pessoal' },
+  { label: 'Anki', path: '/anki', icon: Brain, group: 'Pessoal', mode: 'pessoal' },
   { label: 'Administração', path: '/admin', icon: ShieldCheck, group: 'Administração', mode: 'shared', controllable: false, adminOnly: true },
   { label: 'Configurações', path: '/settings', icon: Settings, group: 'Conta', mode: 'shared', controllable: false },
 ];

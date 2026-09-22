@@ -24,7 +24,7 @@ export function DashboardLayout({ children, currentPath, navigate }: DashboardLa
     if (!saved) return;
     const businessPaths = ['/action-flows','/goals','/profile','/links','/microblog','/newsletter','/leads','/analytics','/posts','/drafts','/sales','/offers','/product-portfolio','/book-writer','/revenue','/command-center','/partnerships','/launches','/radar'];
     if (mode === 'pessoal' && businessPaths.includes(currentPath)) navigate('/dashboard');
-    if (mode === 'negocios' && currentPath === '/goat') navigate('/dashboard');
+    if (mode === 'negocios' && (currentPath === '/goat' || currentPath === '/anki')) navigate('/dashboard');
     setMobileOpen(false);
   }
 
