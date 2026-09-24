@@ -24,6 +24,7 @@ export const navItems: NavItem[] = [
   { label: 'Perfil', path: '/profile', icon: Users, group: 'Presença', mode: 'negocios' },
   { label: 'Links', path: '/links', icon: Link2, group: 'Presença', mode: 'negocios' },
   { label: 'Posts', path: '/posts', icon: FileText, group: 'Conteúdo', mode: 'negocios' },
+  { label: 'Flux', path: '/flux', icon: Workflow, group: 'Criação', mode: 'negocios' },
   { label: 'Blog', path: '/microblog', icon: MessageSquare, group: 'Conteúdo', mode: 'negocios' },
   { label: 'Newsletter', path: '/newsletter', icon: Mail, group: 'Captação', mode: 'negocios' },
   { label: 'Leads', path: '/leads', icon: Users, group: 'Captação', mode: 'negocios' },
