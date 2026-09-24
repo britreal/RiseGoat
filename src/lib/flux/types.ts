@@ -15,6 +15,7 @@ export interface EntradaField {
 export interface EntradaConfig { fields: EntradaField[]; }
 export interface TemplateConfig { template: string; }
 export interface ExportarConfig { format: ExportFormat; name: string; }
+export type FluxNodeConfig = EntradaConfig | TemplateConfig | ExportarConfig;
 
 interface FluxNodeCommon {
   title: string;
