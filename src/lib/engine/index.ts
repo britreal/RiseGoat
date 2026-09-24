@@ -1,5 +1,5 @@
-import type { FluxGraph, FluxNode, ExecutionResult, RunInput } from '@/lib/flux/types';
-import { EntradaConfigSchema, ExportarConfigSchema, TemplateConfigSchema, validateNodeConfig } from '@/lib/flux/schemas';
+import type { FluxGraph, FluxNode, ExecutionResult, RunInput } from '../flux/types';
+import { EntradaConfigSchema, ExportarConfigSchema, TemplateConfigSchema, validateNodeConfig } from '../flux/schemas';
 
 export interface GraphValidationResult {
   valid: boolean;
