@@ -1,5 +1,5 @@
 import type { FluxGraph, FluxNode, ExecutionResult, RunInput } from '@/lib/flux/types';
-import { parseConfig, validateNodeConfig } from '@/lib/flux/schemas';
+import { EntradaConfigSchema, ExportarConfigSchema, TemplateConfigSchema, validateNodeConfig } from '@/lib/flux/schemas';
 
 export interface GraphValidationResult {
   valid: boolean;
@@ -105,7 +105,7 @@ export function resolveVariables(template: string, context: Record<string, unkno
 
 export function validateRunInput(graph: FluxGraph, input: RunInput) {
   for (const node of graph.nodes.filter(node => node.data.nodeType === 'entrada')) {
-    const config = parseConfig('entrada', node.data.config);
+    const config = EntradaConfigSchema.parse(node.data.config);
     for (const field of config.fields) {
       const value = input[field.id];
       if (field.required && (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0))) {
@@ -138,13 +138,13 @@ export async function executeGraph(graph: FluxGraph, input: RunInput, options: {
       output = input;
       context.entrada = output;
     } else if (nodeType === 'template') {
-      const config = parseConfig('template', node.data.config);
+      const config = TemplateConfigSchema.parse(node.data.config);
       output = { text: resolveVariables(config.template, context) };
     } else {
       const upstreamText = typeof upstreamOutput === 'object' && upstreamOutput !== null && 'text' in upstreamOutput
         ? String((upstreamOutput as Record<string, unknown>).text || '')
         : upstreamOutput;
-      const config = parseConfig('exportar', node.data.config);
+      const config = ExportarConfigSchema.parse(node.data.config);
       const content = config.format === 'json' ? JSON.stringify(upstreamOutput ?? {}, null, 2) : String(upstreamText ?? '');
       output = {
         format: config.format,
