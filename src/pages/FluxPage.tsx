@@ -186,8 +186,8 @@ function FluxEditor({ workflowId, navigate }: { workflowId: string; navigate: Fl
   const entradaFields = entrada?.data.nodeType === 'entrada' ? entrada.data.config.fields : [];
 
   const updateGraph = (next: FluxGraph, previous = graph) => mutate(next, previous);
-  const onNodesChange = (changes: NodeChange<FluxNode>[]) => {
-    const nextNodes = applyNodeChanges(changes, nodes) as FluxNode[];
+  const onNodesChange = (changes: NodeChange[]) => {
+    const nextNodes = applyNodeChanges(changes, nodes) as unknown as FluxNode[];
     const removed = changes.filter(change => change.type === 'remove').map(change => change.id);
     const nextEdges = removed.length ? edges.filter(edge => !removed.includes(edge.source) && !removed.includes(edge.target)) : edges;
     if (JSON.stringify({ nodes: nextNodes, edges: nextEdges }) !== JSON.stringify(graph)) updateGraph({ nodes: nextNodes, edges: nextEdges }, graph);
