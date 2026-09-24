@@ -6,7 +6,7 @@ export type Route =
   | { name: 'microblog' } | { name: 'newsletter' } | { name: 'posts' } | { name: 'drafts' } | { name: 'leads' }
   | { name: 'analytics' } | { name: 'settings' } | { name: 'sales' } | { name: 'offers' } | { name: 'product-portfolio' }
   | { name: 'book-writer' } | { name: 'revenue' } | { name: 'command-center' } | { name: 'partnerships' }
-  | { name: 'launches' } | { name: 'radar' } | { name: 'goals' } | { name: 'goat' } | { name: 'admin' }
+  | { name: 'launches' } | { name: 'radar' } | { name: 'goals' } | { name: 'goat' } | { name: 'flux'; workflowId?: string } | { name: 'admin' }
   | { name: 'sales-editor'; pageId: string }
   | { name: 'public'; username: string }
   | { name: 'public-microblog'; username: string; postId: string }
@@ -72,6 +72,8 @@ function parseRoute(): Route {
   if (parts[0] === 'radar') return { name: 'radar' };
   if (parts[0] === 'goals') return { name: 'goals' };
   if (parts[0] === 'goat') return { name: 'goat' };
+  if (parts[0] === 'flux') return { name: 'flux', workflowId: parts[1] };
+
   if (parts[0] === 'admin') return { name: 'admin' };
   return { name: 'dashboard' };
 }
