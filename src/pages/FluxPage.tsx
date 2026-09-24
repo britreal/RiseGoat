@@ -14,7 +14,7 @@ import { FluxNodeView } from '@/components/flux/FluxNodeView';
 import { createFluxNode, createStarterGraph } from '@/lib/flux/factory';
 import { useFluxEditorStore } from '@/lib/flux/store';
 import { validateGraph } from '@/lib/engine';
-import type { ExportFormat, FluxGraph, FluxNode, FluxNodeType, RunInput } from '@/lib/flux/types';
+import type { EntradaConfig, ExportFormat, FluxGraph, FluxNode, FluxNodeType, RunInput } from '@/lib/flux/types';
 
 const nodeTypes = { flux: FluxNodeView };
 const queryClient = new QueryClient();
@@ -216,6 +216,20 @@ function FluxEditor({ workflowId, navigate }: { workflowId: string; navigate: Fl
     const nextNodes = nodes.map(node => node.id === selectedNode.id ? updater(node) : node);
     updateGraph({ nodes: nextNodes, edges }, graph);
   };
+  const updateEntradaConfig = (updater: (config: EntradaConfig) => EntradaConfig) => updateSelected(node => {
+    if (node.data.nodeType !== 'entrada') return node;
+    return { ...node, data: { ...node.data, config: updater(node.data.config) } };
+  });
+
+  const updateTemplate = (template: string) => updateSelected(node => {
+    if (node.data.nodeType !== 'template') return node;
+    return { ...node, data: { ...node.data, config: { template } } };
+  });
+
+  const updateExportar = (updater: (config: { format: ExportFormat; name: string }) => { format: ExportFormat; name: string }) => updateSelected(node => {
+    if (node.data.nodeType !== 'exportar') return node;
+    return { ...node, data: { ...node.data, config: updater(node.data.config) } };
+  });
 
   const removeSelected = () => {
     if (!selectedNode) return;
@@ -317,9 +331,26 @@ function FluxEditor({ workflowId, navigate }: { workflowId: string; navigate: Fl
           {!selectedNode ? <div className="rounded-2xl border border-dashed border-white/10 px-4 py-10 text-center text-xs text-slate-500">Selecione um nó para editar.</div> : <div className="space-y-4">
             <div><label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Título</label><input value={selectedNode.data.title} onChange={e => updateSelected(node => ({ ...node, data: { ...node.data, title: e.target.value } }))} className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none focus:border-white/30" /></div>
             <div><label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Chave</label><input value={selectedNode.data.key} onChange={e => updateSelected(node => ({ ...node, data: { ...node.data, key: e.target.value.replace(/[^a-zA-Z0-9_-]/g, '') } }))} className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none" /></div>
-            {selectedNode.data.nodeType === 'template' && <div><label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Template</label><textarea rows={9} value={selectedNode.data.config.template} onChange={e => updateSelected(node => ({ ...node, data: { ...node.data, config: { template: e.target.value } } }))} className="w-full resize-y rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 font-mono text-xs leading-5 text-white outline-none" /><p className="mt-2 text-[10px] text-slate-500">Use {'{{entrada.campo}}'} para substituir valores. Nunca executa código.</p></div>}
-            {selectedNode.data.nodeType === 'entrada' && <div className="space-y-3">{selectedNode.data.config.fields.map((field, index) => <div key={field.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-3"><div className="grid grid-cols-2 gap-2"><input value={field.id} onChange={e => updateSelected(node => ({ ...node, data: { ...node.data, config: { fields: node.data.config.fields.map((item, i) => i === index ? { ...item, id: e.target.value } : item) } } }))} placeholder="id" className="rounded-lg border border-white/10 bg-black/20 px-2.5 py-2 text-xs" /><input value={field.label} onChange={e => updateSelected(node => ({ ...node, data: { ...node.data, config: { fields: node.data.config.fields.map((item, i) => i === index ? { ...item, label: e.target.value } : item) } } }))} placeholder="rótulo" className="rounded-lg border border-white/10 bg-black/20 px-2.5 py-2 text-xs" /></div><div className="mt-2 grid grid-cols-[1fr_auto] gap-2"><select value={field.type} onChange={e => updateSelected(node => ({ ...node, data: { ...node.data, config: { fields: node.data.config.fields.map((item, i) => i === index ? { ...item, type: e.target.value as typeof item.type } : item) } } }))} className="rounded-lg border border-white/10 bg-black/20 px-2.5 py-2 text-xs"><option value="text">Texto</option><option value="textarea">Texto longo</option><option value="number">Número</option><option value="list">Lista</option></select><button onClick={() => updateSelected(node => ({ ...node, data: { ...node.data, config: { fields: node.data.config.fields.filter((_, i) => i !== index) } } }))} className="rounded-lg border border-red-400/20 px-2.5 text-red-300 hover:bg-red-400/10"><Trash2 className="h-3.5 w-3.5" /></button></div><label className="mt-2 flex items-center gap-2 text-[10px] text-slate-400"><input type="checkbox" checked={!!field.required} onChange={e => updateSelected(node => ({ ...node, data: { ...node.data, config: { fields: node.data.config.fields.map((item, i) => i === index ? { ...item, required: e.target.checked } : item) } } }))} /> obrigatório</label></div>)}<button onClick={() => updateSelected(node => ({ ...node, data: { ...node.data, config: { fields: [...node.data.config.fields, { id: 'campo' + (node.data.config.fields.length + 1), label: 'Novo campo', type: 'text' }] } } }))} className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs font-bold text-slate-300 hover:bg-white/5"><Plus className="h-3.5 w-3.5" /> campo</button></div>}
-            {selectedNode.data.nodeType === 'exportar' && <div className="space-y-3"><div><label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Formato</label><select value={selectedNode.data.config.format} onChange={e => updateSelected(node => ({ ...node, data: { ...node.data, config: { ...node.data.config, format: e.target.value as ExportFormat } } }))} className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs"><option value="md">Markdown</option><option value="html">HTML</option><option value="json">JSON</option></select></div><div><label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Nome do arquivo</label><input value={selectedNode.data.config.name} onChange={e => updateSelected(node => ({ ...node, data: { ...node.data, config: { ...node.data.config, name: e.target.value } } }))} className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs" /></div></div>}
+            {selectedNode.data.nodeType === 'template' && <div><label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Template</label><textarea rows={9} value={selectedNode.data.config.template} onChange={e => updateTemplate(e.target.value)} className="w-full resize-y rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 font-mono text-xs leading-5 text-white outline-none" /><p className="mt-2 text-[10px] text-slate-500">Use {'{{entrada.campo}}'} para substituir valores. Nunca executa código.</p></div>}
+            {selectedNode.data.nodeType === 'entrada' && <div className="space-y-3">
+              {selectedNode.data.config.fields.map((field, index) => (
+                <div key={field.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    <input value={field.id} onChange={e => updateEntradaConfig(config => ({ ...config, fields: config.fields.map((item, i) => i === index ? { ...item, id: e.target.value } : item) }))} placeholder="id" className="rounded-lg border border-white/10 bg-black/20 px-2.5 py-2 text-xs" />
+                    <input value={field.label} onChange={e => updateEntradaConfig(config => ({ ...config, fields: config.fields.map((item, i) => i === index ? { ...item, label: e.target.value } : item) }))} placeholder="rótulo" className="rounded-lg border border-white/10 bg-black/20 px-2.5 py-2 text-xs" />
+                  </div>
+                  <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
+                    <select value={field.type} onChange={e => updateEntradaConfig(config => ({ ...config, fields: config.fields.map((item, i) => i === index ? { ...item, type: e.target.value as typeof item.type } : item) }))} className="rounded-lg border border-white/10 bg-black/20 px-2.5 py-2 text-xs">
+                      <option value="text">Texto</option><option value="textarea">Texto longo</option><option value="number">Número</option><option value="list">Lista</option>
+                    </select>
+                    <button onClick={() => updateEntradaConfig(config => ({ ...config, fields: config.fields.filter((_, i) => i !== index) }))} className="rounded-lg border border-red-400/20 px-2.5 text-red-300 hover:bg-red-400/10"><Trash2 className="h-3.5 w-3.5" /></button>
+                  </div>
+                  <label className="mt-2 flex items-center gap-2 text-[10px] text-slate-400"><input type="checkbox" checked={!!field.required} onChange={e => updateEntradaConfig(config => ({ ...config, fields: config.fields.map((item, i) => i === index ? { ...item, required: e.target.checked } : item) }))} /> obrigatório</label>
+                </div>
+              ))}
+              <button onClick={() => updateEntradaConfig(config => ({ ...config, fields: [...config.fields, { id: 'campo' + (config.fields.length + 1), label: 'Novo campo', type: 'text' }] }))} className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs font-bold text-slate-300 hover:bg-white/5"><Plus className="h-3.5 w-3.5" /> campo</button>
+            </div>}
+            {selectedNode.data.nodeType === 'exportar' && <div className="space-y-3"><div><label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Formato</label><select value={selectedNode.data.config.format} onChange={e => updateExportar(config => ({ ...config, format: e.target.value as ExportFormat }))} className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs"><option value="md">Markdown</option><option value="html">HTML</option><option value="json">JSON</option></select></div><div><label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Nome do arquivo</label><input value={selectedNode.data.config.name} onChange={e => updateExportar(config => ({ ...config, name: e.target.value }))} className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs" /></div></div>}
             {selectedNode.data.nodeType === 'template' && <div className="rounded-xl border border-cyan-400/10 bg-cyan-400/5 p-3"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-300">Variáveis disponíveis</p><div className="mt-2 space-y-1 text-[10px] font-mono text-slate-400">{entradaFields.map(field => <div key={field.id}>{'{{entrada.' + field.id + '}}'}</div>)}<div>{'{{template.text}}'}</div></div></div>}
             <button onClick={removeSelected} className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-red-400/20 py-2.5 text-xs font-bold text-red-300 hover:bg-red-400/10"><Trash2 className="h-4 w-4" /> Excluir nó</button>
           </div>}
