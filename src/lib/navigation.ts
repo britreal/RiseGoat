@@ -19,7 +19,7 @@ export interface NavItem {
 
 export const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, group: 'Núcleo', mode: 'shared' },
-  { label: 'Fluxos de Ação', path: '/action-flows', icon: Workflow, group: 'Núcleo', mode: 'negocios' },
+  { label: 'Flux', path: '/flux', icon: Workflow, group: 'Núcleo', mode: 'negocios' },
   { label: 'Metas', path: '/goals', icon: Target, group: 'Núcleo', mode: 'negocios' },
   { label: 'Perfil', path: '/profile', icon: Users, group: 'Presença', mode: 'negocios' },
   { label: 'Links', path: '/links', icon: Link2, group: 'Presença', mode: 'negocios' },
