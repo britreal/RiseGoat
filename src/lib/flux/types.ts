@@ -15,20 +15,41 @@ export interface EntradaField {
 export interface EntradaConfig { fields: EntradaField[]; }
 export interface TemplateConfig { template: string; }
 export interface ExportarConfig { format: ExportFormat; name: string; }
-export type FluxNodeConfig = EntradaConfig | TemplateConfig | ExportarConfig;
 
-export interface FluxNodeData {
-  nodeType: FluxNodeType;
+interface FluxNodeCommon {
   title: string;
   description: string;
   key: string;
-  config: FluxNodeConfig;
+  [key: string]: unknown;
 }
 
+export interface EntradaNodeData extends FluxNodeCommon {
+  nodeType: 'entrada';
+  config: EntradaConfig;
+}
+
+export interface TemplateNodeData extends FluxNodeCommon {
+  nodeType: 'template';
+  config: TemplateConfig;
+}
+
+export interface ExportarNodeData extends FluxNodeCommon {
+  nodeType: 'exportar';
+  config: ExportarConfig;
+}
+
+export type FluxNodeData = EntradaNodeData | TemplateNodeData | ExportarNodeData;
 export type FluxNode = Node<FluxNodeData, 'flux'>;
 export type FluxEdge = Edge;
-export interface FluxGraph { nodes: FluxNode[]; edges: FluxEdge[]; }
-export interface RunInput { [key: string]: unknown; }
+
+export interface FluxGraph {
+  nodes: FluxNode[];
+  edges: FluxEdge[];
+}
+
+export interface RunInput {
+  [key: string]: unknown;
+}
 
 export interface StepExecution {
   nodeId: string;
