@@ -134,16 +134,17 @@ export async function executeGraph(graph: FluxGraph, input: RunInput, options: {
     await options.onStepStart?.(node, upstreamOutput);
     let output: unknown;
     const nodeType = node.data.nodeType;
-    const config = parseConfig(nodeType, node.data.config);
     if (nodeType === 'entrada') {
       output = input;
       context.entrada = output;
     } else if (nodeType === 'template') {
+      const config = parseConfig('template', node.data.config);
       output = { text: resolveVariables(config.template, context) };
     } else {
       const upstreamText = typeof upstreamOutput === 'object' && upstreamOutput !== null && 'text' in upstreamOutput
         ? String((upstreamOutput as Record<string, unknown>).text || '')
         : upstreamOutput;
+      const config = parseConfig('exportar', node.data.config);
       const content = config.format === 'json' ? JSON.stringify(upstreamOutput ?? {}, null, 2) : String(upstreamText ?? '');
       output = {
         format: config.format,
