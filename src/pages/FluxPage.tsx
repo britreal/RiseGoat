@@ -5,11 +5,11 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
-  Download, FileJson, History, Loader2, Plus, Redo2, Save, Trash2, Undo2, Upload, Workflow, X, Play, AlertTriangle, CheckCircle2, Clock3, ChevronRight, Copy,
+  Download, FileJson, History, Loader2, Plus, Redo2, Trash2, Undo2, Upload, Workflow, X, Play, AlertTriangle, CheckCircle2, Clock3, ChevronRight,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
-import { Card, PageHeader, Spinner } from '@/components/ui';
+import { Spinner } from '@/components/ui';
 import { FluxNodeView } from '@/components/flux/FluxNodeView';
 import { createFluxNode, createStarterGraph } from '@/lib/flux/factory';
 import { useFluxEditorStore } from '@/lib/flux/store';
