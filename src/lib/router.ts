@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { isReservedRootSegment } from '@/lib/publicRoutes';
 
 export type Route =
-  | { name: 'auth' } | { name: 'dashboard' } | { name: 'action-flows' } | { name: 'profile' } | { name: 'links' }
+  | { name: 'auth' } | { name: 'dashboard' } | { name: 'action-flows' } | { name: 'flux' } | { name: 'profile' } | { name: 'links' }
   | { name: 'microblog' } | { name: 'newsletter' } | { name: 'posts' } | { name: 'drafts' } | { name: 'leads' }
   | { name: 'analytics' } | { name: 'settings' } | { name: 'sales' } | { name: 'offers' } | { name: 'product-portfolio' }
   | { name: 'book-writer' } | { name: 'revenue' } | { name: 'command-center' } | { name: 'partnerships' }
@@ -26,6 +26,8 @@ function getBlogRoute(path: string): Route | null {
 
 function parseRoute(): Route {
   const pathParts = window.location.pathname.split('/').filter(Boolean);
+  if (pathParts[0] === 'flux') return { name: 'flux' };
+  if (pathParts[0] === 'action-flows') return { name: 'action-flows' };
   if (pathParts[0] === 'u' && pathParts[1] && pathParts[2] === 'microblog' && pathParts[3]) return { name: 'public-microblog', username: decodeURIComponent(pathParts[1]), postId: decodeURIComponent(pathParts[3]) };
   if (pathParts[0]?.startsWith('@') && pathParts[0].length > 1 && pathParts[2] === 'microblog' && pathParts[3]) return { name: 'public-microblog', username: decodeURIComponent(pathParts[0].slice(1)), postId: decodeURIComponent(pathParts[3]) };
   if (pathParts[0]?.startsWith('@') && pathParts[0].length > 1) return { name: 'public', username: decodeURIComponent(pathParts[0].slice(1)) };
@@ -49,6 +51,7 @@ function parseRoute(): Route {
   if (parts[0] === 'p' && parts[1]) return { name: 'public-sales', slug: parts.slice(1).map(decodeURIComponent).join('/') };
   if (parts[0] === 'unsubscribe' && parts[1]) return { name: 'unsubscribe', token: decodeURIComponent(parts[1]) };
   if (parts[0] === 'dashboard') return { name: 'dashboard' };
+  if (parts[0] === 'flux') return { name: 'flux' };
   if (parts[0] === 'action-flows') return { name: 'action-flows' };
   if (parts[0] === 'profile') return { name: 'profile' };
   if (parts[0] === 'links') return { name: 'links' };
