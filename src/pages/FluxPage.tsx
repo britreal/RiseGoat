@@ -202,8 +202,9 @@ function FluxEditor({ workflowId, navigate }: { workflowId: string; navigate: Fl
     const target = nodes.find(node => node.id === connection.target);
     if (!source || !target || source.data.nodeType === 'exportar' || target.data.nodeType === 'entrada') return;
     if (edges.some(edge => edge.target === target.id)) return;
-    const edge = addEdge({ ...connection, animated: true }, edges).at(-1);
-    if (edge) updateGraph({ nodes, edges: [...edges, edge] }, graph);
+    const addedEdges = addEdge({ ...connection, animated: true }, edges);
+    const edge = addedEdges[addedEdges.length - 1];
+    if (edge) updateGraph({ nodes, edges: addedEdges }, graph);
   };
 
   const addNode = (type: FluxNodeType, position?: { x: number; y: number }) => {
@@ -278,6 +279,19 @@ function FluxEditor({ workflowId, navigate }: { workflowId: string; navigate: Fl
   };
 
   const cancelRun = async () => { if (!activeRunId) return; await supabase.from('runs').update({ status: 'cancelled', finished_at: new Date().toISOString() }).eq('id', activeRunId).eq('user_id', user?.id); };
+  const downloadExport = () => {
+    const step = activeSteps.data?.find(item => item.node_type === 'exportar' && item.status === 'succeeded');
+    const output = step?.output as { format?: string; name?: string; content?: string } | undefined;
+    if (!output || typeof output.content !== 'string') return;
+    const mime = output.format === 'html' ? 'text/html;charset=utf-8' : output.format === 'json' ? 'application/json;charset=utf-8' : 'text/markdown;charset=utf-8';
+    const blob = new Blob([output.content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = output.name || ('flux-export.' + (output.format || 'md'));
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
 
   if (workflow.isLoading || !loaded) return <div className="min-h-full bg-[#0b0f17]"><Spinner /></div>;
   if (workflow.error) return <div className="min-h-full bg-[#0b0f17] p-8 text-white">Não foi possível carregar o fluxo.</div>;
@@ -358,7 +372,7 @@ function FluxEditor({ workflowId, navigate }: { workflowId: string; navigate: Fl
       </div>
 
       {activeRunId && <div className="border-t border-white/10 bg-[#0d121d] px-4 py-3">
-        <div className="flex items-center gap-3"><div className="h-2.5 w-2.5 rounded-full bg-cyan-400 animate-pulse" /><p className="text-xs font-bold">Execução {activeRunId.slice(0, 8)}</p><span className="text-[10px] text-slate-500">{activeRun.data?.status || 'queued'}</span><button onClick={() => void cancelRun()} className="ml-auto rounded-lg border border-red-400/20 px-2.5 py-1.5 text-[10px] font-bold text-red-300">Cancelar</button></div>
+        <div className="flex items-center gap-3"><div className="h-2.5 w-2.5 rounded-full bg-cyan-400 animate-pulse" /><p className="text-xs font-bold">Execução {activeRunId.slice(0, 8)}</p><span className="text-[10px] text-slate-500">{activeRun.data?.status || 'queued'}</span><div className="ml-auto flex items-center gap-2">{activeRun.data?.status === 'succeeded' && <button onClick={downloadExport} className="rounded-lg bg-white px-2.5 py-1.5 text-[10px] font-black text-slate-950">Baixar exportação</button>}{!['succeeded','failed','cancelled'].includes(activeRun.data?.status || '') && <button onClick={() => void cancelRun()} className="rounded-lg border border-red-400/20 px-2.5 py-1.5 text-[10px] font-bold text-red-300">Cancelar</button>}</div></div>
         <div className="mt-3 grid gap-2 sm:grid-cols-3">{activeSteps.data?.map(step => <div key={step.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-2.5"><p className="text-[10px] font-bold text-slate-300">{step.node_type}</p><p className="mt-1 text-[10px] text-slate-500">{step.status}</p></div>)}</div>
       </div>}
 
