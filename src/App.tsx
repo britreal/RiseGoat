@@ -28,6 +28,7 @@ const PartnershipsPage = lazy(() => import('@/pages/BusinessModulesPage').then((
 const LaunchesPage = lazy(() => import('@/pages/BusinessModulesPage').then((m) => ({ default: m.LaunchesPage })));
 const RadarPage = lazy(() => import('@/pages/BusinessModulesPage').then((m) => ({ default: m.RadarPage })));
 const GoalsPage = lazy(() => import('@/pages/BusinessModulesPage').then((m) => ({ default: m.GoalsPage })));
+const FluxPage = lazy(() => import('@/pages/FluxPage').then((m) => ({ default: m.FluxPage })));
 const PublicPage = lazy(() => import('@/pages/PublicPage').then((m) => ({ default: m.PublicPage })));
 const PublicMicroblogPage = lazy(() => import('@/pages/PublicMicroblogPage').then((m) => ({ default: m.PublicMicroblogPage })));
 const PublicBlogPage = lazy(() => import('@/pages/PublicBlogPage').then((m) => ({ default: m.PublicBlogPage })));
@@ -49,7 +50,7 @@ function AppContent() {
   }, [isPublic]);
 
   useEffect(() => {
-    const businessOnly = new Set(['profile','links','microblog','newsletter','posts','drafts','leads','analytics','sales','offers','product-portfolio','book-writer','revenue','command-center','partnerships','launches','radar','sales-editor']);
+    const businessOnly = new Set(['profile','links','microblog','newsletter','posts','drafts','leads','analytics','sales','offers','product-portfolio','book-writer','revenue','command-center','partnerships','launches','radar','sales-editor','flux']);
     if (!isPublic && route.name === 'auth' && session) navigate('/dashboard');
     if (!isPublic && route.name !== 'auth' && !loading && !session) navigate('/auth');
     if (!isPublic && session && workspaceMode === 'pessoal' && businessOnly.has(route.name)) navigate('/dashboard');
@@ -91,6 +92,7 @@ function AppContent() {
     else if (route.name === 'launches') page = <LaunchesPage />;
     else if (route.name === 'radar') page = <RadarPage />;
     else if (route.name === 'goals') page = <GoalsPage />;
+    else if (route.name === 'flux') page = <FluxPage workflowId={route.workflowId} navigate={navigate} />;
     page = <DashboardLayout currentPath={currentPath} navigate={navigate}>{page}</DashboardLayout>;
   }
 
