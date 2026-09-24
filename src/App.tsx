@@ -71,7 +71,7 @@ function AppContent() {
   else {
     const currentPath = '/' + route.name;
     if (route.name === 'dashboard') page = <DashboardPage navigate={navigate} />;
-    else if (route.name === 'action-flows') page = <ActionFlowsPage navigate={navigate} />;
+    else if (route.name === 'flux' || route.name === 'action-flows') page = <ActionFlowsPage navigate={navigate} />;
     else if (route.name === 'profile') page = <ProfilePage />;
     else if (route.name === 'links') page = <LinksPage />;
     else if (route.name === 'microblog') page = <MicroblogPage />;
