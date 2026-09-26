@@ -18,12 +18,7 @@ function AppContent() {
   const { route, navigate } = useRouter();
   const { session, loading } = useAuth();
 
-  const isPublic =
-    route.name === 'home' ||
-    route.name === 'public-blog' ||
-    route.name === 'public-blog-post' ||
-    route.name === 'unsubscribe' ||
-    route.name === 'auth';
+  const isPublic = route.name === 'home' || route.name === 'public-blog' || route.name === 'public-blog-post' || route.name === 'unsubscribe';
 
   useEffect(() => {
     const meta = document.head.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
@@ -35,10 +30,9 @@ function AppContent() {
       navigate('/admin');
       return;
     }
+
     const privateRoutes = new Set(['admin', 'posts', 'newsletter', 'site']);
-    if (privateRoutes.has(route.name) && !loading && !session) {
-      navigate('/auth');
-    }
+    if (privateRoutes.has(route.name) && !loading && !session) navigate('/auth');
   }, [route.name, session, loading, navigate]);
 
   let page: React.ReactNode = <PublicHomePage />;
@@ -53,7 +47,7 @@ function AppContent() {
   else if (route.name === 'unsubscribe') page = <UnsubscribePage token={route.token} />;
 
   if (loading) return <Spinner />;
-  if (!session && ['admin','posts','newsletter','site'].includes(route.name)) return <Spinner />;
+  if (!session && ['admin', 'posts', 'newsletter', 'site'].includes(route.name)) return <Spinner />;
 
   return <Suspense fallback={<Spinner />}>{page}</Suspense>;
 }
