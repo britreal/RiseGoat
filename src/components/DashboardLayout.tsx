@@ -1,75 +1,79 @@
 import { type ReactNode, useState } from 'react';
+import { LogOut, Menu, X, ExternalLink, PenLine } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { cn } from '@/lib/utils';
-import { Sparkles, LogOut, Menu, X, UserRound, BriefcaseBusiness } from 'lucide-react';
 import { navItems } from '@/lib/navigation';
+import { cn } from '@/lib/utils';
 
-interface DashboardLayoutProps { children: ReactNode; currentPath: string; navigate: (path: string) => void; }
+interface DashboardLayoutProps {
+  children: ReactNode;
+  currentPath: string;
+  navigate: (path: string) => void;
+}
 
 export function DashboardLayout({ children, currentPath, navigate }: DashboardLayoutProps) {
-  const { signOut, workspaceMode, setWorkspaceMode, menuVisibility, isAdmin } = useAuth();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const visibleNavItems = navItems.filter((item) => {
-    const modeVisible = item.mode === 'shared' || item.mode === workspaceMode;
-    const visibilityAllowed = item.controllable === false || menuVisibility[item.path] !== false;
-    const adminVisible = !item.adminOnly || isAdmin;
-    return modeVisible && visibilityAllowed && adminVisible;
-  });
-  const groups = [...new Set(visibleNavItems.map((n) => n.group))];
+  const { signOut, profile } = useAuth();
+  const [open, setOpen] = useState(false);
 
-  function handleNav(path: string) { navigate(path); setMobileOpen(false); }
-
-  async function handleWorkspaceMode(mode: 'pessoal' | 'negocios') {
-    const saved = await setWorkspaceMode(mode);
-    if (!saved) return;
-    const businessPaths = ['/action-flows','/goals','/profile','/links','/microblog','/newsletter','/leads','/analytics','/posts','/drafts','/sales','/offers','/product-portfolio','/book-writer','/revenue','/command-center','/partnerships','/launches','/radar'];
-    if (mode === 'pessoal' && businessPaths.includes(currentPath)) navigate('/dashboard');
-    if (mode === 'negocios' && (currentPath === '/goat' || currentPath === '/anki')) navigate('/dashboard');
-    setMobileOpen(false);
-  }
+  const handleNav = (path: string) => {
+    navigate(path);
+    setOpen(false);
+  };
 
   return (
-    <div className="min-h-screen bg-[#f7f7f5] flex">
-      <aside className={cn('fixed lg:sticky top-0 left-0 h-screen w-[248px] bg-white/95 backdrop-blur border-r border-slate-200/80 flex flex-col z-50 transition-transform', mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0')}>
-        <div className="flex items-center gap-3 px-5 h-[68px] border-b border-slate-200/80">
-          <div className="w-9 h-9 rounded-xl bg-slate-950 flex items-center justify-center shadow-sm"><Sparkles className="w-4 h-4 text-white" /></div>
-          <div className="min-w-0">
-            <span className="block font-black text-slate-950 tracking-[-0.02em]">RiseGoat</span>
-            <span className="block text-[10px] font-medium text-slate-400 mt-0.5">Workspace operacional</span>
+    <div className="min-h-screen bg-[#f7f7f4] text-slate-900">
+      <aside className={cn(
+        'fixed inset-y-0 left-0 z-50 w-64 border-r border-slate-200 bg-white transition-transform lg:translate-x-0',
+        open ? 'translate-x-0' : '-translate-x-full'
+      )}>
+        <div className="h-16 border-b border-slate-200 px-5 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-black tracking-tight">RiseGoat</p>
+            <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Blog pessoal</p>
           </div>
+          <button onClick={() => setOpen(false)} className="lg:hidden p-2 text-slate-400"><X className="w-4 h-4" /></button>
         </div>
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
-          {groups.map((group) => (
-            <div key={group}>
-              <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">{group}</p>
-              <div className="space-y-0.5">
-                {visibleNavItems.filter((n) => n.group === group).map((item) => (
-                  <button key={item.path} onClick={() => handleNav(item.path)}
-                    className={cn('w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all',
-                      currentPath === item.path ? 'bg-slate-950 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-950')}>
-                    <item.icon className="w-[17px] h-[17px] shrink-0" />
-                    <span className="truncate">{item.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
+
+        <nav className="p-3 space-y-1">
+          {navItems.map((item) => {
+            const active = currentPath === item.path;
+            return (
+              <button
+                key={item.path}
+                onClick={() => handleNav(item.path)}
+                className={cn(
+                  'w-full flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition',
+                  active ? 'bg-slate-950 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+                )}
+              >
+                <item.icon className="w-4 h-4" />
+                {item.label}
+              </button>
+            );
+          })}
         </nav>
-        <div className="border-t border-slate-200/80 p-3 space-y-1 bg-slate-50/40">
-          <button onClick={() => signOut()} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition"><LogOut className="w-4 h-4 shrink-0" />Sair</button>
+
+        <div className="absolute inset-x-0 bottom-0 border-t border-slate-200 p-4">
+          <a href="/" target="_blank" rel="noreferrer" className="w-full flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+            Abrir blog <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+          <button onClick={() => void signOut()} className="mt-2 w-full flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold text-red-500 hover:bg-red-50">
+            <LogOut className="w-3.5 h-3.5" /> Sair
+          </button>
         </div>
       </aside>
-      {mobileOpen && <div className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={() => setMobileOpen(false)} />}
-      <div className="flex-1 min-w-0 flex flex-col">
-        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200/80 min-h-14 flex items-center px-4 lg:px-7 gap-3">
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-1.5 rounded-lg hover:bg-slate-100">{mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}</button>
-          <div className="hidden lg:flex items-center gap-2"><span className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.16em]">Workspace</span></div>
-          <div className="ml-auto flex items-center gap-1 rounded-2xl border border-slate-200 bg-slate-50 p-1 shadow-sm">
-            <button onClick={() => void handleWorkspaceMode('pessoal')} className={cn('inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition', workspaceMode === 'pessoal' ? 'bg-white text-slate-950 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-800')}><UserRound className="w-3.5 h-3.5" /> Pessoal</button>
-            <button onClick={() => void handleWorkspaceMode('negocios')} className={cn('inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition', workspaceMode === 'negocios' ? 'bg-slate-950 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800')}><BriefcaseBusiness className="w-3.5 h-3.5" /> Negócios</button>
+
+      {open && <button aria-label="Fechar menu" onClick={() => setOpen(false)} className="fixed inset-0 z-40 bg-black/20 lg:hidden" />}
+
+      <div className="lg:pl-64 min-h-screen">
+        <header className="h-16 border-b border-slate-200 bg-white/90 backdrop-blur sticky top-0 z-30 px-4 sm:px-6 flex items-center justify-between">
+          <button onClick={() => setOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-slate-100"><Menu className="w-5 h-5" /></button>
+          <div className="hidden lg:flex items-center gap-2 text-xs text-slate-400">
+            <PenLine className="w-3.5 h-3.5" />
+            <span>{profile?.display_name || profile?.username || 'Área privada'}</span>
           </div>
+          <div className="ml-auto text-xs text-slate-400">Seu espaço de escrita</div>
         </header>
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main>{children}</main>
       </div>
     </div>
   );
