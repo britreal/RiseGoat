@@ -9,19 +9,7 @@
       "destination": "/api/feed"
     },
     {
-      "source": "/@:username/microblog/:path*",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/@:username",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/u/:path*",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/p/:path*",
+      "source": "/blog/:path*",
       "destination": "/index.html"
     },
     {

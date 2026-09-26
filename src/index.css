@@ -2,29 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer components {
-  .input {
-    @apply w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-50;
-  }
-
-  .fieldLabel {
-    @apply block text-[11px] font-semibold text-slate-500 mb-1.5;
-  }
-
-  .badge {
-    @apply inline-flex items-center px-2.5 py-1 rounded-lg bg-white/10 text-[10px] font-bold text-white border border-white/10;
-  }
-}
-
-
 @layer base {
-  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
-  body { @apply bg-slate-50 text-slate-900; }
+  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; scroll-behavior: smooth; }
+  body { @apply bg-[#f6f2ea] text-slate-900; }
   ::selection { @apply bg-slate-900 text-white; }
   button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
-  :focus-visible { outline: 2px solid rgb(15 23 42); outline-offset: 2px; }
+  :focus-visible { outline: 2px solid rgb(15 23 42); outline-offset: 3px; }
 }
 
-@layer utilities {
-  .text-balance { text-wrap: balance; }
+@layer components {
+  .input {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-800 outline-none transition focus:border-slate-400;
+  }
 }
