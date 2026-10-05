@@ -23,6 +23,7 @@ export function NotesPage() {
   const [filter,setFilter]=useState<'all'|'pinned'|'archive'|'trash'>('all');
   const [loading,setLoading]=useState(true);
   const [saving,setSaving]=useState(false);
+  const [theme,setTheme]=useState<'system'|'light'|'dark'>(()=>(localStorage.getItem('risegoat-notes-theme') as 'system'|'light'|'dark')||'system');
   const selected=notes.find(n=>n.id===selectedId) ?? null;
 
   useEffect(()=>{ if(!user) return; void loadNotes(); },[user]);
@@ -69,7 +70,10 @@ export function NotesPage() {
     return !n.is_archived;
   }).filter(n=>!query || (n.title+' '+n.content).toLocaleLowerCase().includes(query.toLocaleLowerCase())),[notes,filter,query]);
 
-  return <div className="notes-shell">
+  useEffect(()=>{localStorage.setItem('risegoat-notes-theme',theme)},[theme]);
+  const dark = theme==='dark' || (theme==='system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+  return <div className={cn('notes-shell',dark&&'is-dark')}>
     <aside className="notes-sidebar">
       <div className="notes-brand"><div><strong>Notas</strong><span>RiseGoat</span></div><button className="notes-icon-button mobile-only" aria-label="Fechar nota" onClick={()=>setSelectedId(null)}><X size={17}/></button></div>
       <button className="notes-new" onClick={()=>void createNote()}><Plus size={17}/> Nova nota <kbd>⌘N</kbd></button>
@@ -81,12 +85,12 @@ export function NotesPage() {
     <main className="notes-main">
       <header className="notes-toolbar">
         <div className="notes-search"><Search size={17}/><input id="notes-search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar notas..." aria-label="Buscar notas"/><kbd><Command size={11}/>K</kbd></div>
-        <div className="notes-toolbar-actions"><button className={cn('notes-icon-button',view==='grid'&&'active')} onClick={()=>setView('grid')} aria-label="Grade"><Grid2X2 size={17}/></button><button className={cn('notes-icon-button',view==='list'&&'active')} onClick={()=>setView('list')} aria-label="Lista"><List size={17}/></button><button className="notes-primary" onClick={()=>void createNote()}><Plus size={16}/><span>Nova</span></button></div>
+        <div className="notes-toolbar-actions"><button className={cn('notes-icon-button',view==='grid'&&'active')} onClick={()=>setView('grid')} aria-label="Grade"><Grid2X2 size={17}/></button><button className={cn('notes-icon-button',view==='list'&&'active')} onClick={()=>setView('list')} aria-label="Lista"><List size={17}/></button><button className="notes-primary" onClick={()=>void createNote()}><Plus size={16}/><span>Nova</span></button><button className="notes-icon-button" onClick={()=>setTheme(theme==='system'?'dark':theme==='dark'?'light':'system')} aria-label={`Tema: ${theme}`}>{dark?'☾':'☀'}</button></div>
       </header>
       <section className={cn('notes-content',view==='list'&&'list-view')}>
         <div className="notes-heading"><div><p className="eyebrow">Seu espaço</p><h1>{filter==='trash'?'Lixeira':filter==='pinned'?'Fixadas':filter==='archive'?'Arquivo':'Todas as notas'}</h1></div><span>{visible.length}</span></div>
         {loading ? <div className="notes-empty">Carregando suas notas…</div> : visible.length===0 ? <div className="notes-empty"><div className="empty-orb"><Plus size={20}/></div><h2>{query?'Nenhuma nota encontrada':'Comece com uma nota'}</h2><p>{query?'Tente outro termo de busca.':'Capture uma ideia, lista ou pensamento.'}</p>{filter!=='trash'&&<button className="notes-primary" onClick={()=>void createNote()}><Plus size={16}/> Criar nota</button>}</div> :
-          <div className="notes-grid">{visible.map(note=><article key={note.id} className={cn('note-card',colors.find(c=>c.key===note.color)?.className)} onClick={()=>setSelectedId(note.id)}><div className="note-card-top">{note.is_pinned&&<Pin size={14}/>}<span>{new Date(note.updated_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})}</span></div><h3>{note.title||'Sem título'}</h3><p>{note.content||'Comece a escrever…'}</p><div className="note-card-actions">{note.is_deleted?<button onClick={e=>{e.stopPropagation();void restoreNote(note)}}><Check size={14}/> Restaurar</button>:<><button onClick={e=>{e.stopPropagation();void updateNote.call({},{})}} className="sr-only">Editar</button></>}</div></article>)}</div>}
+          <div className="notes-grid">{visible.map(note=><article key={note.id} className={cn('note-card',colors.find(c=>c.key===note.color)?.className)} onClick={()=>setSelectedId(note.id)}><div className="note-card-top">{note.is_pinned&&<Pin size={14}/>}<span>{new Date(note.updated_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})}</span></div><h3>{note.title||'Sem título'}</h3><p>{note.content||'Comece a escrever…'}</p>{note.is_deleted&&<div className="note-card-actions"><button onClick={e=>{e.stopPropagation();void restoreNote(note)}}><Check size={14}/> Restaurar</button></div>}</article>)}</div>}
       </section>
     </main>
     {selected&&<div className="notes-editor-overlay" onMouseDown={e=>{if(e.currentTarget===e.target)setSelectedId(null)}}><section className={cn('notes-editor',colors.find(c=>c.key===selected.color)?.className)}><header><button className="notes-icon-button" onClick={()=>setSelectedId(null)} aria-label="Fechar"><ChevronLeft size={18}/></button><div className="editor-actions"><span>{saving?'Salvando…':'Salvo'}</span><button className={cn('notes-icon-button',selected.is_pinned&&'active')} onClick={()=>void updateNote({is_pinned:!selected.is_pinned})} aria-label="Fixar"><Pin size={17}/></button><button className="notes-icon-button" onClick={()=>void updateNote({is_archived:true})} aria-label="Arquivar"><Archive size={17}/></button><button className="notes-icon-button danger" onClick={()=>void deleteNote()} aria-label="Excluir"><Trash2 size={17}/></button></div></header><input className="notes-title-input" value={selected.title} onChange={e=>void updateNote({title:e.target.value})} placeholder="Título"/><textarea className="notes-body-input" value={selected.content} onChange={e=>void updateNote({content:e.target.value})} placeholder="Escreva o que estiver pensando…"/><footer><div className="color-picker">{colors.map(c=><button key={c.key} title={c.label} aria-label={c.label} className={cn('color-dot',c.className,selected.color===c.key&&'selected')} onClick={()=>void updateNote({color:c.key})}/>)}</div><span>{selected.content.trim()?selected.content.trim().split(/\s+/).length:0} palavras</span></footer></section></div>}
