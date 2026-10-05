@@ -7,7 +7,8 @@ function parseRoute(): Route {
   const hash = window.location.hash.replace(/^#/, '').replace(/\/+$/, '') || '/';
   const current = path !== '/' ? path : hash;
   if (current === '/auth') return { name: 'auth' };
-  if (current === '/notes') return { name: 'notes' };\n  if (current === '/settings') return { name: 'settings' };
+  if (current === '/notes') return { name: 'notes' };
+  if (current === '/settings') return { name: 'settings' };
   return { name: 'landing' };
 }
 
