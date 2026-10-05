@@ -67,8 +67,8 @@
 .notes-shell.is-dark .note-color-purple{background:#30283b}
 .notes-shell.is-dark .note-color-pink{background:#3a2930}
 .notes-shell.is-dark .note-color-red{background:#392a27}
-.note-card-cover{display:block;width:calc(100% + 36px);height:150px;object-fit:cover;margin:-18px -18px 15px;border-radius:19px 19px 0 0;background:#ececec}
-.note-card-cover-placeholder{width:calc(100% + 36px);height:118px;margin:-18px -18px 15px;display:grid;place-items:center;border-radius:19px 19px 0 0;background:rgba(255,255,255,.34);color:#888}
+.note-card-cover{display:block;width:calc(100% + 36px);height:148px;aspect-ratio:16/9;object-fit:contain;margin:-18px -18px 15px;border-radius:19px 19px 0 0;background:rgba(255,255,255,.62);padding:6px;box-sizing:border-box}
+.note-card-cover-placeholder{width:calc(100% + 36px);height:148px;aspect-ratio:16/9;margin:-18px -18px 15px;display:grid;place-items:center;border-radius:19px 19px 0 0;background:rgba(255,255,255,.42);color:#888}
 .notes-shell.is-dark .note-card-cover-placeholder{background:rgba(255,255,255,.06)}
 .note-quick-actions{position:absolute;left:12px;right:12px;bottom:12px;z-index:20;display:flex;align-items:center;justify-content:flex-end;gap:2px;padding:4px;border:1px solid rgba(0,0,0,.07);border-radius:14px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.12);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(5px);transition:opacity .16s ease,transform .16s ease,visibility .16s ease}
 .note-card:hover .note-quick-actions,.note-quick-actions:focus-within{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0)}
@@ -101,3 +101,31 @@
 @media(max-width:800px){
   .note-quick-actions{opacity:1;visibility:visible;pointer-events:auto;transform:none}
 }
+
+/* Expanded Keep-like palette */
+.note-color-orange{background:#ffe1c7}
+.note-color-teal{background:#d7efe9}
+.note-color-indigo{background:#dce2f8}
+.note-color-gray{background:#e8e9e7}
+.notes-shell.is-dark .note-color-orange{background:#3b2c22}
+.notes-shell.is-dark .note-color-teal{background:#203630}
+.notes-shell.is-dark .note-color-indigo{background:#292e3f}
+.notes-shell.is-dark .note-color-gray{background:#292a2b}
+
+.notes-title-input,.notes-body-editor,.check-row input{outline:none!important;box-shadow:none!important}
+.notes-title-input:focus,.notes-body-editor:focus,.check-row input:focus{outline:none!important;box-shadow:none!important}
+.check-row input:focus{border-bottom-color:transparent}
+.notes-title-input[readonly]{cursor:default}
+.notes-body-editor.is-locked{cursor:default;color:inherit;opacity:.88}
+.locked-status{display:inline-flex;align-items:center;gap:5px;color:#777}
+.notes-shell.is-dark .locked-status{color:#aaa}
+
+.note-card{border:1px solid rgba(0,0,0,.06)}
+.note-card:hover{border-color:rgba(0,0,0,.1)}
+.notes-shell.is-dark .note-card{border-color:rgba(255,255,255,.08)}
+.notes-shell.is-dark .note-card:hover{border-color:rgba(255,255,255,.14)}
+.note-quick-actions{background:rgba(255,255,255,.98)}
+.notes-shell.is-dark .note-quick-actions{background:rgba(36,36,38,.98)}
+.note-quick-popover{background:#fff!important;backdrop-filter:none!important}
+.notes-shell.is-dark .note-quick-popover{background:#1c1c1e!important}
+.editor-type-tabs button:focus,.notes-icon-button:focus,.note-quick-actions button:focus,.quick-color-dot:focus{outline:none}
