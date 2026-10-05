@@ -8,7 +8,7 @@ import '@/lib/notes.css';
 
 const AuthPage = lazy(() => import('@/pages/AuthPage').then((m) => ({ default: m.AuthPage })));
 const LandingPage = lazy(() => import('@/pages/LandingPage').then((m) => ({ default: m.LandingPage })));
-const NotesPage = lazy(() => import('@/pages/NotesPage').then((m) => ({ default: m.NotesPage })));
+const NotesPage = lazy(() => import('@/pages/NotesPage').then((m) => ({ default: m.NotesPage })));\nconst SettingsPage = lazy(() => import('@/pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
 
 function AppContent() {
   const { route, navigate } = useRouter();
@@ -18,7 +18,7 @@ function AppContent() {
     if (loading) return;
     if (route.name === 'auth' && session) { navigate('/notes'); return; }
     if (route.name === 'landing' && session) { navigate('/notes'); return; }
-    if (route.name === 'notes' && !session) navigate('/auth');
+    if ((route.name === 'notes' || route.name === 'settings') && !session) navigate('/auth');
   }, [route.name, session, loading, navigate]);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ function AppContent() {
   }, [route.name]);
 
   if (loading) return <Spinner />;
-  return <Suspense fallback={<Spinner />}>{route.name === 'landing' ? <LandingPage /> : route.name === 'auth' ? <AuthPage /> : <NotesPage />}</Suspense>;
+  return <Suspense fallback={<Spinner />}>{route.name === 'landing' ? <LandingPage /> : route.name === 'auth' ? <AuthPage /> : route.name === 'settings' ? <SettingsPage /> : <NotesPage />}</Suspense>;
 }
 
 function App() { return <AuthProvider><AppContent /></AuthProvider>; }
