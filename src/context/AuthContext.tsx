@@ -6,8 +6,11 @@ interface AuthContextValue {
   session: Session | null;
   user: User | null;
   loading: boolean;
+  recoveryMode: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string, username: string, displayName: string) => Promise<{ error: string | null; needsConfirmation: boolean }>;
+  signUp: (email: string, password: string) => Promise<{ error: string | null; needsConfirmation: boolean }>;
+  resetPassword: (email: string) => Promise<{ error: string | null }>;
+  updatePassword: (password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -17,6 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [recoveryMode, setRecoveryMode] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -25,9 +29,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       setLoading(false);
-    }).catch((error) => { console.error('Failed to initialize authentication:', error); if (mounted) setLoading(false); });
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, currentSession) => { setSession(currentSession); setUser(currentSession?.user ?? null); });
-    return () => { mounted = false; subscription.subscription.unsubscribe(); };
+    }).catch((error) => {
+      console.error('Failed to initialize authentication:', error);
+      if (mounted) setLoading(false);
+    });
+
+    const { data: subscription } = supabase.auth.onAuthStateChange((event, currentSession) => {
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      if (event === 'PASSWORD_RECOVERY') setRecoveryMode(true);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.subscription.unsubscribe();
+    };
   }, []);
 
   async function signIn(email: string, password: string) {
@@ -35,16 +51,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null };
   }
 
-  async function signUp(email: string, password: string, username: string, displayName: string) {
-    const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { username: username.toLowerCase().trim(), display_name: displayName.trim() } } });
+  async function signUp(email: string, password: string) {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: window.location.origin + '/auth' },
+    });
     if (error) return { error: error.message, needsConfirmation: false };
-    if (!data.user) return { error: 'Não foi possível criar a conta.', needsConfirmation: false };
     return { error: null, needsConfirmation: !data.session };
   }
 
-  async function signOut() { await supabase.auth.signOut(); setSession(null); setUser(null); }
+  async function resetPassword(email: string) {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/auth',
+    });
+    return { error: error?.message ?? null };
+  }
 
-  return <AuthContext.Provider value={{ session, user, loading, signIn, signUp, signOut }}>{children}</AuthContext.Provider>;
+  async function updatePassword(password: string) {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (!error) setRecoveryMode(false);
+    return { error: error?.message ?? null };
+  }
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    setSession(null);
+    setUser(null);
+    setRecoveryMode(false);
+  }
+
+  return (
+    <AuthContext.Provider value={{ session, user, loading, recoveryMode, signIn, signUp, resetPassword, updatePassword, signOut }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-export function useAuth() { const ctx = useContext(AuthContext); if (!ctx) throw new Error('useAuth must be used within AuthProvider'); return ctx; }
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  return ctx;
+}
