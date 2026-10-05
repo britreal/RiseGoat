@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2, Eye, EyeOff, KeyRound, Loader2, LockKeyhole, Mail, UserPlus } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -15,7 +15,7 @@ export function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  useMemo(() => {
+  useEffect(() => {
     if (recoveryMode) setMode('reset');
   }, [recoveryMode]);
 
