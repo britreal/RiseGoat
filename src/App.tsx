@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { useRouter } from '@/lib/router';
 import { Spinner } from '@/components/ui';
 import '@/lib/landing.css';
+import '@/lib/auth.css';
 import '@/lib/notes.css';
 
 const AuthPage = lazy(() => import('@/pages/AuthPage').then((m) => ({ default: m.AuthPage })));
