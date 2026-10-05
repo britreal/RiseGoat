@@ -71,7 +71,7 @@ export function NotesPage(){
   return <div className={cn('notes-shell',dark&&'is-dark')}>
     <aside className="notes-sidebar"><div className="notes-brand"><div><strong>Notas</strong><span>Espaço pessoal</span></div></div>
       <div className="notes-new-wrap"><button className="notes-new" onClick={()=>void create('text')}><Plus size={17}/> Nova nota <kbd>⌘N</kbd></button><button className="notes-new-menu" onClick={()=>setNewMenu(v=>!v)}><ChevronDown size={15}/></button>{newMenu&&<div className="notes-popover new-menu">{types.map(t=><button key={t.key} onClick={()=>void create(t.key)}><t.icon size={15}/>{t.label}</button>)}</div>}</div>
-      <nav className="notes-nav">{[['all','Todas',Grid2X2],['pinned','Fixadas',Pin],['archive','Arquivo',Archive],['trash','Lixeira',Trash2]].map(([k,l,I])=><button key={k as string} className={cn('notes-nav-item',filter===k&&'active')} onClick={()=>{setFilter(k as any);setSelectedId(null)}}><I size={16}/><span>{l}</span></button>)}</nav>
+      <nav className="notes-nav">{[{k:'all',l:'Todas',icon:Grid2X2},{k:'pinned',l:'Fixadas',icon:Pin},{k:'archive',l:'Arquivo',icon:Archive},{k:'trash',l:'Lixeira',icon:Trash2}].map(item=>{const Icon=item.icon;return <button key={item.k} className={cn('notes-nav-item',filter===item.k&&'active')} onClick={()=>{setFilter(item.k);setSelectedId(null)}}><Icon size={16}/><span>{item.l}</span></button>})}</nav>
       <div className="notes-sidebar-extra"><button onClick={()=>setFilters(v=>!v)}><Filter size={14}/> Filtros</button><button onClick={exportAll}><Download size={14}/> Exportar tudo</button></div>
       <div className="notes-sidebar-foot"><span>{notes.filter(n=>!n.is_deleted).length} notas</span><span className="notes-status-dot"/>Sincronizado</div>
     </aside>
