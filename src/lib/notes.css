@@ -187,9 +187,9 @@
 .note-quick-actions button:hover,.note-quick-actions button.active{background:rgba(0,0,0,.055);color:#1d1d1f}
 .notes-shell.is-dark .note-quick-actions{background:transparent;border-top-color:rgba(255,255,255,.08)}
 .notes-shell.is-dark .note-quick-actions button:hover,.notes-shell.is-dark .note-quick-actions button.active{background:rgba(255,255,255,.08);color:#fff}
-.note-quick-popover{bottom:auto;top:calc(100% - 2px);box-shadow:0 14px 40px rgba(0,0,0,.14);border-radius:14px}
+.note-quick-popover{bottom:52px;top:auto;box-shadow:0 14px 40px rgba(0,0,0,.14);border-radius:14px}
 .note-card-cover{border-radius:18px 18px 0 0}
-@media(max-width:800px){.note-card:hover{transform:none;box-shadow:none}.note-quick-actions{opacity:1;visibility:visible;transform:none}}
+@media(min-width:801px){.note-quick-actions{opacity:0;visibility:hidden;pointer-events:none}.note-card:hover .note-quick-actions,.note-quick-actions:focus-within{opacity:1;visibility:visible;pointer-events:auto}}\n@media(max-width:800px){.note-card:hover{transform:none;box-shadow:none}.note-quick-actions{opacity:1;visibility:visible;transform:none}}
 @media(prefers-reduced-motion:reduce){.note-card{transition:none}}
 
 /* Settings */
