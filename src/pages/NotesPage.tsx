@@ -48,7 +48,19 @@ export function NotesPage(){
   async function remove(){if(!selected)return;await update({is_deleted:true,deleted_at:new Date().toISOString()});setSelectedId(null)}
   async function loadSelected(id:string){const [c,a]=await Promise.all([supabase.from('note_checklist_items').select('*').eq('note_id',id).order('position'),supabase.from('note_attachments').select('*').eq('note_id',id).order('created_at',{ascending:false})]);if(c.data)setCheck(v=>({...v,[id]:c.data as Checklist[]}));if(a.data){const arr=await Promise.all((a.data as Attachment[]).map(async x=>x.file_path?({...x,signed_url:(await supabase.storage.from('notes-media').createSignedUrl(x.file_path,3600)).data?.signedUrl}):x));setFiles(v=>({...v,[id]:arr}))}}
   async function addItem(parentId:string|null){if(!selected)return;const arr=check[selected.id]??[],pos=Math.max(-1,...arr.map(x=>x.position))+1,{data,e}=await supabase.from('note_checklist_items').insert({note_id:selected.id,parent_id:parentId,title:'',position:pos}).select().single();if(e){setError(e.message);return}setCheck(v=>({...v,[selected.id]:[...arr,data as Checklist]}))}
-  async function saveItem(item:Checklist,patch:Partial<Checklist>){const arr=(check[selected!.id]??[]).map(x=>x.id===item.id?{...x,...patch}:x);if(patch.is_completed){arr.sort((a,b)=>Number(a.is_completed)-Number(b.is_completed)).forEach((x,i)=>x.position=i);await supabase.from('note_checklist_items').upsert(arr.map(x=>({id:x.id,note_id:selected!.id,parent_id:x.parent_id,title:x.title,is_completed:x.is_completed,position:x.position})))}else await supabase.from('note_checklist_items').update(patch).eq('id',item.id);setCheck(v=>({...v,[selected!.id]:arr))}
+  async function saveItem(item:Checklist,patch:Partial<Checklist>){
+    if(!selected)return;
+    const current=check[selected.id]??[];
+    const arr=current.map(x=>x.id===item.id?{...x,...patch}:x);
+    if(patch.is_completed){
+      arr.sort((a,b)=>Number(a.is_completed)-Number(b.is_completed));
+      arr.forEach((x,i)=>x.position=i);
+      await supabase.from('note_checklist_items').upsert(arr.map(x=>({id:x.id,note_id:selected.id,parent_id:x.parent_id,title:x.title,is_completed:x.is_completed,position:x.position})));
+    }else{
+      await supabase.from('note_checklist_items').update(patch).eq('id',item.id);
+    }
+    setCheck(v=>({...v,[selected.id]:arr}));
+  }
   async function addLabel(){if(!user||!newLabel.trim())return;const {data,e}=await supabase.from('note_labels').insert({user_id:user.id,name:newLabel.trim(),color:selected?.color??'default'}).select().single();if(e)setError(e.message);else{setLabels(v=>[...v,data as Label]);setNewLabel('')}}
   async function toggleLabel(id:string){if(!selected)return;const arr=links[selected.id]??[];if(arr.includes(id)){await supabase.from('note_label_links').delete().eq('note_id',selected.id).eq('label_id',id);setLinks(v=>({...v,[selected.id]:arr.filter(x=>x!==id)}))}else{await supabase.from('note_label_links').insert({note_id:selected.id,label_id:id});setLinks(v=>({...v,[selected.id]:[...arr,id]}))}}
   async function upload(file:File,type:'image'|'drawing'|'file'){if(!user||!selected)return;const path=user.id+'/'+selected.id+'/'+crypto.randomUUID()+'-'+file.name.replace(/[^a-z0-9._-]/gi,'');const {error:e}=await supabase.storage.from('notes-media').upload(path,file,{contentType:file.type,upsert:false});if(e){setError(e.message);return}await supabase.from('note_attachments').insert({note_id:selected.id,user_id:user.id,attachment_type:type,file_path:path,file_name:file.name,mime_type:file.type,size_bytes:file.size});await loadSelected(selected.id)}
