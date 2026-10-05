@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Loader2, LockKeyhole, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, LockKeyhole } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export function AuthPage() {
@@ -9,36 +9,17 @@ export function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    setError(null);
-    setLoading(true);
-    const result = await signIn(email.trim(), password);
-    setLoading(false);
-    if (result.error) setError(result.error);
-  }
+  async function submit(event: FormEvent) { event.preventDefault(); setError(null); setLoading(true); const result = await signIn(email.trim(), password); setLoading(false); if (result.error) setError(result.error); }
 
-  return (
-    <div className="min-h-screen bg-[#f6f2ea] px-5 flex items-center justify-center">
-      <div className="w-full max-w-md">
-        <a href="/" className="text-xs uppercase tracking-[0.22em] text-slate-400">Voltar ao blog</a>
-        <div className="mt-8 rounded-[2rem] bg-white border border-black/5 shadow-xl shadow-black/5 p-7 sm:p-9">
-          <LockKeyhole className="w-6 h-6 text-slate-400" />
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-400 mt-6">Área privada</p>
-          <h1 className="text-3xl font-black tracking-tight mt-2">Entrar para escrever</h1>
-          <p className="text-sm text-slate-500 mt-3 leading-6">Gerencie seus textos e sua newsletter em um só lugar.</p>
-
-          <form onSubmit={submit} className="mt-8 space-y-3">
-            <input required type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Seu e-mail" className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400" />
-            <input required type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Sua senha" className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400" />
-            {error && <p className="text-sm text-red-600">{error}</p>}
-            <button disabled={loading} className="w-full flex items-center justify-center gap-2 rounded-xl bg-slate-950 text-white px-4 py-3 text-sm font-bold disabled:opacity-60">
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
-              {loading ? 'Entrando…' : 'Entrar'}
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
+  return <div className="auth-screen"><div className="auth-orb auth-orb-one" /><div className="auth-orb auth-orb-two" /><div className="auth-wrap">
+    <a href="/" className="auth-back"><ArrowLeft size={15} /> Início</a>
+    <div className="auth-card"><div className="auth-icon"><LockKeyhole size={20} /></div><p className="auth-kicker">Espaço privado</p><h1>Entre no Notas.</h1><p className="auth-copy">Suas ideias, listas e pensamentos em um espaço simples e silencioso.</p>
+      <form onSubmit={submit} className="auth-form">
+        <label><span>E-mail</span><input required type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@email.com" /></label>
+        <label><span>Senha</span><input required type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Sua senha" /></label>
+        {error && <p className="auth-error">{error}</p>}
+        <button type="submit" disabled={loading} className="auth-submit">{loading ? <Loader2 size={16} className="spin" /> : <ArrowRight size={16} />}{loading ? 'Entrando…' : 'Continuar'}</button>
+      </form>
+      <p className="auth-note">Acesso protegido por autenticação segura.</p>
+    </div></div></div>;
 }
