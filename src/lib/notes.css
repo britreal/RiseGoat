@@ -586,3 +586,304 @@
   .notes-editor{padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 }
 @media(prefers-reduced-motion:reduce){.notes-sidebar{transition:none!important}}
+
+
+/* Native mobile experience */
+.notes-mobile-tabbar,.notes-mobile-backdrop{display:none}
+@media(max-width:800px){
+  :root{overscroll-behavior-y:none}
+  body{background:#f5f5f3}
+  .notes-shell{
+    min-height:100svh;
+    width:100%;
+    display:block;
+    background:#f5f5f3;
+    -webkit-user-select:none;
+    user-select:none;
+  }
+  .notes-main{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  .notes-toolbar{
+    position:sticky;
+    top:0;
+    height:auto;
+    min-height:58px;
+    padding:calc(7px + env(safe-area-inset-top)) 12px 7px;
+    border-bottom:1px solid rgba(0,0,0,.06);
+    background:rgba(247,247,245,.92);
+    backdrop-filter:saturate(180%) blur(24px);
+    z-index:40;
+  }
+  .notes-menu-button{
+    width:34px;height:34px;
+    border-radius:10px;
+    background:rgba(255,255,255,.72);
+    flex:0 0 34px;
+  }
+  .notes-search{
+    height:34px;
+    padding:0 11px;
+    border-radius:11px;
+    box-shadow:none;
+    background:rgba(255,255,255,.72);
+  }
+  .notes-search input{font-size:13px}
+  .notes-toolbar-actions .notes-icon-button{display:none!important}
+  .notes-toolbar-actions .notes-primary{
+    width:34px;height:34px;
+    min-width:34px;
+    padding:0;
+    border-radius:11px;
+    box-shadow:0 5px 16px rgba(0,0,0,.12);
+  }
+  .notes-content{
+    max-width:none;
+    margin:0;
+    padding:20px 14px 26px;
+  }
+  .notes-heading{
+    margin-bottom:15px;
+    align-items:center;
+  }
+  .notes-heading .eyebrow{font-size:9px}
+  .notes-heading h1{
+    font-size:27px;
+    line-height:1.05;
+    margin-top:4px;
+  }
+  .notes-heading>span{
+    min-width:30px;
+    height:30px;
+    padding:0 9px;
+    border-radius:999px;
+    background:rgba(0,0,0,.045);
+    display:grid;
+    place-items:center;
+  }
+  .notes-grid{
+    grid-template-columns:1fr!important;
+    gap:10px;
+  }
+  .note-card{
+    width:100%;
+    border-radius:17px;
+    box-shadow:0 1px 2px rgba(0,0,0,.025);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .note-card:hover{
+    transform:none;
+    box-shadow:0 1px 2px rgba(0,0,0,.025);
+  }
+  .note-card-body{padding:16px 16px 11px}
+  .note-card h3{
+    font-size:17px;
+    line-height:1.27;
+    font-weight:600;
+  }
+  .note-card p{
+    font-size:14px;
+    line-height:1.55;
+    -webkit-line-clamp:6;
+  }
+  .note-quick-actions{
+    margin:0;
+    min-height:46px;
+    padding:4px 10px 7px!important;
+    border-top:1px solid rgba(0,0,0,.045);
+    justify-content:space-between;
+    gap:4px;
+  }
+  .note-quick-actions button,
+  .note-quick-actions .note-card-icon-button{
+    width:34px!important;
+    height:34px!important;
+    flex-basis:34px!important;
+    border-radius:10px;
+  }
+  .notes-folder-create{display:none}
+  .notes-mobile-backdrop{
+    position:fixed;
+    inset:0;
+    z-index:80;
+    background:rgba(0,0,0,.22);
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:opacity .2s ease,visibility .2s ease;
+    backdrop-filter:blur(2px);
+  }
+  .notes-sidebar.mobile-open + .notes-mobile-backdrop{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+  }
+  .notes-sidebar{
+    z-index:100!important;
+    border-radius:0 22px 22px 0;
+    padding:calc(18px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom));
+    box-shadow:24px 0 70px rgba(0,0,0,.2);
+    background:rgba(250,250,248,.98)!important;
+  }
+  .notes-brand{
+    padding:0 10px 20px;
+  }
+  .notes-brand strong{font-size:23px}
+  .notes-new-wrap{margin-bottom:18px}
+  .notes-new{height:46px;border-radius:13px;font-size:13px}
+  .notes-new-menu{height:46px;width:44px}
+  .notes-nav{gap:2px}
+  .notes-nav-item{
+    min-height:44px;
+    border-radius:12px;
+    font-size:13px;
+  }
+  .notes-folder-row{min-height:42px}
+  .notes-folder-main{min-height:42px}
+  .notes-sidebar-extra{margin-top:14px}
+  .notes-sidebar-account{padding:14px 10px}
+  .notes-mobile-tabbar{
+    display:grid;
+    position:fixed;
+    left:0;right:0;bottom:0;
+    z-index:70;
+    grid-template-columns:repeat(5,1fr);
+    align-items:end;
+    min-height:64px;
+    padding:7px 8px calc(7px + env(safe-area-inset-bottom));
+    background:rgba(250,250,248,.94);
+    border-top:1px solid rgba(0,0,0,.07);
+    backdrop-filter:saturate(180%) blur(24px);
+    box-shadow:0 -10px 30px rgba(0,0,0,.055);
+  }
+  .notes-mobile-tab{
+    min-width:0;
+    border:0;
+    background:transparent;
+    color:#8a8a8f;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    min-height:52px;
+    border-radius:12px;
+    font:inherit;
+    font-size:9px;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .notes-mobile-tab.active{color:#111;font-weight:650}
+  .notes-mobile-tab:active{background:rgba(0,0,0,.055)}
+  .notes-mobile-create{
+    justify-self:center;
+    align-self:start;
+    width:48px;height:48px;
+    margin-top:-17px;
+    border:0;
+    border-radius:16px;
+    background:#111;
+    color:#fff;
+    display:grid;
+    place-items:center;
+    box-shadow:0 10px 25px rgba(0,0,0,.18);
+    cursor:pointer;
+  }
+  .notes-mobile-create:active{transform:scale(.96)}
+  .notes-editor-overlay{
+    z-index:150;
+    background:#f5f5f3;
+    backdrop-filter:none;
+  }
+  .notes-editor{
+    width:100%;
+    height:100svh;
+    max-height:none;
+    border-radius:0;
+    padding:calc(8px + env(safe-area-inset-top)) 12px calc(8px + env(safe-area-inset-bottom));
+    box-shadow:none;
+  }
+  .notes-editor-header{
+    min-height:42px;
+    gap:4px;
+  }
+  .notes-editor-header>.notes-icon-button:first-child{
+    width:36px;height:36px;
+    background:rgba(0,0,0,.045);
+    border-radius:11px;
+  }
+  .editor-actions{
+    gap:2px;
+    overflow-x:auto;
+    scrollbar-width:none;
+    padding-left:4px;
+  }
+  .editor-actions::-webkit-scrollbar{display:none}
+  .editor-actions .notes-icon-button{
+    flex:0 0 34px;
+    width:34px;height:34px;
+    border-radius:10px;
+  }
+  .editor-type-tabs{
+    margin:10px -12px 0;
+    padding:5px 12px 7px;
+    background:rgba(255,255,255,.35);
+    border-top:1px solid rgba(0,0,0,.045);
+    border-bottom:1px solid rgba(0,0,0,.045);
+  }
+  .editor-type-tabs button{
+    min-height:32px;
+    padding:7px 10px;
+    border-radius:9px;
+    font-size:10px;
+  }
+  .notes-title-input{
+    font-size:30px;
+    line-height:1.1;
+    padding:22px 6px 12px;
+  }
+  .editor-formatbar{
+    padding:0 6px 8px;
+  }
+  .notes-body-editor{
+    padding:14px 6px 24px;
+    font-size:17px;
+    line-height:1.75;
+    -webkit-user-select:text;
+    user-select:text;
+    -webkit-overflow-scrolling:touch;
+  }
+  .checklist-editor,.media-note,.audio-editor,.drawing-editor{
+    padding:14px 6px 24px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .notes-editor-footer{
+    min-height:50px;
+    padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+    background:rgba(255,255,255,.45);
+    margin:0 -12px;
+    padding-inline:18px;
+  }
+  .color-picker{
+    overflow-x:auto;
+    max-width:62vw;
+    padding:3px 0;
+  }
+  .color-dot{flex:0 0 20px}
+}
+@media(max-width:430px){
+  .notes-toolbar{padding-left:9px;padding-right:9px}
+  .notes-content{padding-left:11px;padding-right:11px}
+  .notes-search{padding-inline:9px}
+  .notes-heading h1{font-size:25px}
+  .note-card-body{padding:15px 15px 10px}
+  .note-quick-actions button,.note-quick-actions .note-card-icon-button{width:32px!important;height:32px!important;flex-basis:32px!important}
+  .notes-mobile-tabbar{padding-inline:5px}
+  .notes-mobile-tab{font-size:8px}
+  .notes-mobile-create{width:46px;height:46px;border-radius:15px}
+}
+@media(display-mode:standalone){
+  .notes-mobile-tabbar{padding-bottom:calc(7px + env(safe-area-inset-bottom))}
+  .notes-toolbar{padding-top:calc(7px + env(safe-area-inset-top))}
+}
+@media(prefers-reduced-motion:reduce){
+  .notes-mobile-backdrop,.notes-sidebar{transition:none!important}
+}
