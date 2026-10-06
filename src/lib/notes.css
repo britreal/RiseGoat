@@ -503,3 +503,86 @@
 .notes-shell.is-dark .folder-action-popover p{color:#aaa}
 .notes-shell.is-dark .folder-action-popover input{background:#252527;color:#fff;border-color:rgba(255,255,255,.12)}
 .notes-shell.is-dark .folder-confirm-actions button:last-child{background:#fff;color:#111}
+
+
+/* Mobile app shell */
+@media(max-width:800px){
+  .notes-shell{min-height:100dvh;overflow-x:hidden}
+  .notes-sidebar{
+    position:fixed!important;
+    left:0!important;
+    top:0!important;
+    bottom:0!important;
+    width:min(286px,88vw)!important;
+    height:100dvh!important;
+    min-height:0!important;
+    z-index:90!important;
+    transform:translateX(-105%)!important;
+    border-right:1px solid rgba(0,0,0,.08)!important;
+    border-bottom:0!important;
+    box-shadow:18px 0 55px rgba(0,0,0,.16);
+    transition:transform .22s ease!important;
+    overflow:auto;
+    background:rgba(250,250,248,.98)!important;
+  }
+  .notes-sidebar.mobile-open{transform:translateX(0)!important}
+  .notes-sidebar .notes-nav{grid-template-columns:1fr!important}
+  .notes-sidebar .notes-sidebar-foot{display:flex!important}
+  .notes-main{width:100%;min-width:0}
+  .notes-toolbar{
+    height:auto;
+    min-height:68px;
+    padding:10px 12px;
+    gap:8px;
+    padding-top:max(10px,env(safe-area-inset-top));
+  }
+  .notes-menu-button{display:grid!important;flex:0 0 36px}
+  .notes-search{min-width:0;padding:9px 11px;border-radius:13px}
+  .notes-toolbar-actions{gap:3px}
+  .notes-toolbar-actions .notes-icon-button{display:grid}
+  .notes-toolbar-actions .notes-icon-button:nth-child(1),
+  .notes-toolbar-actions .notes-icon-button:nth-child(2){display:none}
+  .notes-toolbar-actions .notes-primary{width:36px;height:36px;padding:0;flex:0 0 36px;border-radius:11px}
+  .notes-toolbar-actions .notes-primary span{display:none}
+  .notes-content{padding:24px 14px 70px}
+  .notes-heading{margin-bottom:17px}
+  .notes-heading h1{font-size:27px}
+  .notes-filter-bar{top:68px;padding:8px 12px}
+  .notes-filter-bar select{min-width:132px}
+  .notes-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+  .note-card{border-radius:12px}
+  .note-card-body{padding:11px 13px 7px}
+  .note-card h3{font-size:15px}
+  .note-card p{font-size:13px}
+  .note-quick-actions{max-height:52px!important;padding:4px 6px 7px!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}
+  .note-quick-actions button,.note-quick-actions .note-card-icon-button{width:29px!important;height:29px!important;flex-basis:29px!important}
+  .note-quick-popover{max-width:calc(100vw - 28px)}
+  .note-more-quick{right:7px;bottom:47px}
+  .notes-editor-overlay{padding:0}
+  .notes-editor{width:100%;height:100dvh;max-height:none;border-radius:0;padding:12px 14px calc(10px + env(safe-area-inset-bottom))}
+  .notes-editor-header{min-width:0}
+  .editor-actions{min-width:0;overflow:auto;justify-content:flex-end}
+  .editor-actions .editor-date{display:none}
+  .notes-title-input{font-size:27px;padding:24px 6px 10px}
+  .notes-body-editor{font-size:16px;line-height:1.65;min-height:0}
+}
+@media(max-width:520px){
+  .notes-toolbar{min-height:62px}
+  .notes-search{font-size:13px}
+  .notes-grid{grid-template-columns:1fr}
+  .notes-heading h1{font-size:25px}
+  .notes-content{padding-inline:12px}
+  .note-card p{-webkit-line-clamp:4}
+  .note-quick-actions{justify-content:space-between}
+  .notes-filter-bar{top:62px}
+  .notes-filter-bar select{min-width:125px}
+  .notes-editor{padding-left:11px;padding-right:11px}
+  .editor-type-tabs{gap:3px}
+  .editor-type-tabs button{padding:7px 8px}
+  .notes-editor-footer{padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+}
+@media(display-mode:standalone){
+  .notes-toolbar{padding-top:max(10px,env(safe-area-inset-top))}
+  .notes-editor{padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+}
+@media(prefers-reduced-motion:reduce){.notes-sidebar{transition:none!important}}
