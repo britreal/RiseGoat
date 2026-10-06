@@ -1,4 +1,4 @@
-import { Archive, ArrowRight, AudioLines, Bell, Check, Clock3, Command, FileCheck2, Folder, Grid2X2, ImagePlus, List, Lock, Menu, MoreHorizontal, Palette, Search, Share2, Sparkles, Tag, X, Plus } from 'lucide-react';
+import { Archive, ArrowRight, AudioLines, Bell, Check, Clock3, Command, FileCheck2, Folder, Grid2X2, ImagePlus, Lock, Menu, MoreHorizontal, Palette, Search, Share2, Sparkles, Tag, X, Plus } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect, useState } from 'react';
 
@@ -11,7 +11,9 @@ const benefits = [
   { icon: Lock, title: 'Seu espaço pessoal', copy: 'A experiência começa pela sua conta e fica separada do resto.' },
 ];
 
-function PinDot(){ return <span className="landing-pin-dot" aria-hidden="true" />; }\n\nexport function LandingPage() {
+function PinDot(){ return <span className="landing-pin-dot" aria-hidden="true" />; }
+
+export function LandingPage() {
   const { session } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
