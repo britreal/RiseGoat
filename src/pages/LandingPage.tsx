@@ -1,12 +1,14 @@
-import { ArrowRight, Check, Command, FileCheck2, Lock, Menu, Search, Sparkles, X } from 'lucide-react';
+import { ArrowRight, AudioLines, Bell, Check, Command, FileCheck2, Folder, Lock, Menu, Search, Sparkles, Tag, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect, useState } from 'react';
 
 const benefits = [
-  { icon: FileCheck2, title: 'Notas rápidas', copy: 'Escreva uma ideia antes que ela escape.' },
-  { icon: Check, title: 'Listas simples', copy: 'Organize tarefas sem transformar tudo em projeto.' },
-  { icon: Search, title: 'Busca instantânea', copy: 'Encontre pensamentos pelo que realmente escreveu.' },
-  { icon: Lock, title: 'Privado por padrão', copy: 'Seu espaço fica protegido pela sua conta.' },
+  { icon: FileCheck2, title: 'Capture rápido', copy: 'Uma nota aberta em segundos para registrar o que importa agora.' },
+  { icon: Folder, title: 'Organize do seu jeito', copy: 'Pastas, cores e marcadores sem transformar a organização em trabalho.' },
+  { icon: Tag, title: 'Encontre contexto', copy: 'Busque pelo título, conteúdo e tudo o que você já salvou.' },
+  { icon: AudioLines, title: 'Escreva com a voz', copy: 'Grave ideias, mantenha o áudio e transforme fala em texto quando disponível.' },
+  { icon: Bell, title: 'Lembre quando importa', copy: 'Use lembretes para tirar as coisas da cabeça e voltar no momento certo.' },
+  { icon: Lock, title: 'Seu espaço pessoal', copy: 'A experiência começa pela sua conta e fica separada do resto.' },
 ];
 
 export function LandingPage() {
@@ -45,13 +47,13 @@ export function LandingPage() {
         <section className="landing-hero">
           <div className="landing-hero-copy">
             <div className="landing-eyebrow"><Sparkles size={13} /> Feito para pensar</div>
-            <h1>Tudo o que passa pela sua cabeça.<br /><em>Em um só lugar.</em></h1>
-            <p>Notas é um espaço pessoal, calmo e rápido para capturar ideias, organizar listas e voltar ao que importa.</p>
+            <h1>Capture antes que esqueça.<br /><em>Organize sem complicar.</em></h1>
+            <p>Notas é um espaço pessoal para ideias, listas, referências e pensamentos. Abra, escreva e volte para o que importa.</p>
             <div className="landing-actions">
               <a href={action} className="landing-primary">Começar a escrever <ArrowRight size={17} /></a>
               <a href="#recursos" className="landing-secondary">Conhecer o Notas</a>
             </div>
-            <div className="landing-meta"><span><Check size={14} /> Simples por design</span><span><Check size={14} /> Rápido por natureza</span><span><Check size={14} /> Privado por padrão</span></div>
+            <div className="landing-meta"><span><Check size={14} /> Sem curva de aprendizado</span><span><Check size={14} /> Sincronizado</span><span><Check size={14} /> Pensado para uso diário</span></div>
           </div>
 
           <div className="landing-product-wrap" aria-label="Prévia do aplicativo Notas">
@@ -90,6 +92,24 @@ export function LandingPage() {
           <p className="landing-eyebrow">Menos interface. Mais pensamento.</p>
           <h2>Seu espaço não precisa competir<br />com a sua atenção.</h2>
           <p>O Notas foi desenhado para desaparecer quando você começa a escrever.</p>
+        </section>
+
+        <section className="landing-usecases">
+          <div className="landing-usecase-copy">
+            <p className="landing-eyebrow">Do primeiro pensamento ao arquivo</p>
+            <h2>Uma nota pode ser pequena.<br /><em>O contexto não precisa ser.</em></h2>
+            <p>Separe ideias por pastas, use cores para enxergar o que merece atenção e deixe a busca fazer o trabalho pesado.</p>
+            <div className="landing-usecase-list">
+              <div><Folder size={16}/><span><strong>Pastas</strong><small>Crie espaços diferentes sem perder a visão geral.</small></span></div>
+              <div><Tag size={16}/><span><strong>Marcadores</strong><small>Conecte assuntos sem mover a nota de lugar.</small></span></div>
+              <div><AudioLines size={16}/><span><strong>Áudio</strong><small>Registre uma ideia no instante em que ela surgir.</small></span></div>
+            </div>
+          </div>
+          <div className="landing-feature-preview">
+            <div className="feature-preview-top"><span>Hoje</span><b>3 notas</b></div>
+            <article><span>Produto</span><strong>Uma ideia para testar amanhã.</strong><p>Proposta simples, primeira versão, feedback rápido.</p><div className="preview-chips"><i>produto</i><i>teste</i></div></article>
+            <article className="preview-compact"><span>Áudio</span><strong>Rascunho gravado</strong><p>0:42 · transcrição disponível</p></article>
+          </div>
         </section>
 
         <section id="recursos" className="landing-features">
