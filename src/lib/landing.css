@@ -153,3 +153,180 @@
 @media(prefers-reduced-motion:reduce){
   .landing-app-preview,.landing-editor-preview{transform:none}
 }
+
+/* Mobile landing: phone-first product preview */
+@media(max-width:720px){
+  .landing-shell{
+    min-height:100svh;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .landing-nav{
+    position:sticky;
+    top:0;
+    height:60px;
+    padding:0 16px;
+    background:rgba(247,247,245,.86);
+    backdrop-filter:saturate(180%) blur(24px);
+    border-bottom:1px solid rgba(0,0,0,.045);
+  }
+  .landing-brand-mark{width:29px;height:29px;border-radius:9px}
+  .landing-hero{
+    padding:58px 16px 76px;
+    gap:36px;
+  }
+  .landing-eyebrow{font-size:9px;letter-spacing:.16em;margin-bottom:15px}
+  .landing-hero h1{
+    font-size:clamp(40px,11.8vw,54px);
+    line-height:.94;
+    letter-spacing:-.065em;
+  }
+  .landing-hero-copy>p{
+    font-size:15px;
+    line-height:1.6;
+    margin-top:21px;
+  }
+  .landing-actions{margin-top:25px;gap:9px}
+  .landing-primary,.landing-secondary{
+    width:100%;
+    min-height:48px;
+    border-radius:14px;
+    box-sizing:border-box;
+  }
+  .landing-meta{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+    margin-top:16px;
+  }
+  .landing-meta span{font-size:9px}
+  .landing-meta span:last-child{grid-column:1/-1}
+  .landing-product-wrap{
+    width:100%;
+    max-width:330px;
+    margin:0 auto;
+    padding:8px 0 5px;
+  }
+  .landing-glow{
+    width:90%;height:80%;right:5%;top:9%;
+    filter:blur(18px);
+  }
+  .landing-window.landing-app-preview{
+    width:100%;
+    border-radius:28px;
+    background:#f7f7f5;
+    box-shadow:0 28px 80px rgba(0,0,0,.16),0 1px 2px rgba(0,0,0,.05);
+    transform:none;
+    overflow:hidden;
+    border:1px solid rgba(0,0,0,.09);
+  }
+  .landing-window.landing-app-preview:before{
+    content:'';
+    display:block;
+    position:absolute;
+    top:8px;left:50%;
+    width:70px;height:5px;
+    transform:translateX(-50%);
+    border-radius:999px;
+    background:#171717;
+    opacity:.92;
+    z-index:5;
+  }
+  .landing-app-preview .landing-window-top{
+    height:58px;
+    padding:12px 12px 5px;
+    grid-template-columns:28px 1fr 28px;
+    border-bottom:1px solid rgba(0,0,0,.06);
+  }
+  .landing-app-preview .window-dots{display:none}
+  .landing-app-preview .window-search{
+    width:100%;
+    height:34px;
+    box-sizing:border-box;
+    border-radius:10px;
+    font-size:10px;
+  }
+  .landing-app-preview .window-search kbd{display:none}
+  .landing-app-preview .window-avatar{
+    width:26px;height:26px;
+    font-size:9px;
+  }
+  .landing-app-body{display:block;min-height:0}
+  .landing-app-sidebar{display:none!important}
+  .landing-app-main{
+    padding:16px 12px 18px;
+    background:#f7f7f5;
+  }
+  .landing-app-heading{margin-bottom:12px}
+  .landing-app-heading span{font-size:7px}
+  .landing-app-heading strong{font-size:19px}
+  .landing-app-heading>b{font-size:9px}
+  .landing-app-grid{
+    grid-template-columns:1fr;
+    gap:9px;
+  }
+  .landing-note-card{
+    min-height:134px;
+    padding:13px 13px 8px;
+    border-radius:15px;
+  }
+  .landing-note-card:nth-child(n+4){display:none}
+  .landing-note-card>strong{font-size:12px;margin-top:14px}
+  .landing-note-card>p{font-size:8.5px;line-height:1.5;-webkit-line-clamp:3}
+  .landing-note-actions{
+    opacity:1;
+    padding-top:8px;
+    color:#777;
+  }
+  .landing-note-actions svg{width:10px;height:10px}
+  .landing-note-tags i{font-size:6px}
+  .landing-statement{
+    padding:72px 18px 88px;
+  }
+  .landing-statement h2{
+    font-size:clamp(34px,10.5vw,47px);
+    line-height:1;
+  }
+  .landing-usecases{
+    padding:10px 18px 82px;
+    grid-template-columns:1fr;
+    gap:32px;
+  }
+  .landing-usecase-copy h2{font-size:clamp(35px,10.5vw,48px)}
+  .landing-usecase-copy>p:not(.landing-eyebrow){font-size:15px}
+  .landing-feature-preview.landing-editor-preview{
+    width:100%;
+    box-sizing:border-box;
+    transform:none;
+    border-radius:22px;
+  }
+  .landing-editor-toolbar{height:46px}
+  .landing-editor-icons{gap:7px}
+  .landing-editor-tabs{padding:7px 10px}
+  .landing-editor-tabs span{font-size:6px;padding:5px 6px}
+  .landing-editor-content{
+    min-height:200px;
+    padding:24px 16px 20px;
+  }
+  .landing-editor-content>strong{font-size:22px}
+  .landing-features{padding:8px 18px 78px}
+  .landing-section-head h2{font-size:clamp(35px,10.5vw,47px)}
+  .landing-feature-grid{grid-template-columns:1fr;gap:9px;margin-top:28px}
+  .landing-feature{padding:18px;border-radius:18px}
+  .feature-icon{margin-bottom:22px}
+  .landing-final{padding:10px 18px 48px}
+  .landing-final-inner{
+    padding:29px 21px 23px;
+    border-radius:22px;
+    gap:22px;
+  }
+  .landing-final h2{font-size:clamp(38px,11vw,53px)}
+  .landing-footer{padding:0 18px 24px}
+}
+@media(max-width:390px){
+  .landing-product-wrap{max-width:310px}
+  .landing-hero{padding-top:50px}
+  .landing-hero h1{font-size:39px}
+  .landing-meta{grid-template-columns:1fr}
+  .landing-meta span:last-child{grid-column:auto}
+  .landing-app-preview .landing-window-top{grid-template-columns:20px 1fr 25px}
+}
