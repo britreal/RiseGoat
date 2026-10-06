@@ -964,3 +964,56 @@
 .notes-shell.is-dark .note-card.note-color-teal{background:#203532}
 .notes-shell.is-dark .note-card.note-color-indigo{background:#2b2f3e}
 .notes-shell.is-dark .note-card.note-color-gray{background:#2d2e30}
+
+/* Native touch and feedback refinements */
+@media(max-width:800px){
+  .note-quick-actions button,
+  .note-quick-actions .note-card-icon-button{
+    width:44px!important;
+    height:44px!important;
+    flex-basis:44px!important;
+    min-width:44px!important;
+    border-radius:12px;
+  }
+  .quick-color-dot{
+    width:44px!important;
+    height:44px!important;
+    padding:10px;
+    background-clip:content-box!important;
+    border:0;
+  }
+  .color-dot{
+    width:44px;
+    height:44px;
+    flex:0 0 44px;
+    padding:10px;
+    background-clip:content-box!important;
+    border:0;
+  }
+  .notes-mobile-tab{
+    min-height:52px;
+    min-width:44px;
+  }
+  .notes-mobile-tab:active,
+  .notes-mobile-create:active,
+  .notes-icon-button:active,
+  .note-quick-actions button:active,
+  .note-quick-actions .note-card-icon-button:active{
+    transform:scale(.96);
+  }
+  .notes-icon-button:focus-visible,
+  .note-quick-actions button:focus-visible,
+  .note-quick-actions .note-card-icon-button:focus-visible,
+  .notes-mobile-tab:focus-visible,
+  .notes-mobile-create:focus-visible{
+    outline:2px solid #111;
+    outline-offset:2px;
+  }
+}
+.notes-alert button:active,
+.notes-primary:active,
+.notes-new:active,
+.notes-new-menu:active,
+.settings-group button:active{
+  transform:scale(.98);
+}
