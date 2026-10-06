@@ -903,3 +903,28 @@
     flex:1 1 auto;
   }
 }
+
+.settings-install{
+  border:0!important;
+  border-radius:10px!important;
+  background:#111!important;
+  color:#fff!important;
+  padding:9px 12px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:7px!important;
+  font:inherit!important;
+  font-size:12px!important;
+  cursor:pointer;
+  width:auto!important;
+  min-height:0!important;
+  white-space:nowrap;
+}
+.settings-install:hover{background:#2b2b2d!important}
+@media(prefers-color-scheme:dark){
+  .settings-install{background:#f5f5f7!important;color:#1d1d1f!important}
+  .settings-install:hover{background:#e5e5ea!important}
+}
+@media(max-width:600px){
+  .settings-install{width:100%!important;justify-content:center}
+}
