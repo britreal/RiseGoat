@@ -887,3 +887,19 @@
 @media(prefers-reduced-motion:reduce){
   .notes-mobile-backdrop,.notes-sidebar{transition:none!important}
 }
+
+/* Mobile top bar: search only */
+@media(max-width:800px){
+  .notes-toolbar{
+    justify-content:center;
+  }
+  .notes-menu-button,
+  .notes-toolbar-actions{
+    display:none!important;
+  }
+  .notes-search{
+    width:100%;
+    max-width:none;
+    flex:1 1 auto;
+  }
+}
