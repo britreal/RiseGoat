@@ -1,4 +1,4 @@
-import { ArrowRight, AudioLines, Bell, Check, Command, FileCheck2, Folder, Lock, Menu, Search, Sparkles, Tag, X } from 'lucide-react';
+import { Archive, ArrowRight, AudioLines, Bell, Check, Clock3, Command, FileCheck2, Folder, Grid2X2, ImagePlus, List, Lock, Menu, MoreHorizontal, Palette, Search, Share2, Sparkles, Tag, X, Plus } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect, useState } from 'react';
 
@@ -11,7 +11,7 @@ const benefits = [
   { icon: Lock, title: 'Seu espaço pessoal', copy: 'A experiência começa pela sua conta e fica separada do resto.' },
 ];
 
-export function LandingPage() {
+function PinDot(){ return <span className="landing-pin-dot" aria-hidden="true" />; }\n\nexport function LandingPage() {
   const { session } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -58,29 +58,57 @@ export function LandingPage() {
 
           <div className="landing-product-wrap" aria-label="Prévia do aplicativo Notas">
             <div className="landing-glow" />
-            <div className="landing-window">
+            <div className="landing-window landing-app-preview">
               <div className="landing-window-top">
                 <div className="window-dots"><i /><i /><i /></div>
                 <div className="window-search"><Search size={13} /><span>Buscar notas...</span><kbd><Command size={10} /> K</kbd></div>
                 <div className="window-avatar">N</div>
               </div>
-              <div className="landing-window-body">
-                <aside>
-                  <div className="preview-brand"><span className="landing-brand-mark small">N</span><strong>Notas</strong></div>
-                  <div className="preview-new">+ Nova nota</div>
-                  <span className="preview-section">Biblioteca</span>
-                  <div className="preview-item active">Todas <b>8</b></div>
-                  <div className="preview-item">Fixadas <b>2</b></div>
-                  <div className="preview-item">Arquivo</div>
-                  <div className="preview-item">Lixeira</div>
+              <div className="landing-window-body landing-app-body">
+                <aside className="landing-app-sidebar">
+                  <div className="landing-app-brand"><span className="landing-brand-mark small">N</span><div><strong>Notas</strong><small>Espaço pessoal</small></div></div>
+                  <div className="landing-app-new"><Plus size={11}/> Nova nota <kbd>⌘N</kbd></div>
+                  <span className="landing-app-section">Biblioteca</span>
+                  <div className="landing-app-nav active"><Grid2X2 size={11}/> Todas <b>8</b></div>
+                  <div className="landing-app-folder-heading"><span>Pastas</span><MoreHorizontal size={10}/></div>
+                  <div className="landing-app-nav"><Folder size={11}/> Produto <b>3</b></div>
+                  <div className="landing-app-nav"><Folder size={11}/> Estudos <b>2</b></div>
+                  <div className="landing-app-nav"><Folder size={11}/> Ideias <b>4</b></div>
+                  <div className="landing-app-nav"><Archive size={11}/> Arquivo</div>
+                  <div className="landing-app-nav"><span className="landing-app-trash-dot" /> Lixeira</div>
                 </aside>
-                <div className="preview-main">
-                  <div className="preview-heading"><span>Seu espaço</span><strong>Todas as notas</strong></div>
-                  <div className="preview-grid">
-                    <article className="preview-note note-cream"><span>Hoje</span><strong>Uma ideia simples pode mudar tudo.</strong><p>Não precisa de um sistema complicado. Precisa de um lugar onde pensar seja fácil.</p></article>
-                    <article className="preview-note note-blue"><span>Hoje</span><strong>Lista da manhã</strong><p>Escrever. Caminhar. Fazer uma coisa importante.</p></article>
-                    <article className="preview-note note-lilac"><span>Ontem</span><strong>Para lembrar</strong><p>Voltar para a ideia do produto mínimo.</p></article>
-                    <article className="preview-note note-green"><span>Ontem</span><strong>Leitura</strong><p>Uma boa nota preserva contexto, não apenas palavras.</p></article>
+                <div className="landing-app-main">
+                  <div className="landing-app-heading">
+                    <div><span>Seu espaço</span><strong>Todas as notas</strong></div>
+                    <b>8</b>
+                  </div>
+                  <div className="landing-app-grid">
+                    <article className="landing-note-card warm">
+                      <div className="landing-note-top"><span>Hoje</span><small>12:42</small></div>
+                      <strong>Uma ideia simples pode mudar tudo.</strong>
+                      <p>Não precisa de um sistema complicado. Precisa de um lugar para pensar.</p>
+                      <div className="landing-note-tags"><i>ideia</i><i>produto</i></div>
+                      <div className="landing-note-actions"><Palette size={10}/><Clock3 size={10}/><Share2 size={10}/><ImagePlus size={10}/><Archive size={10}/><MoreHorizontal size={10}/></div>
+                    </article>
+                    <article className="landing-note-card yellow">
+                      <div className="landing-note-top"><span>Hoje</span><small>09:18</small></div>
+                      <strong>Lista da manhã</strong>
+                      <p>Escrever. Caminhar. Fazer uma coisa importante.</p>
+                      <div className="landing-note-actions"><Palette size={10}/><Clock3 size={10}/><Share2 size={10}/><ImagePlus size={10}/><Archive size={10}/><MoreHorizontal size={10}/></div>
+                    </article>
+                    <article className="landing-note-card blue">
+                      <div className="landing-note-top"><span>Ontem</span><small>18:05</small></div>
+                      <strong>Para lembrar</strong>
+                      <p>Voltar para a ideia do produto mínimo e testar com alguém.</p>
+                      <div className="landing-note-tags"><i>teste</i></div>
+                      <div className="landing-note-actions"><Palette size={10}/><Clock3 size={10}/><Share2 size={10}/><ImagePlus size={10}/><Archive size={10}/><MoreHorizontal size={10}/></div>
+                    </article>
+                    <article className="landing-note-card green">
+                      <div className="landing-note-top"><span>Ontem</span><small>16:27</small></div>
+                      <strong>Leitura</strong>
+                      <p>Uma boa nota preserva contexto, não apenas palavras.</p>
+                      <div className="landing-note-actions"><Palette size={10}/><Clock3 size={10}/><Share2 size={10}/><ImagePlus size={10}/><Archive size={10}/><MoreHorizontal size={10}/></div>
+                    </article>
                   </div>
                 </div>
               </div>
@@ -105,10 +133,20 @@ export function LandingPage() {
               <div><AudioLines size={16}/><span><strong>Áudio</strong><small>Registre uma ideia no instante em que ela surgir.</small></span></div>
             </div>
           </div>
-          <div className="landing-feature-preview">
-            <div className="feature-preview-top"><span>Hoje</span><b>3 notas</b></div>
-            <article><span>Produto</span><strong>Uma ideia para testar amanhã.</strong><p>Proposta simples, primeira versão, feedback rápido.</p><div className="preview-chips"><i>produto</i><i>teste</i></div></article>
-            <article className="preview-compact"><span>Áudio</span><strong>Rascunho gravado</strong><p>0:42 · transcrição disponível</p></article>
+          <div className="landing-feature-preview landing-editor-preview">
+            <div className="landing-editor-toolbar">
+              <span className="landing-editor-back">‹</span>
+              <div><small>Salvo</small><b>•</b></div>
+              <div className="landing-editor-icons"><PinDot /><Archive size={10}/><Clock3 size={10}/><Share2 size={10}/><Tag size={10}/><Folder size={10}/><MoreHorizontal size={10}/></div>
+            </div>
+            <div className="landing-editor-tabs"><span className="active">Texto</span><span>Checklist</span><span>Imagem</span><span>Desenho</span><span>Áudio</span></div>
+            <div className="landing-editor-content">
+              <small>CRIADA HOJE</small>
+              <strong>Uma ideia para testar amanhã.</strong>
+              <p>Proposta simples, primeira versão, feedback rápido. O editor real mantém o foco no conteúdo.</p>
+              <div className="landing-editor-labels"><i>produto</i><i>teste</i></div>
+            </div>
+            <div className="landing-editor-footer"><span>Neutro</span><span>Salvo automaticamente</span></div>
           </div>
         </section>
 
