@@ -222,3 +222,171 @@
 .settings-about{padding-top:4px}
 @media(prefers-color-scheme:dark){.settings-shell{background:#1c1c1e;color:#f5f5f7}.settings-header{background:rgba(28,28,30,.78);border-color:rgba(255,255,255,.1)}.settings-group{background:#2c2c2e;border-color:rgba(255,255,255,.08)}.settings-group>button{background:#2c2c2e;color:#f5f5f7;border-color:rgba(255,255,255,.08)}.settings-group>button:hover,.settings-group>button.selected{background:#323234}.settings-section-title p,.settings-group small{color:#98989d}.settings-back{color:#98989d}.settings-back:hover{background:rgba(255,255,255,.08);color:#fff}.settings-danger{background:#3a3a3c}.settings-danger:hover{background:#454547}}
 @media(max-width:600px){.settings-header{padding:0 14px}.settings-header h1{font-size:17px}.settings-main{width:calc(100% - 24px);padding:34px 0 60px}.settings-section{margin-bottom:34px}.settings-section-title h2{font-size:20px}.settings-account{align-items:flex-start;flex-direction:column}.settings-danger{width:100%;justify-content:center}}
+
+
+/* Google Keep-inspired note cards */
+.note-card{
+  position:relative;
+  min-height:0;
+  height:fit-content;
+  padding:0;
+  border:1px solid #e0e0e0;
+  border-radius:12px;
+  background:#fff;
+  overflow:hidden;
+  box-shadow:none;
+  transform:none;
+  transition:box-shadow .2s ease;
+}
+.note-card:hover{
+  transform:none;
+  box-shadow:0 1px 2px 0 rgba(60,64,67,.3),0 2px 6px 2px rgba(60,64,67,.15);
+}
+.note-card-select-check{
+  position:absolute;
+  top:8px;
+  left:8px;
+  z-index:30;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  color:#fff;
+  background:#202124;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .15s ease;
+}
+.note-card:hover .note-card-select-check,
+.note-card-select-check.selected{opacity:1}
+.note-card-images{
+  width:100%;
+  display:grid;
+  gap:2px;
+  background:#e0e0e0;
+  overflow:hidden;
+}
+.note-card-images.single{grid-template-columns:1fr}
+.note-card-images.multi{grid-template-columns:repeat(2,minmax(0,1fr))}
+.note-card-image-cell{
+  min-width:0;
+  overflow:hidden;
+  background:#f1f3f4;
+}
+.note-card-images.single .note-card-image-cell{aspect-ratio:16/9}
+.note-card-images.multi .note-card-image-cell{aspect-ratio:1/1}
+.note-card-image-cell img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.note-card-cover-placeholder{
+  width:100%;
+  height:148px;
+  margin:0;
+  border-radius:0;
+}
+.note-card-body{padding:12px 16px 8px}
+.note-card h3{
+  font-size:16px;
+  font-weight:500;
+  line-height:1.35;
+  letter-spacing:0;
+  color:#202124;
+  margin:0 0 8px;
+}
+.note-card p{
+  color:#202124;
+  font-size:14px;
+  line-height:1.5;
+  margin:0;
+}
+.note-card .note-labels{
+  margin-top:8px;
+}
+.note-quick-actions{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:25;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:4px 8px 8px;
+  gap:2px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transform:none;
+  transition:opacity .15s ease,visibility .15s ease;
+}
+.note-card:hover .note-quick-actions,
+.note-quick-actions:focus-within{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+}
+.note-quick-actions button,
+.note-quick-actions .note-card-icon-button{
+  position:relative;
+  width:32px;
+  height:32px;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:50%;
+  background:transparent;
+  color:#5f6368;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  flex:0 0 32px;
+}
+.note-quick-actions button:hover,
+.note-quick-actions button.active,
+.note-quick-actions .note-card-icon-button:hover{
+  background:rgba(95,99,104,.157);
+}
+.note-card-icon-button input{display:none}
+.note-more-quick{
+  right:8px;
+  bottom:48px;
+  min-width:220px;
+  padding:6px;
+  display:grid;
+  gap:2px;
+}
+.note-more-quick button{
+  width:100%;
+  height:auto;
+  min-height:34px;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:#202124;
+  padding:7px 9px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  justify-content:flex-start;
+  cursor:pointer;
+  font:inherit;
+  font-size:12px;
+}
+.note-more-quick button:hover{background:rgba(95,99,104,.10)}
+.note-more-quick button.danger{color:#b3261e}
+.attachment-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.attachment-card .attachment-actions button{margin:8px 0 0}
+.attachment-card .attachment-actions button.danger{color:#b3261e;background:rgba(179,38,30,.08)}
+@media(max-width:520px){
+  .note-quick-actions{padding-inline:6px}
+  .note-quick-actions button,
+  .note-quick-actions .note-card-icon-button{width:30px;height:30px;flex-basis:30px}
+}
