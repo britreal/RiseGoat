@@ -18,7 +18,7 @@ export function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    document.title = 'Notas — seu espaço para pensar';
+    document.title = 'Notas | Seu espaço para pensar';
     return () => { document.title = 'Notas'; };
   }, []);
 
@@ -28,7 +28,7 @@ export function LandingPage() {
     <div className="landing-shell">
       <div className="landing-noise" />
       <header className="landing-nav">
-        <a href="/" className="landing-brand" aria-label="Notas — início">
+        <a href="/" className="landing-brand" aria-label="Notas | início">
           <span className="landing-brand-mark">N</span>
           <span>Notas</span>
         </a>
@@ -48,14 +48,14 @@ export function LandingPage() {
       <main>
         <section className="landing-hero">
           <div className="landing-hero-copy">
-            <div className="landing-eyebrow"><Sparkles size={13} /> Feito para pensar</div>
-            <h1>Capture antes que esqueça.<br /><em>Organize sem complicar.</em></h1>
-            <p>Notas é um espaço pessoal para ideias, listas, referências e pensamentos. Abra, escreva e volte para o que importa.</p>
+            <div className="landing-eyebrow"><Sparkles size={13} /> Para suas ideias</div>
+            <h1>Anote o que importa.<br /><em>Encontre quando precisar.</em></h1>
+            <p>Um lugar simples para guardar ideias, listas, referências e pensamentos. Escreva agora e encontre tudo quando precisar.</p>
             <div className="landing-actions">
-              <a href={action} className="landing-primary">Começar a escrever <ArrowRight size={17} /></a>
-              <a href="#recursos" className="landing-secondary">Conhecer o Notas</a>
+              <a href={action} className="landing-primary">Começar a usar <ArrowRight size={17} /></a>
+              <a href="#recursos" className="landing-secondary">Ver recursos</a>
             </div>
-            <div className="landing-meta"><span><Check size={14} /> Sem curva de aprendizado</span><span><Check size={14} /> Sincronizado</span><span><Check size={14} /> Pensado para uso diário</span></div>
+            <div className="landing-meta"><span><Check size={14} /> Fácil de aprender</span><span><Check size={14} /> Sincroniza automaticamente</span><span><Check size={14} /> Feito para o dia a dia</span></div>
           </div>
 
           <div className="landing-product-wrap" aria-label="Prévia do aplicativo Notas">
@@ -119,9 +119,9 @@ export function LandingPage() {
         </section>
 
         <section id="filosofia" className="landing-statement">
-          <p className="landing-eyebrow">Menos interface. Mais pensamento.</p>
-          <h2>Seu espaço não precisa competir<br />com a sua atenção.</h2>
-          <p>O Notas foi desenhado para desaparecer quando você começa a escrever.</p>
+          <p className="landing-eyebrow">Menos distração. Mais clareza.</p>
+          <h2>Seu espaço não precisa disputar<br />a sua atenção.</h2>
+          <p>O Notas foi feito para sair do caminho quando você começa a escrever.</p>
         </section>
 
         <section className="landing-usecases">
@@ -154,8 +154,8 @@ export function LandingPage() {
 
         <section id="recursos" className="landing-features">
           <div className="landing-section-head">
-            <p className="landing-eyebrow">Tudo o que importa</p>
-            <h2>Ferramentas que ficam<br />no seu caminho — não na sua frente.</h2>
+            <p className="landing-eyebrow">Recursos essenciais</p>
+            <h2>Tudo o que você precisa<br />para guardar e encontrar o que importa.</h2>
           </div>
           <div className="landing-feature-grid">
             {benefits.map(({ icon: Icon, title, copy }) => (
@@ -170,7 +170,7 @@ export function LandingPage() {
 
         <section className="landing-final">
           <div className="landing-final-inner">
-            <div><p className="landing-eyebrow">Comece agora</p><h2>Abra espaço<br />para uma ideia.</h2></div>
+            <div><p className="landing-eyebrow">Comece agora</p><h2>Dê um lugar<br />às suas ideias.</h2></div>
             <a href={action} className="landing-primary">Abrir o Notas <ArrowRight size={17} /></a>
           </div>
         </section>
