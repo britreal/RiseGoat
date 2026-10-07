@@ -62,7 +62,7 @@ export function NotesPage(){
       setCheck(v=>{const map={...v};delete map[selected.id];return map});
     }
   }
-  function closeEditor(){discardEmptyDraft();closeEditor();}
+  function closeEditor(){discardEmptyDraft();setSelectedId(null)}
   useEffect(()=>{document.querySelector('.notes-sidebar')?.classList.remove('mobile-open')},[filter,folderId]);
   useEffect(()=>{if(!selected)return;setMore(false);setShare(false);setReminder(false);setLabelPanel(false);setQuickAction(null);setFolderMenuId(null);setFolderEditId(null);setFolderDeleteId(null);void loadSelected(selected.id)},[selectedId]);
   useEffect(()=>{const closePanels=(e:PointerEvent)=>{const target=e.target as HTMLElement|null;if(target?.closest('.note-quick-actions,.note-quick-popover,.editor-actions,.notes-popover,.notes-folder-row'))return;setQuickAction(null);setMore(false);setShare(false);setReminder(false);setLabelPanel(false);setFolderMenuId(null)};document.addEventListener('pointerdown',closePanels,true);return()=>document.removeEventListener('pointerdown',closePanels,true)},[]);
