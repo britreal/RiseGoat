@@ -199,7 +199,7 @@ export function NotesPage(){
   async function upload(file:File,type:'image'|'drawing'|'file'){
     if(!selected)return;
     let noteId=selected.id;
-    if(isDraftNote(noteId)){const saved=await persistDraftNote(noteId,{note_type:type==='drawing'?'drawing':'image'},true);if(!saved)return;noteId=saved.id}
+    if(isDraftNote(noteId)){const saved=await persistDraftNote(noteId,{note_type:type==='drawing'?'drawing':type==='image'?'image':selected.note_type},true);if(!saved)return;noteId=saved.id}
     await uploadAttachment(noteId,file,type)
   }
   function img(e:ChangeEvent<HTMLInputElement>){const f=e.target.files?.[0];if(f)void upload(f,'image');e.currentTarget.value=''}
