@@ -394,7 +394,7 @@
 /* Equal-height note rows on desktop */
 @media(min-width:801px){
   .notes-grid{
-    grid-auto-rows:1fr;
+    grid-auto-rows:auto;
     align-items:stretch;
   }
   .notes-grid .note-card{
@@ -1136,4 +1136,11 @@
   .note-card-check-empty{
     padding-left:43px;
   }
+}
+
+
+/* Final equal-height rule: cards in the same desktop grid row share the row height. */
+@media(min-width:801px){
+  .notes-content:not(.list-view) .notes-grid .note-card{height:100%;}
+  .notes-content.list-view .notes-grid .note-card{height:auto;}
 }
