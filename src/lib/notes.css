@@ -391,6 +391,23 @@
   .note-quick-actions .note-card-icon-button{width:30px;height:30px;flex-basis:30px}
 }
 
+/* Equal-height note rows on desktop */
+@media(min-width:801px){
+  .notes-grid{
+    grid-auto-rows:1fr;
+    align-items:stretch;
+  }
+  .notes-grid .note-card{
+    height:100%;
+  }
+  .notes-content.list-view .notes-grid{
+    grid-auto-rows:auto;
+  }
+  .notes-content.list-view .notes-grid .note-card{
+    height:auto;
+  }
+}
+
 /* Final notes layout fixes */
 .note-card{display:flex;flex-direction:column;height:auto;min-height:0;align-self:stretch}
 .note-card-body{flex:1 1 auto}
