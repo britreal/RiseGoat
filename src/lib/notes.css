@@ -409,6 +409,21 @@
 }
 
 /* Final notes layout fixes */
+@media(min-width:801px){
+  /* Keep every grid card visually uniform regardless of content length. */
+  .notes-content:not(.list-view) .notes-grid .note-card{
+    height:280px;
+    min-height:280px;
+  }
+  .notes-content:not(.list-view) .notes-grid .note-card-body{
+    min-height:0;
+    overflow:hidden;
+  }
+  .notes-content:not(.list-view) .notes-grid .note-card-images{
+    flex:0 0 auto;
+    max-height:148px;
+  }
+}
 .note-card{display:flex;flex-direction:column;height:auto;min-height:0;align-self:stretch}
 .note-card-body{flex:1 1 auto}
 .note-quick-actions{
