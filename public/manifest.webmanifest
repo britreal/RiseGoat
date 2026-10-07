@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Notas — seu espaço para pensar",
+  "name": "Notas | Seu espaço para pensar",
   "short_name": "Notas",
-  "description": "Seu espaço pessoal para capturar ideias, pensamentos, listas e referências.",
+  "description": "Um espaço pessoal para guardar ideias, pensamentos, listas e referências.",
   "lang": "pt-BR",
   "dir": "ltr",
   "start_url": "/",
