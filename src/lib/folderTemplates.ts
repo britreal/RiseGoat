@@ -94,7 +94,7 @@ export const folderTemplates: FolderTemplate[] = [
   {
     id: 'acesso',
     name: '🔓 ACESSO',
-    color: '#00BFA6',
+    color: '#00F5D4',
     icon: 'key-round',
     description: 'Networking intencional, aproximação respeitosa e contribuições de valor.',
     purpose: 'Organize o caminho entre conhecer alguém, iniciar uma conversa genuína e construir colaboração mútua.',
@@ -129,8 +129,8 @@ export const folderTemplates: FolderTemplate[] = [
         type: 'text',
         tags: ['acesso', 'dossie'],
         sections: [
-          { heading: '[Nome da pessoa]', items: ['Objetivo declarado:', 'Objetivos que a própria pessoa compartilhou:', 'Riscos profissionais que mencionou:', 'Desafios que já tentou resolver:', 'Aliados e colaboradores citados publicamente:', 'Interesses e temas públicos:', 'Pontos de conexão comigo:', 'Uma forma concreta e respeitosa de ajudar:'] },
-          { heading: 'Nota de responsabilidade', items: ['Use apenas informações públicas ou compartilhadas de forma apropriada.', 'Não registre segredos, dados sensíveis nem informações obtidas sem consentimento.', 'Revise e remova dados desnecessários ou desatualizados.'] },
+          { heading: '[Nome da pessoa]', items: ['Objetivo declarado:', 'Objetivo não declarado (hipótese, não fato):', 'Risco que procura evitar:', 'Preocupação profissional que já compartilhou:', 'O que já tentou e não funcionou:', 'Aliados e colaboradores conhecidos:', 'Conflitos ou relações profissionais relevantes:', 'Pontos de conexão comigo:', 'Próximo passo respeitoso:'] },
+          { heading: 'Nota de responsabilidade', items: ['Diferencie informação confirmada de hipótese. Não trate suposições sobre objetivos ou medos como fatos.', 'Use apenas informações públicas ou compartilhadas de forma apropriada.', 'Não investigue nem registre segredos, dados sensíveis ou informações obtidas sem consentimento.', 'Revise e remova dados desnecessários ou desatualizados.'] },
         ],
       },
       {
@@ -156,7 +156,7 @@ export const folderTemplates: FolderTemplate[] = [
         title: 'Construção de Círculo Íntimo',
         type: 'checklist',
         tags: ['acesso', 'comunidade'],
-        checklistItems: ['Identificar 5 pessoas com interesses compartilhados', 'Definir um propósito claro para o grupo', 'Convidar 3 pessoas sem pressão', 'Compartilhar conteúdo útil e autorizado', 'Manter a privacidade e respeitar os limites de cada participante'],
+        checklistItems: ['Identificar 5 pessoas com interesses compartilhados', 'Definir um propósito claro para o grupo', 'Criar um grupo no Telegram se fizer sentido para todos', 'Convidar 3 pessoas sem pressão', 'Compartilhar conteúdo útil e autorizado', 'Manter a privacidade e respeitar os limites de cada participante'],
       },
     ],
     connections: [
