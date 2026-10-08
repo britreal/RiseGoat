@@ -149,3 +149,25 @@
   .help-center-count{display:none}
 }
 @media(prefers-reduced-motion:reduce){.help-center-overlay{animation:none}}
+
+/* Expanded guide: compact accordions and printable/exportable reference */
+.help-center-header-actions{display:flex;align-items:center;gap:7px;flex:0 0 auto}
+.help-center-export{min-height:36px;display:flex;align-items:center;justify-content:center;gap:7px;padding:0 12px;border:1px solid rgba(0,0,0,.1);border-radius:10px;background:#f6f6f4;color:#4b4b4e;font:inherit;font-size:11px;font-weight:650;white-space:nowrap;cursor:pointer}
+.help-center-export:hover{background:#ebebe8;color:#19191a}
+.help-center-article>summary{list-style:none;cursor:pointer;align-items:center;padding:0 2px 0 0}
+.help-center-article>summary::-webkit-details-marker{display:none}
+.help-center-article>summary:focus-visible{outline:2px solid #929292;outline-offset:5px;border-radius:5px}
+.help-center-article-chevron{flex:0 0 16px;color:#8b8b8f;transition:transform .16s ease}
+.help-center-article[open]>summary .help-center-article-chevron{transform:rotate(180deg)}
+.help-center-article>ol{padding-bottom:1px}
+.notes-shell.is-dark .help-center-export{background:#29292c;border-color:rgba(255,255,255,.12);color:#ddd}
+.notes-shell.is-dark .help-center-export:hover{background:#353538;color:#fff}
+.notes-shell.is-dark .help-center-article-chevron{color:#aaa}
+@media(max-width:760px){
+  .help-center-header-actions{gap:4px}
+  .help-center-export{width:34px;min-height:34px;padding:0;border-radius:9px}
+  .help-center-export span{display:none}
+  .help-center-article>summary{align-items:flex-start}
+  .help-center-article-chevron{margin-top:7px}
+}
+@media(prefers-reduced-motion:reduce){.help-center-article-chevron{transition:none}}
