@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import {
-  Archive, Bell, BookOpen, Camera, CheckSquare, ChevronRight, CircleHelp,
-  Clock3, Command, Download, FileText, Folder, Keyboard, Link2, ListChecks,
-  Map, Mic, Palette, Search, Share2, ShieldCheck, Smartphone, Sparkles, Tag,
-  Trash2, Upload, X, type LucideIcon,
+  Bell, BookOpen, ChevronRight, CircleHelp, Command, FileText, Folder,
+  Map, Search, ShieldCheck, Sparkles, X, type LucideIcon,
 } from 'lucide-react';
 import '@/lib/help-center.css';
 
@@ -463,6 +461,7 @@ export function HelpCenter({ open, onClose, onCreateNote, onOpenMap }: HelpCente
     if (event.key === 'Enter' && results.length > 0) {
       const first = results[0];
       setActiveId(first.categoryId);
+      setQuery('');
     }
   };
 
