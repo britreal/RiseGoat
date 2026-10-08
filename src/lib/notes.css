@@ -1163,3 +1163,51 @@
 .notes-shell.is-dark .folder-multi-select button.active{background:rgba(255,255,255,.1)!important;color:#fff!important}
 .notes-shell.is-dark .folder-multi-select button.active>svg:first-child{color:#fff}
 .notes-shell.is-dark .folder-multi-select button:hover{background:rgba(255,255,255,.07)}
+
+
+/* Checklist completion heatmap */
+.note-heatmap{
+  display:grid;
+  gap:6px;
+  margin-top:10px;
+  padding:8px 9px 6px;
+  min-width:0;
+  overflow:hidden;
+  border-radius:10px;
+  background:rgba(255,255,255,.48);
+}
+.note-heatmap-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  color:#737373;
+  font-size:10px;
+  line-height:1.2;
+}
+.note-heatmap-heading span:first-child{
+  color:#c2410c;
+  font-weight:700;
+}
+.note-heatmap-heading span:last-child{
+  font-variant-numeric:tabular-nums;
+}
+.note-heatmap svg{
+  display:block;
+  width:100%;
+  max-width:100%;
+  height:auto;
+}
+.heatmap-toggle.active{
+  color:#c2410c!important;
+  background:rgba(234,88,12,.11)!important;
+}
+.notes-shell.is-dark .note-heatmap{
+  background:rgba(0,0,0,.15);
+}
+.notes-shell.is-dark .note-heatmap-heading{color:#a1a1aa}
+.notes-shell.is-dark .note-heatmap-heading span:first-child{color:#fb923c}
+@media(max-width:800px){
+  .note-heatmap{margin-top:9px;padding:9px 10px 7px}
+  .note-heatmap-heading{font-size:11px}
+}
