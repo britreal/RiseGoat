@@ -147,7 +147,6 @@ export function NotesPage(){
   }
   async function copyText(note:Note){const text=plain(note.content);if(!text){setError('Esta nota ainda não tem texto para copiar.');return}try{await navigator.clipboard.writeText(text);setError('Texto copiado.');setTimeout(()=>setError(''),1200)}catch{setError('Não foi possível copiar o texto.')}}
   async function toggleTextLock(){if(!selected)return;await update({metadata:{...selected.metadata,locked:!selectedLocked}})}
-  async function remove(){if(!selected)return;await update({is_deleted:true,deleted_at:new Date().toISOString()});closeEditor()}
   async function loadSelected(id:string){
     if(isDraftNote(id))return;
     const [c,a]=await Promise.all([supabase.from('note_checklist_items').select('*').eq('note_id',id).order('position'),supabase.from('note_attachments').select('*').eq('note_id',id).order('created_at',{ascending:false})]);
