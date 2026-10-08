@@ -1,16 +1,32 @@
 import HeatMap from '@uiw/react-heat-map';
 
 type Activity = Record<string, number>;
+type DailyItems = Record<string, string[]>;
 
-function readActivity(value: unknown): Activity {
+function readDailyItems(value: unknown): DailyItems {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  const result: DailyItems = {};
+  for (const [date, rawItems] of Object.entries(value as Record<string, unknown>)) {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date) && Array.isArray(rawItems)) {
+      const ids = [...new Set(rawItems.filter((id): id is string => typeof id === 'string' && id.length > 0))];
+      if (ids.length) result[date] = ids;
+    }
+  }
+  return result;
+}
+
+function readActivity(value: unknown, dailyItemsValue: unknown): Activity {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  const dailyItems = readDailyItems(dailyItemsValue);
   const result: Activity = {};
   for (const [date, rawCount] of Object.entries(value as Record<string, unknown>)) {
     const count = Number(rawCount);
     if (/^\d{4}-\d{2}-\d{2}$/.test(date) && Number.isFinite(count) && count > 0) {
-      result[date] = count;
+      // Legacy history counted clicks; keep only one heat unit per day unless unique items are known.
+      result[date] = dailyItems[date]?.length ?? 1;
     }
   }
+  for (const [date, ids] of Object.entries(dailyItems)) result[date] = ids.length;
   return result;
 }
 
@@ -23,10 +39,11 @@ function dateKey(date: Date): string {
 
 type NoteHeatmapProps = {
   activity: unknown;
+  dailyItems: unknown;
   dark?: boolean;
 };
 
-export function NoteHeatmap({ activity, dark = false }: NoteHeatmapProps) {
+export function NoteHeatmap({ activity, dailyItems, dark = false }: NoteHeatmapProps) {
   const endDate = new Date();
   const startDate = new Date(endDate);
   startDate.setDate(startDate.getDate() - 83);
@@ -34,11 +51,11 @@ export function NoteHeatmap({ activity, dark = false }: NoteHeatmapProps) {
 
   const startKey = dateKey(startDate);
   const endKey = dateKey(endDate);
-  const entries = Object.entries(readActivity(activity))
+  const entries = Object.entries(readActivity(activity, dailyItems))
     .filter(([date]) => date >= startKey && date <= endKey)
     .sort(([a], [b]) => a.localeCompare(b));
-  const total = entries.reduce((sum, [, count]) => sum + count, 0);
-  if (total < 1) return null;
+  const activeDays = entries.length;
+  if (activeDays < 1) return null;
 
   const value = entries.map(([date, count]) => ({ date: date.replace(/-/g, '/'), count }));
 
@@ -46,7 +63,7 @@ export function NoteHeatmap({ activity, dark = false }: NoteHeatmapProps) {
     <div className="note-heatmap" onClick={event => event.stopPropagation()}>
       <div className="note-heatmap-heading">
         <span>Calor</span>
-        <span>{total} {total === 1 ? 'conclusão' : 'conclusões'}</span>
+        <span>{activeDays} {activeDays === 1 ? 'dia ativo' : 'dias ativos'}</span>
       </div>
       <HeatMap
         value={value}
