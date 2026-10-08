@@ -1211,3 +1211,320 @@
   .note-heatmap{margin-top:9px;padding:9px 10px 7px}
   .note-heatmap-heading{font-size:11px}
 }
+
+
+/* Full checklist heatmap statistics popup */
+.note-heatmap-heading{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto 26px;
+  align-items:center;
+  column-gap:8px;
+}
+.note-heatmap-open-stats{
+  display:grid;
+  place-items:center;
+  width:26px;
+  height:26px;
+  border:0;
+  border-radius:8px;
+  background:rgba(234,88,12,.10);
+  color:#c2410c;
+  cursor:pointer;
+  transition:background .15s ease,transform .15s ease;
+}
+.note-heatmap-open-stats:hover{background:rgba(234,88,12,.18);transform:scale(1.04)}
+.note-heatmap-dialog-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:rgba(15,15,18,.52);
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+  animation:heatmap-fade-in .16s ease-out;
+}
+.note-heatmap-dialog{
+  display:grid;
+  gap:19px;
+  width:min(920px,100%);
+  max-height:min(92dvh,1000px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  border:1px solid rgba(255,255,255,.55);
+  border-radius:23px;
+  padding:24px;
+  background:#fafaf9;
+  color:#202124;
+  box-shadow:0 28px 100px rgba(0,0,0,.28);
+  scrollbar-width:thin;
+}
+.note-heatmap-dialog-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.note-heatmap-dialog-brand{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  color:#3f3f46;
+  font-size:13px;
+  font-weight:700;
+}
+.note-heatmap-dialog-flame{
+  display:grid;
+  place-items:center;
+  width:31px;
+  height:31px;
+  border-radius:10px;
+  background:#fff0e6;
+  color:#c2410c;
+}
+.note-heatmap-dialog-close{
+  display:grid;
+  place-items:center;
+  width:36px;
+  height:36px;
+  flex:0 0 36px;
+  border:1px solid rgba(0,0,0,.07);
+  border-radius:11px;
+  background:#f0f0ef;
+  color:#555;
+  cursor:pointer;
+}
+.note-heatmap-dialog-close:hover{background:#e7e7e5;color:#111}
+.note-heatmap-dialog-title{display:grid;gap:6px}
+.note-heatmap-dialog-title p,.note-heatmap-section-kicker{
+  margin:0;
+  color:#929292;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.12em;
+}
+.note-heatmap-dialog-title h2{
+  margin:0;
+  overflow-wrap:anywhere;
+  font-size:clamp(23px,4vw,32px);
+  line-height:1.1;
+  letter-spacing:-.045em;
+  font-weight:720;
+}
+.note-heatmap-dialog-title>span{
+  color:#777;
+  font-size:12px;
+  line-height:1.5;
+}
+.note-heatmap-stat-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.note-heatmap-stat-card{
+  display:grid;
+  align-content:start;
+  gap:6px;
+  min-width:0;
+  border:1px solid rgba(0,0,0,.055);
+  border-radius:16px;
+  padding:14px;
+  background:#fff;
+}
+.note-heatmap-stat-icon{
+  display:grid;
+  place-items:center;
+  width:31px;
+  height:31px;
+  border-radius:10px;
+  background:#f5f5f4;
+  color:#575757;
+}
+.note-heatmap-stat-label{color:#777;font-size:10px;line-height:1.35}
+.note-heatmap-stat-card strong{
+  font-size:clamp(25px,3vw,34px);
+  line-height:1;
+  letter-spacing:-.045em;
+  font-variant-numeric:tabular-nums;
+}
+.note-heatmap-stat-card small{color:#9a9a9a;font-size:9px;line-height:1.35}
+.note-heatmap-intensity-panel{
+  display:grid;
+  gap:14px;
+  border:1px solid rgba(234,88,12,.12);
+  border-radius:17px;
+  padding:17px;
+  background:linear-gradient(135deg,#fff8f2 0%,#fff 74%);
+}
+.note-heatmap-intensity-top,.note-heatmap-section-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+.note-heatmap-intensity-top>div:first-child{min-width:0}
+.note-heatmap-intensity-top h3,.note-heatmap-section-header h3{
+  margin:4px 0 3px;
+  font-size:17px;
+  font-weight:720;
+  letter-spacing:-.025em;
+}
+.note-heatmap-intensity-top p{margin:0;color:#858585;font-size:11px;line-height:1.45}
+.note-heatmap-intensity-level{
+  display:grid;
+  justify-items:center;
+  gap:4px;
+  min-width:68px;
+  color:#ea580c;
+}
+.note-heatmap-intensity-level strong{font-size:11px;font-variant-numeric:tabular-nums}
+.note-heatmap-intensity-level.level-0{color:#a3a3a3}
+.note-heatmap-intensity-level.level-1{color:#fb923c}
+.note-heatmap-intensity-level.level-2{color:#f97316}
+.note-heatmap-intensity-level.level-3{color:#ef4444}
+.note-heatmap-intensity-level.level-4{color:#b91c1c}
+.note-heatmap-intensity-level.level-5{color:#7f1d1d}
+.note-heatmap-level-track{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.note-heatmap-level-track span{height:7px;border-radius:999px;background:#eeeeec}
+.note-heatmap-level-track .level-1{background:#fed7aa}
+.note-heatmap-level-track .level-2{background:#fb923c}
+.note-heatmap-level-track .level-3{background:#ef4444}
+.note-heatmap-level-track .level-4{background:#b91c1c}
+.note-heatmap-level-track .level-5{background:#7f1d1d}
+.note-heatmap-intensity-foot{display:flex;justify-content:space-between;color:#a0a0a0;font-size:9px}
+.note-heatmap-peak{margin:0;border-top:1px solid rgba(0,0,0,.06);padding-top:11px;color:#777;font-size:11px;line-height:1.5}
+.note-heatmap-peak strong{color:#3f3f46}
+.note-heatmap-period-panel,.note-heatmap-checklist-panel{
+  display:grid;
+  gap:15px;
+  border:1px solid rgba(0,0,0,.06);
+  border-radius:17px;
+  padding:17px;
+  background:#fff;
+}
+.note-heatmap-section-header{align-items:flex-start;flex-wrap:wrap}
+.note-heatmap-section-header h3{font-size:15px}
+.note-heatmap-period-tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:3px;
+  padding:3px;
+  border-radius:10px;
+  background:#f3f3f2;
+}
+.note-heatmap-period-tabs button{
+  border:0;
+  border-radius:7px;
+  padding:7px 10px;
+  background:transparent;
+  color:#777;
+  font:inherit;
+  font-size:10px;
+  cursor:pointer;
+}
+.note-heatmap-period-tabs button.active{background:#fff;color:#202124;font-weight:750;box-shadow:0 1px 3px rgba(0,0,0,.09)}
+.note-heatmap-period-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.note-heatmap-period-kpis>div{display:grid;gap:5px;border-radius:11px;padding:11px;background:#f7f7f6}
+.note-heatmap-period-kpis span{color:#868686;font-size:10px}
+.note-heatmap-period-kpis strong{font-size:23px;line-height:1.1;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+.note-heatmap-history-list{display:grid;gap:9px}
+.note-heatmap-history-row{
+  display:grid;
+  grid-template-columns:minmax(66px,100px) minmax(55px,1fr) 46px 34px;
+  align-items:center;
+  gap:9px;
+  min-width:0;
+}
+.note-heatmap-history-name{overflow:hidden;color:#606060;font-size:10px;text-overflow:ellipsis;white-space:nowrap}
+.note-heatmap-history-bar{height:7px;overflow:hidden;border-radius:999px;background:#f0f0ee}
+.note-heatmap-history-bar>span{display:block;height:100%;min-width:0;border-radius:inherit}
+.note-heatmap-history-bar>span.level-0{background:#e9e9e7}
+.note-heatmap-history-bar>span.level-1{background:#fed7aa}
+.note-heatmap-history-bar>span.level-2{background:#fb923c}
+.note-heatmap-history-bar>span.level-3{background:#ef4444}
+.note-heatmap-history-bar>span.level-4{background:#b91c1c}
+.note-heatmap-history-bar>span.level-5{background:#7f1d1d}
+.note-heatmap-history-days{color:#929292;text-align:right;font-size:9px}
+.note-heatmap-history-row>strong{text-align:right;font-size:11px;font-variant-numeric:tabular-nums}
+.note-heatmap-no-data{margin:0;padding:14px 3px;color:#929292;font-size:11px;line-height:1.5}
+.note-heatmap-progress-pill{flex:0 0 auto;border-radius:999px;padding:6px 9px;background:#fff0e6;color:#c2410c;font-size:10px;font-weight:750}
+.note-heatmap-progress{height:7px;overflow:hidden;border-radius:999px;background:#eeeeec}
+.note-heatmap-progress>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#fb923c,#c2410c);transition:width .2s ease}
+.note-heatmap-task-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.note-heatmap-task-list{display:grid;align-content:start;gap:9px;min-width:0;padding:12px;border:1px solid #f0f0ee;border-radius:13px;background:#fcfcfb}
+.note-heatmap-task-list h4{display:flex;align-items:center;gap:7px;margin:0 0 2px;font-size:12px;font-weight:750}
+.note-heatmap-task-list h4>svg{color:#16a34a}
+.note-heatmap-task-list h4 span{margin-left:auto;display:grid;place-items:center;min-width:23px;height:23px;border-radius:7px;background:#efefed;color:#555;font-size:10px}
+.note-heatmap-task-list.pending h4>svg{color:#ea580c}
+.note-heatmap-task{display:flex;align-items:flex-start;gap:7px;min-width:0;color:#666;font-size:11px;line-height:1.45}
+.note-heatmap-task>svg{flex:0 0 15px;margin-top:1px;color:#16a34a}
+.note-heatmap-task-list.pending .note-heatmap-task>svg{color:#b0b0b0}
+.note-heatmap-task>span{min-width:0;overflow-wrap:anywhere}
+.note-heatmap-task-empty{margin:0;color:#999;font-size:10px;line-height:1.5}
+.note-heatmap-dialog-footnote{display:flex;align-items:flex-start;gap:8px;color:#969696;font-size:10px;line-height:1.5}
+.note-heatmap-dialog-footnote svg{flex:0 0 14px;margin-top:1px}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-dialog{
+  border-color:rgba(255,255,255,.10);
+  background:#1e1e20;
+  color:#f5f5f7;
+}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-dialog-brand,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-peak strong{color:#e4e4e7}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-dialog-title>span,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-intensity-top p,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-peak,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-task,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-history-name{color:#a1a1aa}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-dialog-close,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-stat-icon,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-period-tabs,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-period-kpis>div{background:#2b2b2e;color:#ddd}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-stat-card,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-period-panel,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-checklist-panel{border-color:rgba(255,255,255,.08);background:#252527}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-stat-label,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-stat-card small,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-period-kpis span,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-section-kicker,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-history-days,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-no-data,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-task-empty,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-dialog-footnote{color:#999}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-intensity-panel{border-color:rgba(234,88,12,.16);background:linear-gradient(135deg,#30251f,#252527 75%)}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-period-tabs button.active{background:#3c3c40;color:#fff}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-history-bar,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-progress{background:#39393c}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-task-list{border-color:rgba(255,255,255,.07);background:#202022}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-task-list h4 span{background:#36363a;color:#ccc}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-progress-pill{background:#402b20;color:#fb923c}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-dialog-flame{background:#402b20;color:#fb923c}
+@keyframes heatmap-fade-in{from{opacity:0}to{opacity:1}}
+@media(max-width:680px){
+  .note-heatmap-dialog-backdrop{align-items:flex-end;padding:0}
+  .note-heatmap-dialog{
+    width:100%;
+    max-height:94dvh;
+    border-radius:22px 22px 0 0;
+    padding:18px 14px calc(16px + env(safe-area-inset-bottom));
+    gap:15px;
+  }
+  .note-heatmap-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .note-heatmap-stat-card{padding:12px;border-radius:13px}
+  .note-heatmap-stat-card strong{font-size:27px}
+  .note-heatmap-period-panel,.note-heatmap-checklist-panel,.note-heatmap-intensity-panel{padding:13px;border-radius:14px}
+  .note-heatmap-section-header{display:grid;gap:10px}
+  .note-heatmap-period-tabs{width:100%}
+  .note-heatmap-period-tabs button{flex:1;padding:8px 5px}
+  .note-heatmap-period-kpis{gap:6px}
+  .note-heatmap-period-kpis>div{padding:9px}
+  .note-heatmap-period-kpis span{font-size:9px}
+  .note-heatmap-period-kpis strong{font-size:20px}
+  .note-heatmap-task-columns{grid-template-columns:1fr}
+  .note-heatmap-task-list{padding:11px}
+}
+@media(prefers-reduced-motion:reduce){
+  .note-heatmap-dialog-backdrop{animation:none}
+  .note-heatmap-progress>span,.note-heatmap-open-stats{transition:none}
+}
