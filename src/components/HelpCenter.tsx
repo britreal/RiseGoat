@@ -676,6 +676,28 @@ export function HelpCenter({ open, onClose, onCreateNote, onOpenMap }: HelpCente
     }
   };
 
+  const exportGuide = () => {
+    const lines: string[] = ['# Central de Ajuda do RiseGoat', ''];
+    for (const category of helpCategories) {
+      lines.push('## ' + category.title, category.description, '');
+      for (const article of category.articles) {
+        lines.push('### ' + article.title, article.summary, '');
+        lines.push(...article.steps.map(step => '- ' + step), '');
+        if (article.tip) lines.push('**Dica prática:** ' + article.tip, '');
+        if (article.note) lines.push('**Importante:** ' + article.note, '');
+      }
+      lines.push('');
+    }
+    const url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'guia-risegoat.md';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   if (!open) return null;
 
   return (
@@ -695,7 +717,7 @@ export function HelpCenter({ open, onClose, onCreateNote, onOpenMap }: HelpCente
               <span>Capture, organize e conecte informações para transformar ideias em ação.</span>
             </div>
           </div>
-          <button type="button" className="help-center-close" onClick={onClose} aria-label="Fechar ajuda" title="Fechar ajuda"><X size={19} /></button>
+          <div className="help-center-header-actions"><button type="button" className="help-center-export" onClick={exportGuide}><Download size={15} /><span>Exportar guia</span></button><button type="button" className="help-center-close" onClick={onClose} aria-label="Fechar ajuda" title="Fechar ajuda"><X size={19} /></button></div>
         </header>
 
         <div className="help-center-search-wrap">
