@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Background, Controls, Handle, MiniMap, Panel, Position, ReactFlow, useReactFlow,
+  Background, BackgroundVariant, Controls, Handle, MiniMap, Panel, Position, ReactFlow, useReactFlow,
   type Connection, type Node, type NodeProps, type OnEdgesDelete,
 } from '@xyflow/react';
 import { ArrowLeft, ExternalLink, Link2, Maximize2, Search, X } from 'lucide-react';
@@ -216,8 +216,12 @@ export function GraphPage() {
     const adjacent = new Map<string,string[]>();
     for (const edge of noteLinks) {
       if (!baseIdSet.has(edge.source_note_id) || !baseIdSet.has(edge.target_note_id)) continue;
-      (adjacent.get(edge.source_note_id) ??= []).push(edge.target_note_id);
-      (adjacent.get(edge.target_note_id) ??= []).push(edge.source_note_id);
+      const sourceNeighbors = adjacent.get(edge.source_note_id) ?? [];
+      sourceNeighbors.push(edge.target_note_id);
+      adjacent.set(edge.source_note_id, sourceNeighbors);
+      const targetNeighbors = adjacent.get(edge.target_note_id) ?? [];
+      targetNeighbors.push(edge.source_note_id);
+      adjacent.set(edge.target_note_id, targetNeighbors);
     }
     const found = new Set([selectedId]);
     let frontier = [selectedId];
@@ -381,7 +385,6 @@ export function GraphPage() {
           onNodeDoubleClick={(_event,node)=>openNote(node.id)}
           onConnect={onConnect}
           onEdgesDelete={onEdgesDelete}
-          nodesDeletable={false}
           fitView={!savedViewport}
           minZoom={0.15}
           maxZoom={2.2}
@@ -389,7 +392,7 @@ export function GraphPage() {
           deleteKeyCode={['Backspace','Delete']}
           className="graph-flow"
         >
-          <Background variant="dots" gap={22} size={1} />
+          <Background variant={BackgroundVariant.Dots} gap={22} size={1} />
           <Controls showInteractive={false} />
           <MiniMap pannable zoomable nodeColor={node=>palette[(node.data as NoteNodeData)?.color || 'default']} maskColor="rgba(245,245,243,.72)" />
           <Panel position="bottom-left" className="graph-tip"><Link2 size={14}/> Arraste de um ponto lateral para outro para conectar duas notas.</Panel>
