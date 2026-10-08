@@ -1144,3 +1144,22 @@
   .notes-content:not(.list-view) .notes-grid .note-card{height:100%;}
   .notes-content.list-view .notes-grid .note-card{height:auto;}
 }
+
+/* A note can belong to more than one folder */
+.editor-folder-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:3px 5px 9px}
+.editor-folder-summary strong{font-size:11px;font-weight:700;color:#444}
+.editor-folder-summary span{font-size:9px;color:#89898d;white-space:nowrap}
+.folder-multi-select{display:grid;gap:3px;max-height:min(280px,42vh);overflow:auto;overscroll-behavior:contain;padding:0 2px}
+.folder-multi-select button{display:flex!important;align-items:center;gap:8px!important;min-height:36px;padding:8px 9px!important;border-radius:9px!important}
+.folder-multi-select button>svg:first-child{flex:0 0 14px;color:#8a8a8e}
+.folder-multi-select button>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.folder-multi-select button.active{background:rgba(0,0,0,.065)!important;color:#1d1d1f!important}
+.folder-multi-select button.active>svg:first-child{color:#333}
+.folder-multi-select button:hover{background:rgba(0,0,0,.045)}
+.folder-multi-empty{margin:0;padding:11px 8px;color:#888;font-size:10px;line-height:1.5}
+.editor-folder-help{margin:9px 4px 2px;color:#89898d;font-size:9px;line-height:1.5}
+.notes-shell.is-dark .editor-folder-summary strong{color:#eee}
+.notes-shell.is-dark .editor-folder-summary span,.notes-shell.is-dark .editor-folder-help,.notes-shell.is-dark .folder-multi-empty{color:#aaa}
+.notes-shell.is-dark .folder-multi-select button.active{background:rgba(255,255,255,.1)!important;color:#fff!important}
+.notes-shell.is-dark .folder-multi-select button.active>svg:first-child{color:#fff}
+.notes-shell.is-dark .folder-multi-select button:hover{background:rgba(255,255,255,.07)}

@@ -3,7 +3,7 @@ import {
   Background, BackgroundVariant, Controls, Handle, MiniMap, Panel, Position, ReactFlow, useReactFlow,
   type Connection, type Node, type NodeProps, type OnEdgesDelete,
 } from '@xyflow/react';
-import { ArrowLeft, ExternalLink, Link2, Maximize2, Search, X } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Link2, Maximize2, Search, Unlink, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
@@ -96,6 +96,7 @@ export function GraphPage() {
   const { user } = useAuth();
   const [notes,setNotes] = useState<Note[]>([]);
   const [folders,setFolders] = useState<Folder[]>([]);
+  const [folderLinks,setFolderLinks] = useState<Record<string,string[]>>({});
   const [labels,setLabels] = useState<Label[]>([]);
   const [labelLinks,setLabelLinks] = useState<LabelLink[]>([]);
   const [checkItems,setCheckItems] = useState<Checklist[]>([]);
@@ -123,7 +124,7 @@ export function GraphPage() {
   const load = useCallback(async () => {
     if (!user) return;
     setLoading(true);
-    const [n,f,l,ll,c,e,s] = await Promise.all([
+    const [n,f,l,ll,c,e,s,fl] = await Promise.all([
       supabase.from('notes').select('id,title,content,note_type,color,is_pinned,is_deleted,folder_id,updated_at').eq('is_deleted',false).order('updated_at',{ascending:false}),
       supabase.from('note_folders').select('id,name').eq('user_id',user.id).order('position'),
       supabase.from('note_labels').select('id,name,color').eq('user_id',user.id).order('name'),
@@ -131,14 +132,20 @@ export function GraphPage() {
       supabase.from('note_checklist_items').select('note_id,is_completed'),
       supabase.from('note_links').select('id,source_note_id,target_note_id,relation_type,created_at').order('created_at'),
       supabase.from('user_state').select('id,data').eq('user_id',user.id).eq('kind','notes_graph').limit(1),
+      supabase.from('note_folder_links').select('note_id,folder_id'),
     ]);
-    const firstError = n.error || f.error || l.error || ll.error || c.error || e.error || s.error;
+    const firstError = n.error || f.error || l.error || ll.error || c.error || e.error || s.error || fl.error;
     if (firstError) {
       setError(firstError.message || 'Não foi possível carregar o mapa.');
       setLoading(false);
       return;
     }
-    setNotes((n.data ?? []) as Note[]);
+    const loadedNotes=(n.data ?? []) as Note[];
+    setNotes(loadedNotes);
+    const memberships:Record<string,string[]>={};
+    for(const link of (fl.data ?? []) as {note_id:string;folder_id:string}[])(memberships[link.note_id]??=[]).push(link.folder_id);
+    for(const note of loadedNotes)if(note.folder_id&&!(memberships[note.id]??[]).includes(note.folder_id))(memberships[note.id]??=[]).push(note.folder_id);
+    setFolderLinks(memberships);
     setFolders((f.data ?? []) as Folder[]);
     setLabels((l.data ?? []) as Label[]);
     setLabelLinks((ll.data ?? []) as LabelLink[]);
@@ -202,11 +209,11 @@ export function GraphPage() {
   },[checkItems]);
 
   const baseNotes = useMemo(() => notes.filter(note => {
-    if (folderFilter !== 'all' && note.folder_id !== folderFilter) return false;
+    if (folderFilter !== 'all' && !(folderLinks[note.id] ?? (note.folder_id ? [note.folder_id] : [])).includes(folderFilter)) return false;
     if (labelFilter !== 'all' && !(labelsByNote[note.id] ?? []).includes(labelById[labelFilter]?.name || '')) return false;
     if (!query.trim()) return true;
     return (note.title+' '+plain(note.content)).toLowerCase().includes(query.trim().toLowerCase());
-  }),[notes,folderFilter,labelFilter,query,labelsByNote,labelById]);
+  }),[notes,folderLinks,folderFilter,labelFilter,query,labelsByNote,labelById]);
 
   const baseIdSet = useMemo(()=>new Set(baseNotes.map(n=>n.id)),[baseNotes]);
 
@@ -327,6 +334,12 @@ export function GraphPage() {
     setNoteLinks(prev=>prev.filter(link=>!deleted.has(link.id)));
   },[]);
 
+  const disconnectConnection = useCallback(async (connection:NoteLink) => {
+    const {error:e}=await supabase.from('note_links').delete().eq('id',connection.id);
+    if(e){setError(e.message || 'Não foi possível desvincular as notas.');return;}
+    setNoteLinks(prev=>prev.filter(link=>link.id!==connection.id));
+  },[]);
+
   const selectedNote = selectedId ? notes.find(note=>note.id===selectedId) ?? null : null;
   const selectedConnections = selectedId ? noteLinks.filter(link=>link.source_note_id===selectedId||link.target_note_id===selectedId) : [];
 
@@ -414,7 +427,7 @@ export function GraphPage() {
                 : <div className="graph-connection-list">{selectedConnections.map(connection=>{
                     const otherId = connection.source_note_id===selectedNote.id ? connection.target_note_id : connection.source_note_id;
                     const other = notes.find(note=>note.id===otherId);
-                    return <button key={connection.id} onClick={()=>setSelectedId(otherId)}><Link2 size={14}/><span>{other?.title||'Sem título'}</span><small>{relationLabels[connection.relation_type]||connection.relation_type}</small></button>;
+                    return <div className="graph-connection-row" key={connection.id}><button type="button" className="graph-connection-open" onClick={()=>setSelectedId(otherId)}><Link2 size={14}/><span>{other?.title||'Sem título'}</span><small>{relationLabels[connection.relation_type]||connection.relation_type}</small></button><button type="button" className="graph-connection-unlink" title="Desvincular notas" aria-label={'Desvincular de '+(other?.title||'nota')} onClick={event=>{event.stopPropagation();void disconnectConnection(connection)}}><Unlink size={14}/></button></div>;
                   })}</div>}
             </div>
             {mode==='local' && <div className="graph-detail-section"><span>Mapa local</span><p className="graph-muted">Mostrando até {depth} nível{depth>1?'eis':''} a partir desta nota.</p></div>}

@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
-import { Archive, AudioLines, Bold, Check, CheckSquare, CircleHelp, ChevronDown, ChevronLeft, Clock3, Command, Copy, Download, Eraser, FileDown, FileText, Filter, Folder, FolderPlus, Grid2X2, ImagePlus, Italic, Link2, List, Loader2, Lock, LockOpen, LogOut, Mail, MapPin, Map, Menu, Mic, MoreHorizontal, Palette, Pencil, Pin, Plus, Printer, RotateCcw, Search, Send, Settings, Share2, Square, Sun, Moon, Tag, Trash2, Underline, Upload, X } from 'lucide-react';
+import { Archive, AudioLines, BookOpen, Bold, Check, CheckSquare, CircleHelp, ChevronDown, ChevronLeft, Clock3, Command, Copy, Download, Eraser, FileDown, FileText, Filter, Folder, FolderPlus, Grid2X2, ImagePlus, Italic, KeyRound, LayoutTemplate, Link2, List, Loader2, Lock, LockOpen, LogOut, Mail, MapPin, Map, Menu, Mic, Network, MoreHorizontal, Palette, Pencil, Pin, Plus, Printer, RotateCcw, Search, Send, Settings, Share2, Square, Sun, Moon, Tag, Trash2, Underline, Upload, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { HelpCenter } from '@/components/HelpCenter';
+import { FolderTemplatesModal } from '@/components/FolderTemplatesModal';
+import { folderTemplates, templateNoteContent } from '@/lib/folderTemplates';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
@@ -12,7 +14,7 @@ type Label={id:string;user_id:string;name:string;color:Color};
 type Checklist={id:string;note_id:string;parent_id:string|null;title:string;is_completed:boolean;position:number};
 type Attachment={id:string;note_id:string;user_id:string;attachment_type:'image'|'audio'|'drawing'|'file';file_path:string|null;file_name:string;mime_type:string;size_bytes:number;transcript:string;signed_url?:string};
 type Reminder={id:string;note_id:string;user_id:string;reminder_type:'datetime'|'location';remind_at:string|null;location_lat:number|null;location_lng:number|null;location_radius_m:number|null;location_trigger:'arrive'|'leave'|null;repeat_rule:string|null;title:string;completed_at:string|null};
-type Folder={id:string;user_id:string;name:string;position:number;created_at:string;updated_at:string};
+type Folder={id:string;user_id:string;name:string;position:number;created_at:string;updated_at:string;color:string;icon:'folder'|'network'|'key-round'|'book-open'};
 const colorOptions:{key:Color;label:string;hex:string}[]=[{key:'default',label:'Neutro',hex:'#ffffff'},{key:'warm',label:'Creme',hex:'#f7f1e5'},{key:'yellow',label:'Amarelo',hex:'#fff4b8'},{key:'orange',label:'Pêssego',hex:'#ffe1c7'},{key:'red',label:'Coral',hex:'#f3d4cf'},{key:'pink',label:'Rosa',hex:'#f5dce7'},{key:'purple',label:'Lilás',hex:'#e8def7'},{key:'indigo',label:'Índigo',hex:'#dce2f8'},{key:'blue',label:'Azul',hex:'#d9e9f7'},{key:'teal',label:'Menta',hex:'#d7efe9'},{key:'green',label:'Verde',hex:'#dcefdc'},{key:'gray',label:'Cinza',hex:'#e8e9e7'}];
 const types:{key:NoteType;label:string;icon:any}[]=[{key:'text',label:'Texto',icon:FileText},{key:'checklist',label:'Checklist',icon:CheckSquare},{key:'image',label:'Imagem',icon:ImagePlus},{key:'drawing',label:'Desenho',icon:Palette},{key:'audio',label:'Áudio',icon:AudioLines}];
 const plain=(s:string)=>s.replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
@@ -43,14 +45,15 @@ export function NotesPage(){
   const {user,signOut}=useAuth();
   const [notes,setNotes]=useState<Note[]>([]),[selectedId,setSelectedId]=useState<string|null>(null),[query,setQuery]=useState(''),[filter,setFilter]=useState<'all'|'pinned'|'archive'|'trash'>('all'),[view,setView]=useState<'grid'|'list'>('grid'),[folderId,setFolderId]=useState<string|null>(null);
   const [typeFilter,setTypeFilter]=useState<NoteType|'all'>('all'),[colorFilter,setColorFilter]=useState<Color|'all'>('all'),[labelFilter,setLabelFilter]=useState('all'),[reminderFilter,setReminderFilter]=useState('all'),[filters,setFilters]=useState(false);
-  const [labels,setLabels]=useState<Label[]>([]),[links,setLinks]=useState<Record<string,string[]>>({}),[check,setCheck]=useState<Record<string,Checklist[]>>({}),[files,setFiles]=useState<Record<string,Attachment[]>>({}),[reminders,setReminders]=useState<Reminder[]>([]),[folders,setFolders]=useState<Folder[]>([]);
+  const [labels,setLabels]=useState<Label[]>([]),[links,setLinks]=useState<Record<string,string[]>>({}),[check,setCheck]=useState<Record<string,Checklist[]>>({}),[files,setFiles]=useState<Record<string,Attachment[]>>({}),[reminders,setReminders]=useState<Reminder[]>([]),[folders,setFolders]=useState<Folder[]>([]),[folderLinks,setFolderLinks]=useState<Record<string,string[]>>({});
   const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[newMenu,setNewMenu]=useState(false),[more,setMore]=useState(false),[share,setShare]=useState(false),[reminder,setReminder]=useState(false),[labelPanel,setLabelPanel]=useState(false),[theme,setTheme]=useState<'system'|'light'|'dark'>((localStorage.getItem('notes-theme') as any)||'system'),[systemDark,setSystemDark]=useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
   const [shareEmail,setShareEmail]=useState(''),[newLabel,setNewLabel]=useState(''),[remindAt,setRemindAt]=useState(''),[repeat,setRepeat]=useState('none'),[locationTrigger,setLocationTrigger]=useState<'arrive'|'leave'>('arrive'),[recording,setRecording]=useState(false),[seconds,setSeconds]=useState(0),[drawTool,setDrawTool]=useState<'pen'|'marker'|'eraser'>('pen');
   const [quickAction,setQuickAction]=useState<{id:string;type:'palette'|'reminder'|'labels'|'folder'|'more'}|null>(null),[quickReminderAt,setQuickReminderAt]=useState(''),[quickRepeat,setQuickRepeat]=useState('none'),[quickNewLabel,setQuickNewLabel]=useState(''),[newFolderName,setNewFolderName]=useState(''),[folderMenuId,setFolderMenuId]=useState<string|null>(null),[folderEditId,setFolderEditId]=useState<string|null>(null),[folderDraft,setFolderDraft]=useState(''),[folderDeleteId,setFolderDeleteId]=useState<string|null>(null),[labelEditId,setLabelEditId]=useState<string|null>(null),[labelDraft,setLabelDraft]=useState(''),[permanentDeleteId,setPermanentDeleteId]=useState<string|null>(null),[titleDraft,setTitleDraft]=useState('');
   const [editorType,setEditorType]=useState<NoteType>('text');
-  const [helpOpen,setHelpOpen]=useState(false);
+  const [helpOpen,setHelpOpen]=useState(false),[templatesOpen,setTemplatesOpen]=useState(false),[templateCreating,setTemplateCreating]=useState<string|null>(null);
   const editorRef=useRef<HTMLDivElement|null>(null),canvasRef=useRef<HTMLCanvasElement|null>(null),mediaRef=useRef<MediaRecorder|null>(null),chunks=useRef<Blob[]>([]),speech=useRef<any>(null),timerRef=useRef<number|null>(null),saveRef=useRef<number|null>(null);
-  const selected=notes.find(n=>n.id===selectedId)??null,dark=theme==='dark'||(theme==='system'&&systemDark),selectedLocked=selected?.metadata?.locked===true,selectedFolder=folders.find(f=>f.id===selected?.folder_id)??null,activeFolder=folders.find(f=>f.id===folderId)??null;
+  const folderIdsFor=(note:Note|null|undefined):string[]=>note?(folderLinks[note.id]??(note.folder_id?[note.folder_id]:[])):[]; 
+  const selected=notes.find(n=>n.id===selectedId)??null,dark=theme==='dark'||(theme==='system'&&systemDark),selectedLocked=selected?.metadata?.locked===true,selectedFolders=folders.filter(f=>folderIdsFor(selected).includes(f.id)),activeFolder=folders.find(f=>f.id===folderId)??null;
 
   useEffect(()=>{if(user)void load()},[user]);
   useEffect(()=>{localStorage.setItem('notes-theme',theme)},[theme]);
@@ -75,8 +78,8 @@ export function NotesPage(){
   useEffect(()=>{if(!reminders.some(r=>r.reminder_type==='location'&&!r.completed_at)||!navigator.geolocation)return;const watch=navigator.geolocation.watchPosition(async p=>{for(const r of reminders.filter(x=>x.reminder_type==='location'&&!x.completed_at&&x.location_lat!==null&&x.location_lng!==null)){const d=meters({lat:p.coords.latitude,lng:p.coords.longitude},{lat:r.location_lat!,lng:r.location_lng!});if(d<=Number(r.location_radius_m||250)){await fireReminder(r)}}});return()=>navigator.geolocation.clearWatch(watch)},[reminders]);
 
   async function load(){
-    if(!user)return;setLoading(true);await supabase.from('notes').delete().eq('user_id',user.id).eq('is_deleted',true).lt('deleted_at',new Date(Date.now()-30*24*60*60*1000).toISOString());const [n,l,ll,r,a,f,cList]=await Promise.all([supabase.from('notes').select('*').order('is_pinned',{ascending:false}).order('sort_order'),supabase.from('note_labels').select('*').eq('user_id',user.id).order('name'),supabase.from('note_label_links').select('*'),supabase.from('note_reminders').select('*').eq('user_id',user.id).order('remind_at'),supabase.from('note_attachments').select('*').order('created_at',{ascending:false}),supabase.from('note_folders').select('*').eq('user_id',user.id).order('position').order('name'),supabase.from('note_checklist_items').select('*').order('position')]);
-    if(n.error)setError(n.error.message);else {setNotes((n.data??[]) as Note[]);const requestedNote=new URLSearchParams(window.location.search).get('note');if(requestedNote&&(n.data??[]).some((row:any)=>row.id===requestedNote))setSelectedId(requestedNote)}if(f.error)setError(f.error.message);else setFolders((f.data??[]) as Folder[]);if(l.data)setLabels(l.data as Label[]);if(ll.data){const m:Record<string,string[]>={};for(const x of ll.data as any[])(m[x.note_id]??=[]).push(x.label_id);setLinks(m)}if(r.data)setReminders(r.data as Reminder[]);if(a.data){const signed=await Promise.all((a.data as Attachment[]).map(async x=>x.file_path?({...x,signed_url:(await supabase.storage.from('notes-media').createSignedUrl(x.file_path,3600)).data?.signedUrl}):x));const m:Record<string,Attachment[]>={};for(const x of signed)(m[x.note_id]??=[]).push(x);setFiles(m)}if(cList.data){const m:Record<string,Checklist[]>={};for(const x of cList.data as Checklist[])(m[x.note_id]??=[]).push(x);setCheck(m)}setLoading(false);
+    if(!user)return;setLoading(true);await supabase.from('notes').delete().eq('user_id',user.id).eq('is_deleted',true).lt('deleted_at',new Date(Date.now()-30*24*60*60*1000).toISOString());const [n,l,ll,r,a,f,cList,fl]=await Promise.all([supabase.from('notes').select('*').order('is_pinned',{ascending:false}).order('sort_order'),supabase.from('note_labels').select('*').eq('user_id',user.id).order('name'),supabase.from('note_label_links').select('*'),supabase.from('note_reminders').select('*').eq('user_id',user.id).order('remind_at'),supabase.from('note_attachments').select('*').order('created_at',{ascending:false}),supabase.from('note_folders').select('*').eq('user_id',user.id).order('position').order('name'),supabase.from('note_checklist_items').select('*').order('position'),supabase.from('note_folder_links').select('note_id,folder_id')]);
+    if(n.error)setError(n.error.message);else {setNotes((n.data??[]) as Note[]);const requestedNote=new URLSearchParams(window.location.search).get('note');if(requestedNote&&(n.data??[]).some((row:any)=>row.id===requestedNote))setSelectedId(requestedNote)}if(f.error)setError(f.error.message);else setFolders((f.data??[]) as Folder[]);if(l.data)setLabels(l.data as Label[]);if(ll.data){const m:Record<string,string[]>={};for(const x of ll.data as any[])(m[x.note_id]??=[]).push(x.label_id);setLinks(m)}if(r.data)setReminders(r.data as Reminder[]);if(a.data){const signed=await Promise.all((a.data as Attachment[]).map(async x=>x.file_path?({...x,signed_url:(await supabase.storage.from('notes-media').createSignedUrl(x.file_path,3600)).data?.signedUrl}):x));const m:Record<string,Attachment[]>={};for(const x of signed)(m[x.note_id]??=[]).push(x);setFiles(m)}if(cList.data){const m:Record<string,Checklist[]>={};for(const x of cList.data as Checklist[])(m[x.note_id]??=[]).push(x);setCheck(m)}if(fl.error)setError(fl.error.message);else{const m:Record<string,string[]>={};for(const x of (fl.data??[]) as {note_id:string;folder_id:string}[])(m[x.note_id]??=[]).push(x.folder_id);for(const row of (n.data??[]) as Note[])if(row.folder_id&&!(m[row.id]??[]).includes(row.folder_id))(m[row.id]??=[]).push(row.folder_id);setFolderLinks(m)}setLoading(false);
     const invite=new URLSearchParams(location.search).get('invite');if(invite&&user.email){const {data,error:e}=await supabase.rpc('accept_note_share_invite',{p_token:invite});if(!e&&data){history.replaceState({},'', '/notes');setSelectedId(data as string)}else if(e){setError('Não foi possível aceitar este convite.')}}
   }
   const isDraftNote=(id:string)=>id.startsWith('draft-');
@@ -95,17 +98,115 @@ export function NotesPage(){
     }).select().single();
     if(e){setError(e.message);return null}
     const saved=data as Note;
+    const assignedFolderIds=folderLinks[noteId]??(next.folder_id?[next.folder_id]:[]);
+    if(assignedFolderIds.length){const {error:folderError}=await supabase.from('note_folder_links').insert(assignedFolderIds.map(folder_id=>({note_id:saved.id,folder_id})));if(folderError)setError('A nota foi salva, mas não foi possível vincular todas as pastas.');}
+    setFolderLinks(v=>{const map={...v};delete map[noteId];map[saved.id]=assignedFolderIds;return map});
     setNotes(v=>v.map(x=>x.id===noteId?saved:x));
     setSelectedId(v=>v===noteId?saved.id:v);
     setCheck(v=>{const map={...v};if(map[noteId]){map[saved.id]=map[noteId];delete map[noteId]}return map});
     return saved;
   }
+  async function createFolderTemplate(templateId:string){
+    if(!user||templateCreating)return;
+    const template=folderTemplates.find(item=>item.id===templateId);
+    if(!template)return;
+    setTemplateCreating(templateId);
+    let createdFolderId:string|null=null;
+    let createdNoteIds:string[]=[];
+    const createdLabelIds:string[]=[];
+    try{
+      const folderResult=await supabase.from('note_folders').insert({
+        user_id:user.id,name:template.name,position:folders.length,color:template.color,icon:template.icon
+      }).select('*').single();
+      if(folderResult.error||!folderResult.data)throw new Error(folderResult.error?.message||'Não foi possível criar a pasta.');
+      createdFolderId=(folderResult.data as Folder).id;
+
+      const noteResult=await supabase.from('notes').insert(template.notes.map((note,index)=>({
+        user_id:user.id,title:note.title,content:note.type==='checklist'?'':templateNoteContent(note),
+        note_type:note.type,color:'default',is_pinned:false,is_archived:false,is_deleted:false,deleted_at:null,
+        reminder_at:null,sort_order:Math.max(-1,...notes.map(n=>Number(n.sort_order)||0).filter(Number.isFinite))+index+1,
+        folder_id:createdFolderId,metadata:{folder_template:template.id,folder_template_key:note.key}
+      }))).select('id,metadata');
+      if(noteResult.error||!noteResult.data)throw new Error(noteResult.error?.message||'Não foi possível criar as notas.');
+      const createdNotes=noteResult.data as {id:string;metadata:Record<string,unknown>}[];
+      createdNoteIds=createdNotes.map(note=>note.id);
+      const noteIdByKey:Record<string,string>={};
+      for(const note of createdNotes){
+        const key=String(note.metadata?.folder_template_key??'');
+        if(key)noteIdByKey[key]=note.id;
+      }
+      if(template.notes.some(note=>!noteIdByKey[note.key]))throw new Error('Não foi possível relacionar todas as notas do modelo.');
+
+      const folderLinkResult=await supabase.from('note_folder_links').insert(createdNoteIds.map(note_id=>({note_id,folder_id:createdFolderId})));
+      if(folderLinkResult.error)throw new Error('Não foi possível vincular as notas à pasta: '+folderLinkResult.error.message);
+
+      const checklistItems=template.notes.flatMap(note=>(note.checklistItems??[]).map((title,position)=>({
+        note_id:noteIdByKey[note.key],parent_id:null,title,is_completed:false,position
+      })));
+      if(checklistItems.length){
+        const checklistResult=await supabase.from('note_checklist_items').insert(checklistItems);
+        if(checklistResult.error)throw new Error('Não foi possível criar os itens de checklist: '+checklistResult.error.message);
+      }
+
+      const tagNames=Array.from(new Set(template.notes.flatMap(note=>note.tags)));
+      let tagRows:Label[]=[];
+      if(tagNames.length){
+        const existingResult=await supabase.from('note_labels').select('*').eq('user_id',user.id).in('name',tagNames);
+        if(existingResult.error)throw new Error('Não foi possível verificar as etiquetas: '+existingResult.error.message);
+        tagRows=(existingResult.data??[]) as Label[];
+      }
+      const labelIdByName:Record<string,string>={};
+      for(const label of tagRows)labelIdByName[label.name.toLowerCase()]=label.id;
+      for(const tagName of tagNames){
+        const lookup=tagName.toLowerCase();
+        if(labelIdByName[lookup])continue;
+        const labelResult=await supabase.from('note_labels').insert({user_id:user.id,name:tagName,color:'default'}).select('*').single();
+        if(labelResult.error||!labelResult.data)throw new Error('Não foi possível criar a etiqueta "'+tagName+'": '+(labelResult.error?.message||'erro desconhecido'));
+        const label=labelResult.data as Label;
+        createdLabelIds.push(label.id);
+        labelIdByName[lookup]=label.id;
+      }
+      const labelLinksToInsert=template.notes.flatMap(note=>note.tags.map(tag=>({
+        note_id:noteIdByKey[note.key],label_id:labelIdByName[tag.toLowerCase()]
+      })));
+      if(labelLinksToInsert.length){
+        const tagLinkResult=await supabase.from('note_label_links').insert(labelLinksToInsert);
+        if(tagLinkResult.error)throw new Error('Não foi possível associar todas as etiquetas: '+tagLinkResult.error.message);
+      }
+
+      const connectionRows=template.connections.map(connection=>({
+        source_note_id:noteIdByKey[connection.from],
+        target_note_id:noteIdByKey[connection.to],
+        relation_type:'related'
+      }));
+      if(connectionRows.length){
+        const connectionResult=await supabase.from('note_links').insert(connectionRows);
+        if(connectionResult.error)throw new Error('Não foi possível criar as conexões do Mapa: '+connectionResult.error.message);
+      }
+
+      await load();
+      setFolderId(createdFolderId);
+      setFilter('all');
+      setSelectedId(null);
+      setTemplatesOpen(false);
+      setQuickAction(null);
+      setError('');
+    }catch(error){
+      if(createdNoteIds.length)await supabase.from('notes').delete().in('id',createdNoteIds);
+      if(createdFolderId)await supabase.from('note_folders').delete().eq('id',createdFolderId);
+      if(createdLabelIds.length)await supabase.from('note_labels').delete().in('id',createdLabelIds);
+      setError('Não foi possível criar a pasta template. '+(error instanceof Error?error.message:'Tente novamente.'));
+    }finally{
+      setTemplateCreating(null);
+    }
+  }
+
   async function create(type:NoteType){
     if(!user)return;
     setNewMenu(false);setQuickAction(null);setEditorType(type);
     const order=Math.max(-1,...notes.map(n=>Number(n.sort_order)||0).filter(Number.isFinite))+1;
     const draft:Note={id:'draft-'+crypto.randomUUID(),user_id:user.id,title:'',content:'',note_type:type,color:'default',is_pinned:false,is_archived:false,is_deleted:false,deleted_at:null,reminder_at:null,created_at:new Date().toISOString(),updated_at:new Date().toISOString(),sort_order:order,folder_id:folderId,ocr_text:'',transcript:'',metadata:{}};
-    setNotes(v=>[draft,...v]);setSelectedId(draft.id);
+    setNotes(v=>[draft,...v]);if(folderId)setFolderLinks(v=>({...v,[draft.id]:[folderId]}));setSelectedId(draft.id);
   }
   async function updateNoteById(id:string,patch:Partial<Note>){
     setNotes(v=>v.map(n=>n.id===id?{...n,...patch}:n));
@@ -118,8 +219,25 @@ export function NotesPage(){
   function beginRenameFolder(folder:Folder){setFolderMenuId(folder.id);setFolderEditId(folder.id);setFolderDeleteId(null);setFolderDraft(folder.name)}
   async function saveFolderRename(folder:Folder){const name=folderDraft.trim();if(!name||name===folder.name){setFolderEditId(null);setFolderMenuId(null);return}const {data,error:e}=await supabase.from('note_folders').update({name}).eq('id',folder.id).select().single();if(e){setError(e.message);return}setFolders(v=>v.map(x=>x.id===folder.id?(data as Folder):x));setFolderEditId(null);setFolderMenuId(null);setFolderDraft('')}
   function askDeleteFolder(folder:Folder){setFolderMenuId(folder.id);setFolderEditId(null);setFolderDeleteId(folder.id)}
-  async function deleteFolder(folder:Folder){const {error:e}=await supabase.from('note_folders').delete().eq('id',folder.id);if(e){setError(e.message);return}setFolders(v=>v.filter(x=>x.id!==folder.id));setNotes(v=>v.map(n=>n.folder_id===folder.id?{...n,folder_id:null}:n));if(folderId===folder.id){setFolderId(null);setFilter('all')}setFolderDeleteId(null);setFolderMenuId(null)}
-  async function assignFolder(noteId:string,nextFolderId:string|null){const ok=await updateNoteById(noteId,{folder_id:nextFolderId});if(ok)setQuickAction(null)}
+  async function deleteFolder(folder:Folder){const {error:e}=await supabase.from('note_folders').delete().eq('id',folder.id);if(e){setError(e.message);return}setFolders(v=>v.filter(x=>x.id!==folder.id));setNotes(v=>v.map(n=>n.folder_id===folder.id?{...n,folder_id:null}:n));setFolderLinks(v=>{const map:Record<string,string[]>={};for(const [id,ids] of Object.entries(v))map[id]=ids.filter(id=>id!==folder.id);return map});if(folderId===folder.id){setFolderId(null);setFilter('all')}setFolderDeleteId(null);setFolderMenuId(null)}
+  async function assignFolders(noteId:string,requestedFolderIds:string[]){
+    const nextFolderIds=Array.from(new Set(requestedFolderIds)).filter(id=>folders.some(folder=>folder.id===id));
+    const note=notes.find(item=>item.id===noteId);if(!note)return;
+    if(isDraftNote(noteId)){
+      setFolderLinks(v=>({...v,[noteId]:nextFolderIds}));
+      setNotes(v=>v.map(item=>item.id===noteId?{...item,folder_id:nextFolderIds[0]??null}:item));
+      return;
+    }
+    const currentFolderIds=folderIdsFor(note);
+    const toAdd=nextFolderIds.filter(id=>!currentFolderIds.includes(id));
+    if(toAdd.length){const {error:e}=await supabase.from('note_folder_links').insert(toAdd.map(folder_id=>({note_id:noteId,folder_id})));if(e){setError('Não foi possível vincular as pastas selecionadas. '+e.message);return;}setFolderLinks(v=>({...v,[noteId]:Array.from(new Set([...(v[noteId]??currentFolderIds),...toAdd]))}));}
+    const toRemove=currentFolderIds.filter(id=>!nextFolderIds.includes(id));
+    if(toRemove.length){const {error:e}=await supabase.from('note_folder_links').delete().eq('note_id',noteId).in('folder_id',toRemove);if(e){setError('Não foi possível remover uma das pastas. '+e.message);return;}}
+    const {error:e}=await supabase.from('notes').update({folder_id:nextFolderIds[0]??null}).eq('id',noteId);
+    if(e){setError('As pastas foram vinculadas, mas não foi possível atualizar a pasta principal. '+e.message);}
+    else setNotes(v=>v.map(item=>item.id===noteId?{...item,folder_id:nextFolderIds[0]??null}:item));
+    setFolderLinks(v=>({...v,[noteId]:nextFolderIds}));setQuickAction(null);
+  }
   async function quickShare(note:Note){const t=(note.title+'\n\n'+plain(note.content)).trim()||'Nota';if(navigator.share){try{await navigator.share({title:note.title||'Nota',text:t})}catch{return}}else{await navigator.clipboard?.writeText(t);window.open('mailto:?subject='+encodeURIComponent(note.title||'Nota')+'&body='+encodeURIComponent(t),'_blank')}}
   async function quickAddReminder(note:Note){if(!user||!quickReminderAt)return;if('Notification'in window&&Notification.permission==='default')await Notification.requestPermission();const payload={note_id:note.id,user_id:user.id,reminder_type:'datetime' as const,remind_at:new Date(quickReminderAt).toISOString(),title:note.title||'Lembrete',repeat_rule:quickRepeat==='none'?null:quickRepeat};const {data,error:e}=await supabase.from('note_reminders').insert(payload).select().single();if(e){setError(e.message);return}setReminders(v=>[...v,data as Reminder]);await updateNoteById(note.id,{reminder_at:payload.remind_at});setQuickReminderAt('');setQuickRepeat('none');setQuickAction(null)}
   async function quickToggleLabel(noteId:string,labelId:string){const arr=links[noteId]??[];if(arr.includes(labelId)){const {error:e}=await supabase.from('note_label_links').delete().eq('note_id',noteId).eq('label_id',labelId);if(e){setError(e.message);return}setLinks(v=>({...v,[noteId]:arr.filter(x=>x!==labelId)}))}else{const {error:e}=await supabase.from('note_label_links').insert({note_id:noteId,label_id:labelId});if(e){setError(e.message);return}setLinks(v=>({...v,[noteId]:[...arr,labelId]}))}}
@@ -312,14 +430,14 @@ function recordStop(){if(speech.current){speech.current.active=false;try{speech.
   async function remove(){if(!selected)return;await removeNoteById(selected.id)}
   async function removeAttachment(a:Attachment){if(!selected||a.attachment_type!=='image')return;if(a.file_path){const {error:e}=await supabase.storage.from('notes-media').remove([a.file_path]);if(e){setError(e.message);return}}const {error:e}=await supabase.from('note_attachments').delete().eq('id',a.id).eq('note_id',selected.id);if(e){setError(e.message);return}setFiles(v=>({...v,[selected.id]:(v[selected.id]??[]).filter(x=>x.id!==a.id)}))}
   async function downloadFile(a:Attachment){if(!a.signed_url)return;download(await (await fetch(a.signed_url)).blob(),a.file_name||'arquivo')}
-  const visible=useMemo(()=>notes.filter(n=>{if(n.id.startsWith('draft-'))return false;if(filter==='trash')return n.is_deleted&&n.user_id===user?.id;if(n.is_deleted)return false;if(filter==='pinned')return n.is_pinned;if(filter==='archive')return n.is_archived;return !n.is_archived && (folderId ? n.folder_id===folderId : n.folder_id===null)}).filter(n=>typeFilter==='all'||n.note_type===typeFilter).filter(n=>colorFilter==='all'||n.color===colorFilter).filter(n=>labelFilter==='all'||(links[n.id]??[]).includes(labelFilter)).filter(n=>reminderFilter==='all'||(reminderFilter==='with'?reminders.some(r=>r.note_id===n.id&&!r.completed_at):!reminders.some(r=>r.note_id===n.id&&!r.completed_at))).filter(n=>!query||(n.title+' '+plain(n.content)+' '+n.ocr_text+' '+n.transcript).toLowerCase().includes(query.toLowerCase())).sort((a,b)=>a.is_pinned===b.is_pinned?(a.sort_order-b.sort_order):a.is_pinned?-1:1),[notes,filter,folderId,typeFilter,colorFilter,labelFilter,reminderFilter,links,reminders,query]);
+  const visible=useMemo(()=>notes.filter(n=>{if(n.id.startsWith('draft-'))return false;if(filter==='trash')return n.is_deleted&&n.user_id===user?.id;if(n.is_deleted)return false;if(filter==='pinned')return n.is_pinned;if(filter==='archive')return n.is_archived;return !n.is_archived && (folderId ? (folderLinks[n.id]??(n.folder_id?[n.folder_id]:[])).includes(folderId) : (folderLinks[n.id]??(n.folder_id?[n.folder_id]:[])).length===0)}).filter(n=>typeFilter==='all'||n.note_type===typeFilter).filter(n=>colorFilter==='all'||n.color===colorFilter).filter(n=>labelFilter==='all'||(links[n.id]??[]).includes(labelFilter)).filter(n=>reminderFilter==='all'||(reminderFilter==='with'?reminders.some(r=>r.note_id===n.id&&!r.completed_at):!reminders.some(r=>r.note_id===n.id&&!r.completed_at))).filter(n=>!query||(n.title+' '+plain(n.content)+' '+n.ocr_text+' '+n.transcript).toLowerCase().includes(query.toLowerCase())).sort((a,b)=>a.is_pinned===b.is_pinned?(a.sort_order-b.sort_order):a.is_pinned?-1:1),[notes,filter,folderId,folderLinks,typeFilter,colorFilter,labelFilter,reminderFilter,links,reminders,query]);
 
   return <div className={cn('notes-shell',dark&&'is-dark')}>
     <aside className="notes-sidebar"><div className="notes-brand"><div><strong>Notas</strong><span>Espaço pessoal</span></div></div>
       <div className="notes-new-wrap"><button className="notes-new" onClick={()=>void create('text')}><Plus size={17}/> Nova nota <kbd>⌘N</kbd></button><button className="notes-new-menu" onClick={()=>setNewMenu(v=>!v)}><ChevronDown size={15}/></button>{newMenu&&<div className="notes-popover new-menu">{types.map(t=><button key={t.key} onClick={()=>void create(t.key)}><t.icon size={15}/>{t.label}</button>)}</div>}</div>
-      <nav className="notes-nav"><button className={cn('notes-nav-item',filter==='all'&&!folderId&&'active')} onClick={()=>{setFilter('all');setFolderId(null);closeEditor()}}><Grid2X2 size={16}/><span>Todas</span></button><button className="notes-nav-item" onClick={()=>{window.history.pushState({},'', '/map');window.dispatchEvent(new PopStateEvent('popstate'))}}><Map size={16}/><span>Mapa</span></button><button className="notes-nav-item" onClick={()=>setHelpOpen(true)}><CircleHelp size={16}/><span>Ajuda</span></button>
+      <nav className="notes-nav"><button className={cn('notes-nav-item',filter==='all'&&!folderId&&'active')} onClick={()=>{setFilter('all');setFolderId(null);closeEditor()}}><Grid2X2 size={16}/><span>Todas</span></button><button className="notes-nav-item" onClick={()=>{window.history.pushState({},'', '/map');window.dispatchEvent(new PopStateEvent('popstate'))}}><Map size={16}/><span>Mapa</span></button><button className="notes-nav-item" onClick={()=>setTemplatesOpen(true)}><LayoutTemplate size={16}/><span>Pasta Template</span></button><button className="notes-nav-item" onClick={()=>setHelpOpen(true)}><CircleHelp size={16}/><span>Ajuda</span></button>
         <div className="notes-folder-section"><div className="notes-folder-heading"><span>Pastas</span><button title="Nova pasta" onClick={()=>setNewFolderName('')}><FolderPlus size={15}/></button></div>
-          {folders.map(folder=><div className={cn('notes-folder-row',folderId===folder.id&&filter==='all'&&'active')} key={folder.id}><button className="notes-folder-main" onClick={()=>{setFilter('all');setFolderId(folder.id);closeEditor()}}><Folder size={15}/><span>{folder.name}</span><small>{notes.filter(n=>!n.is_deleted&&n.folder_id===folder.id).length}</small></button><button className={cn('notes-folder-more',folderMenuId===folder.id&&'active')} title="Opções da pasta" onClick={e=>{e.stopPropagation();openFolderMenu(folder)}}><MoreHorizontal size={14}/></button>{folderMenuId===folder.id&&<div className="notes-popover folder-action-popover" onClick={e=>e.stopPropagation()}>{folderDeleteId===folder.id?<><strong>Excluir pasta?</strong><p>As notas serão mantidas em Todas as notas.</p><div className="folder-confirm-actions"><button onClick={()=>{setFolderDeleteId(null);setFolderMenuId(null)}}>Cancelar</button><button className="danger" onClick={()=>void deleteFolder(folder)}>Excluir</button></div></>:folderEditId===folder.id?<><input autoFocus value={folderDraft} onChange={e=>setFolderDraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')void saveFolderRename(folder);if(e.key==='Escape'){setFolderEditId(null);setFolderMenuId(null)}}}/><div className="folder-confirm-actions"><button onClick={()=>{setFolderEditId(null);setFolderMenuId(null)}}>Cancelar</button><button onClick={()=>void saveFolderRename(folder)}>Salvar</button></div></>:<><button onClick={()=>beginRenameFolder(folder)}><FileText size={14}/> Renomear</button><button className="danger" onClick={()=>askDeleteFolder(folder)}><Trash2 size={14}/> Excluir</button></>}</div>}</div>)}
+          {folders.map(folder=><div className={cn('notes-folder-row',folderId===folder.id&&filter==='all'&&'active')} key={folder.id}><button className="notes-folder-main" onClick={()=>{setFilter('all');setFolderId(folder.id);closeEditor()}}>{folder.icon==='network'?<Network size={15} style={{color:folder.color}}/>:folder.icon==='key-round'?<KeyRound size={15} style={{color:folder.color}}/>:folder.icon==='book-open'?<BookOpen size={15} style={{color:folder.color}}/>:<Folder size={15} style={{color:folder.color||undefined}}/>}<span>{folder.name}</span><small>{notes.filter(n=>!n.is_deleted&&(folderLinks[n.id]??(n.folder_id?[n.folder_id]:[])).includes(folder.id)).length}</small></button><button className={cn('notes-folder-more',folderMenuId===folder.id&&'active')} title="Opções da pasta" onClick={e=>{e.stopPropagation();openFolderMenu(folder)}}><MoreHorizontal size={14}/></button>{folderMenuId===folder.id&&<div className="notes-popover folder-action-popover" onClick={e=>e.stopPropagation()}>{folderDeleteId===folder.id?<><strong>Excluir pasta?</strong><p>As notas serão mantidas em Todas as notas.</p><div className="folder-confirm-actions"><button onClick={()=>{setFolderDeleteId(null);setFolderMenuId(null)}}>Cancelar</button><button className="danger" onClick={()=>void deleteFolder(folder)}>Excluir</button></div></>:folderEditId===folder.id?<><input autoFocus value={folderDraft} onChange={e=>setFolderDraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')void saveFolderRename(folder);if(e.key==='Escape'){setFolderEditId(null);setFolderMenuId(null)}}}/><div className="folder-confirm-actions"><button onClick={()=>{setFolderEditId(null);setFolderMenuId(null)}}>Cancelar</button><button onClick={()=>void saveFolderRename(folder)}>Salvar</button></div></>:<><button onClick={()=>beginRenameFolder(folder)}><FileText size={14}/> Renomear</button><button className="danger" onClick={()=>askDeleteFolder(folder)}><Trash2 size={14}/> Excluir</button></>}</div>}</div>)}
           {newFolderName!==''||false ? null : null}
         </div>
         <button className={cn('notes-nav-item',filter==='pinned'&&'active')} onClick={()=>{setFilter('pinned');setFolderId(null);closeEditor()}}><Pin size={16}/><span>Fixadas</span></button>
@@ -341,9 +459,9 @@ function recordStop(){if(speech.current){speech.current.active=false;try{speech.
         <button className={cn('notes-mobile-tab',filter==='trash'&&'active')} onClick={()=>{setFilter('trash');setFolderId(null);closeEditor()}}><Trash2 size={19}/><span>Lixeira</span></button>
         <button className="notes-mobile-tab" onClick={()=>document.querySelector('.notes-sidebar')?.classList.add('mobile-open')}><Menu size={19}/><span>Mais</span></button>
       </nav>
-    <HelpCenter open={helpOpen} onClose={()=>setHelpOpen(false)} onCreateNote={()=>void create('text')} onOpenMap={()=>{window.history.pushState({},'', '/map');window.dispatchEvent(new PopStateEvent('popstate'))}} />
+    <HelpCenter open={helpOpen} onClose={()=>setHelpOpen(false)} onCreateNote={()=>void create('text')} onOpenMap={()=>{window.history.pushState({},'', '/map');window.dispatchEvent(new PopStateEvent('popstate'))}} /><FolderTemplatesModal open={templatesOpen} busyTemplateId={templateCreating} onClose={()=>setTemplatesOpen(false)} onCreate={createFolderTemplate} />
     {selected&&<div className="notes-editor-overlay" onMouseDown={e=>{if(e.currentTarget===e.target)closeEditor()}}><section className={cn('notes-editor','note-color-'+selected.color)}>
-      <header className="notes-editor-header"><button className="notes-icon-button" onClick={closeEditor}><ChevronLeft size={18}/></button><div className="editor-actions"><span className="editor-date">Criada em {new Date(selected.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</span><span className={cn(selectedLocked&&'locked-status')}>{selectedLocked?'Bloqueado':saving?'Salvando…':'Salvo'}</span><button className={cn('notes-icon-button',selected.is_pinned&&'active')} title={selected.is_pinned?'Desafixar':'Fixar'} onClick={()=>void update({is_pinned:!selected.is_pinned})}><Pin size={17}/></button><button className="notes-icon-button" title={selected.is_archived?'Restaurar para notas':'Arquivar'} onClick={()=>{void update({is_archived:!selected.is_archived});if(selected.is_archived)closeEditor()}}>{selected.is_archived?<RotateCcw size={17}/>:<Archive size={17}/>}</button><button className="notes-icon-button" onClick={()=>setReminder(v=>!v)}><Clock3 size={17}/></button><button className="notes-icon-button" onClick={()=>setShare(v=>!v)}><Share2 size={17}/></button><button className="notes-icon-button" onClick={()=>setLabelPanel(v=>!v)}><Tag size={17}/></button><button className="notes-icon-button" title={selectedFolder?selectedFolder.name:'Pasta'} onClick={()=>setQuickAction(v=>v?.id===selected.id&&v.type==='folder'?null:{id:selected.id,type:'folder'})}><Folder size={17}/></button>{quickAction?.id===selected.id&&quickAction.type==='folder'&&<div className="note-quick-popover editor-folder-popover" onClick={e=>e.stopPropagation()}><div className="quick-label-list">{<button className={cn(selected.folder_id===null&&'active')} onClick={()=>void assignFolder(selected.id,null)}><Grid2X2 size={12}/> Todas</button>}{folders.map(f=><button key={f.id} className={cn(selected.folder_id===f.id&&'active')} onClick={()=>void assignFolder(selected.id,f.id)}><Folder size={12}/>{f.name}</button>)}</div></div>}<button className="notes-icon-button" title="Copiar texto" onClick={()=>void copyText(selected)}><Copy size={17}/></button><button className={cn('notes-icon-button',selectedLocked&&'active')} title={selectedLocked?'Desbloquear texto':'Bloquear texto'} onClick={()=>void toggleTextLock()}>{selectedLocked?<Lock size={17}/>:<LockOpen size={17}/>}</button><button className="notes-icon-button" onClick={()=>setMore(v=>!v)}><MoreHorizontal size={17}/></button><button className="notes-icon-button danger" onClick={()=>void remove()}><Trash2 size={17}/></button></div></header>
+      <header className="notes-editor-header"><button className="notes-icon-button" onClick={closeEditor}><ChevronLeft size={18}/></button><div className="editor-actions"><span className="editor-date">Criada em {new Date(selected.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</span><span className={cn(selectedLocked&&'locked-status')}>{selectedLocked?'Bloqueado':saving?'Salvando…':'Salvo'}</span><button className={cn('notes-icon-button',selected.is_pinned&&'active')} title={selected.is_pinned?'Desafixar':'Fixar'} onClick={()=>void update({is_pinned:!selected.is_pinned})}><Pin size={17}/></button><button className="notes-icon-button" title={selected.is_archived?'Restaurar para notas':'Arquivar'} onClick={()=>{void update({is_archived:!selected.is_archived});if(selected.is_archived)closeEditor()}}>{selected.is_archived?<RotateCcw size={17}/>:<Archive size={17}/>}</button><button className="notes-icon-button" onClick={()=>setReminder(v=>!v)}><Clock3 size={17}/></button><button className="notes-icon-button" onClick={()=>setShare(v=>!v)}><Share2 size={17}/></button><button className="notes-icon-button" onClick={()=>setLabelPanel(v=>!v)}><Tag size={17}/></button><button className="notes-icon-button" title={selectedFolders.length?selectedFolders.map(folder=>folder.name).join(', '):'Vincular pastas'} onClick={()=>setQuickAction(v=>v?.id===selected.id&&v.type==='folder'?null:{id:selected.id,type:'folder'})}><Folder size={17}/></button>{quickAction?.id===selected.id&&quickAction.type==='folder'&&<div className="note-quick-popover editor-folder-popover" onClick={e=>e.stopPropagation()}><div className="editor-folder-summary"><strong>Pastas vinculadas</strong><span>{folderIdsFor(selected).length} selecionada(s)</span></div><div className="quick-label-list folder-multi-select">{folders.map(f=>{const assigned=folderIdsFor(selected).includes(f.id);return <button type="button" key={f.id} aria-pressed={assigned} className={cn(assigned&&'active')} onClick={()=>{const current=folderIdsFor(selected);void assignFolders(selected.id,assigned?current.filter(id=>id!==f.id):[...current,f.id])}}>{assigned?<CheckSquare size={13}/>:<Square size={13}/>}<Folder size={12}/><span>{f.name}</span></button>})}{folders.length===0&&<p className="folder-multi-empty">Crie uma pasta na barra lateral para começar.</p>}</div><p className="editor-folder-help">Você pode vincular uma nota a várias pastas.</p></div>}<button className="notes-icon-button" title="Copiar texto" onClick={()=>void copyText(selected)}><Copy size={17}/></button><button className={cn('notes-icon-button',selectedLocked&&'active')} title={selectedLocked?'Desbloquear texto':'Bloquear texto'} onClick={()=>void toggleTextLock()}>{selectedLocked?<Lock size={17}/>:<LockOpen size={17}/>}</button><button className="notes-icon-button" onClick={()=>setMore(v=>!v)}><MoreHorizontal size={17}/></button><button className="notes-icon-button danger" onClick={()=>void remove()}><Trash2 size={17}/></button></div></header>
       <div className="editor-type-tabs">{types.map(t=><button key={t.key} className={editorType===t.key?'active':''} onClick={()=>{setEditorType(t.key);void update({note_type:t.key})}}><t.icon size={14}/>{t.label}</button>)}</div>
       {more&&<div className="notes-popover editor-menu"><button onClick={()=>window.print()}><Printer size={15}/> Imprimir</button><button onClick={()=>void shareNote()}><Send size={15}/> Enviar / compartilhar</button><button onClick={()=>void copyDocs()}><FileText size={15}/> Copiar para Google Docs</button><button onClick={()=>exportOne('md')}><FileDown size={15}/> Markdown</button><button onClick={()=>exportOne('txt')}><Download size={15}/> Texto</button><button onClick={()=>exportOne('json')}><FileDown size={15}/> JSON</button></div>}
       {share&&<div className="notes-popover share-panel"><h3>Compartilhar</h3><p>Envie um convite por e-mail. A edição conjunta sincroniza pelo banco em tempo real.</p><form onSubmit={invite}><input type="email" required value={shareEmail} onChange={e=>setShareEmail(e.target.value)} placeholder="email@exemplo.com"/><button className="notes-primary"><Mail size={14}/> Criar convite</button></form></div>}
