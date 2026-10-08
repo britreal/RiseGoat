@@ -775,6 +775,7 @@ export function HelpCenter({ open, onClose, onCreateNote, onOpenMap }: HelpCente
                     article={article}
                     categoryTitle={article.categoryTitle}
                     number={index + 1}
+                    defaultOpen
                   />
                 ))}
               </>
@@ -789,7 +790,7 @@ export function HelpCenter({ open, onClose, onCreateNote, onOpenMap }: HelpCente
                   <span className="help-center-count">{activeCategory.articles.length} guias</span>
                 </div>
                 {activeCategory.articles.map((article, index) => (
-                  <HelpArticleCard key={article.title} article={article} number={index + 1} />
+                  <HelpArticleCard key={article.title} article={article} number={index + 1} defaultOpen={index === 0} />
                 ))}
               </>
             )}
@@ -815,26 +816,29 @@ function HelpArticleCard({
   article,
   number,
   categoryTitle,
+  defaultOpen = false,
 }: {
   article: HelpArticle;
   number: number;
   categoryTitle?: string;
+  defaultOpen?: boolean;
 }) {
   return (
-    <article className="help-center-article">
-      <div className="help-center-article-top">
+    <details className="help-center-article" open={defaultOpen}>
+      <summary className="help-center-article-top">
         <span className="help-center-article-number">{String(number).padStart(2, '0')}</span>
         <div>
           {categoryTitle && <span className="help-center-result-category">{categoryTitle}</span>}
           <h4>{article.title}</h4>
           <p>{article.summary}</p>
         </div>
-      </div>
+        <ChevronDown className="help-center-article-chevron" size={16} />
+      </summary>
       <ol>
         {article.steps.map((step, index) => <li key={index}>{step}</li>)}
       </ol>
       {article.tip && <div className="help-center-tip"><Sparkles size={15} /><p><strong>Dica prática</strong>{article.tip}</p></div>}
       {article.note && <div className="help-center-note"><CircleHelp size={15} /><p><strong>Importante</strong>{article.note}</p></div>}
-    </article>
+    </details>
   );
 }
