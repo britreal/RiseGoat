@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import {
-  Bell, BookOpen, ChevronRight, CircleHelp, Command, FileText, Folder,
-  Map, Search, ShieldCheck, Sparkles, X, type LucideIcon,
+  Bell, BookOpen, ChevronDown, ChevronRight, CircleHelp, Command, Compass,
+  Download, FileText, Folder, History, Map, Network, Search, ShieldCheck,
+  Sparkles, X, type LucideIcon,
 } from 'lucide-react';
 import '@/lib/help-center.css';
 
@@ -356,6 +357,216 @@ const helpCategories: HelpCategory[] = [
     ],
   },
   {
+    id: 'advanced',
+    title: 'Estratégias avançadas',
+    description: 'Transforme registros em conhecimento, decisões e próximos passos.',
+    icon: Compass,
+    articles: [
+      {
+        title: 'O ciclo de inteligência pessoal',
+        summary: 'Use um processo simples para sair da curiosidade e chegar a uma ação consciente.',
+        steps: [
+          'Planeje: escreva a pergunta que quer responder ou o resultado que procura.',
+          'Colete: registre fatos, ideias e referências relevantes em notas separadas.',
+          'Processe: organize com pastas e etiquetas, anotando fonte e data quando forem importantes.',
+          'Analise: conecte notas no Mapa para enxergar relações, lacunas e perguntas em aberto.',
+          'Aja: transforme sua conclusão em checklist ou lembrete.',
+          'Aprenda: registre o resultado e o que faria diferente na próxima vez.',
+        ],
+        tip: 'Diferencie fato observado, interpretação e hipótese. Isso evita tratar suposições como certezas.',
+        keywords: 'inteligência pessoal planejar coletar processar analisar operação método sistema',
+      },
+      {
+        title: 'O método dos cartões conectados',
+        summary: 'Crie notas pequenas e específicas para montar uma base de conhecimento que cresce sem ficar confusa.',
+        steps: [
+          'Crie uma nota para cada ideia, livro, projeto, empresa ou pessoa relevante para você.',
+          'Prefira títulos específicos e registre contexto, fonte e data quando forem importantes.',
+          'Aplique etiquetas consistentes, como ideia, referência, projeto ou próxima ação.',
+          'No Mapa, conecte notas relacionadas e pergunte por que a ligação importa.',
+          'Revise conexões antigas quando surgirem novas informações.',
+        ],
+        tip: 'Uma conexão útil explica a relação: uma ideia veio desta referência, uma tarefa faz parte de um projeto ou duas fontes apontam para a mesma pergunta.',
+        keywords: 'cartões notas conexão fonte pessoa empresa evento projeto conhecimento',
+      },
+      {
+        title: 'Converta observações em decisões',
+        summary: 'Um modelo simples separa o que aconteceu da decisão que você pretende tomar.',
+        steps: [
+          'Contexto: o que está tentando entender ou resolver?',
+          'Evidências: o que observou de fato e de onde veio a informação?',
+          'Interpretação: quais explicações são possíveis e o que ainda não sabe?',
+          'Opções: quais caminhos existem e quais são seus custos?',
+          'Próximo passo: qual ação pequena pode testar sua hipótese?',
+          'Revisão: quando vai verificar o resultado?',
+        ],
+        tip: 'Em decisões importantes, anote o que faria você mudar de ideia. Isso facilita corrigir o rumo diante de novas evidências.',
+        keywords: 'decisão análise evidência hipótese estratégia próximo passo contexto revisar',
+      },
+      {
+        title: 'Conecte a visão de longo prazo com o presente',
+        summary: 'Objetivos distantes ficam mais concretos quando ligados a projetos e ações que você pode executar hoje.',
+        steps: [
+          'Crie uma pasta para sua visão de longo prazo, se essa estrutura ajudar.',
+          'Escreva o resultado desejado e por que ele importa.',
+          'Crie notas para os projetos e competências que podem contribuir para esse resultado.',
+          'Conecte projetos no Mapa e transforme a próxima ação em checklist.',
+          'Reserve uma revisão mensal para ajustar prioridades com base no que aprendeu.',
+        ],
+        tip: 'Um horizonte de cinco ou dez anos é uma ferramenta de reflexão, não uma previsão. Reavalie suas escolhas conforme sua realidade mudar.',
+        keywords: 'jogo longo visão dez anos objetivos futuro horizonte planejamento revisão',
+      },
+      {
+        title: 'Mapeie relacionamentos com respeito',
+        summary: 'O Mapa pode ajudar você a lembrar de contextos e oportunidades de colaboração sem transformar pessoas em alvos.',
+        steps: [
+          'Registre apenas informações apropriadas e necessárias para seu contexto.',
+          'Anote interesses compartilhados, compromissos assumidos e maneiras genuínas de oferecer ajuda.',
+          'Conecte pessoas a projetos ou temas quando a relação for relevante e tiver fundamento.',
+          'Use lembretes para cumprir promessas e fazer acompanhamentos oportunos.',
+          'Revise as notas e remova dados desnecessários ou desatualizados.',
+        ],
+        note: 'Respeite consentimento, privacidade e limites. Não registre segredos, dados sensíveis ou informações obtidas sem autorização. O Mapa não analisa pessoas automaticamente.',
+        keywords: 'rede contatos aliados relacionamentos influência reciprocidade follow up networking',
+      },
+    ],
+  },
+  {
+    id: 'legacy',
+    title: 'Módulos antigos',
+    description: 'Entenda o histórico do RiseGoat sem confundir tabelas antigas com recursos disponíveis.',
+    icon: History,
+    articles: [
+      {
+        title: 'O que são os módulos legados?',
+        summary: 'Versões anteriores do RiseGoat incluíam ideias e ferramentas além do Notas.',
+        steps: [
+          'Business e Growth: estruturas históricas ligadas a produtos, ofertas, lançamentos, receitas e parcerias.',
+          'Authority e Intelligence: tabelas antigas relacionadas a contatos, conexões, tarefas e fontes.',
+          'Action Flows e Workflows: estruturas históricas para fluxos, execuções e etapas.',
+          'Books e Resources: tabelas antigas ligadas a livros, capítulos e recursos.',
+          'Personal: estruturas históricas para hábitos, metas, métricas e sessões.',
+        ],
+        note: 'Esses nomes descrevem tabelas e módulos históricos no banco. Não significam que exista uma tela funcional para cada módulo. A interface atual se concentra em Notas, Mapa e Configurações. Reativar um módulo exige desenvolvimento e validação próprios.',
+        keywords: 'legado antigo módulos business growth authority intelligence action flows workflow books personal metas hábitos banco tabelas',
+      },
+      {
+        title: 'Como aproveitar esse histórico hoje',
+        summary: 'Priorize um uso claro para o produto atual antes de planejar a reativação de módulos antigos.',
+        steps: [
+          'Use Notas para registrar ideias, referências, tarefas e informações relevantes para seus projetos.',
+          'Use pastas e etiquetas para separar contextos sem depender dos módulos antigos.',
+          'Conecte notas no Mapa para testar se essa organização já resolve sua necessidade.',
+          'Antes de reativar um módulo, revise esquema, permissões, telas, integrações e migrações.',
+        ],
+        tip: 'A existência de uma tabela no banco não prova que o recurso esteja pronto. Uma funcionalidade completa precisa de interface, permissões e comportamento testado.',
+        keywords: 'reativar futuro sistema modular banco dados esquema interface permissões migração',
+      },
+    ],
+  },
+  {
+    id: 'security',
+    title: 'Privacidade e segurança',
+    description: 'Proteja seus registros e use o compartilhamento com consciência.',
+    icon: ShieldCheck,
+    articles: [
+      {
+        title: 'Pense antes de registrar informações sensíveis',
+        summary: 'Guarde o que for útil sem acumular dados pessoais ou segredos desnecessários.',
+        steps: [
+          'Evite guardar senhas, tokens, dados bancários ou documentos de identidade completos nas notas.',
+          'Ao registrar informações sobre outra pessoa, limite-se ao que é relevante, legítimo e apropriado.',
+          'Use pastas e etiquetas para encontrar registros, não como substituto de controle de acesso.',
+          'Revise notas antigas e elimine dados que deixaram de ser necessários.',
+        ],
+        tip: 'Escreva cada nota imaginando que um dia ela poderá ser vista por alguém que não era o destinatário original.',
+        keywords: 'OPSEC segurança operacional privacidade discrição dados pessoais sigilo segredo senha token compartimentação',
+      },
+      {
+        title: 'Compartilhe com cuidado',
+        summary: 'Compartilhar dá acesso real ao conteúdo. Confira o destinatário antes de enviar um convite.',
+        steps: [
+          'Confira se abriu a nota correta e se o conteúdo pode ser compartilhado.',
+          'Digite com cuidado o e-mail da pessoa convidada.',
+          'Considere que os convites de colaboração atuais concedem acesso de edição.',
+          'Compartilhe apenas com pessoas que realmente precisam desse conteúdo.',
+        ],
+        note: 'A interface atual não oferece um painel completo para listar e revogar todos os acessos. Não use o compartilhamento para material que exija permissões granulares ou revogação garantida.',
+        keywords: 'OPSEC compartilhar convite edição acesso colaborador email permissões revogar remover',
+      },
+      {
+        title: 'Tenha cópias e saiba o que elas incluem',
+        summary: 'Exportar ajuda a manter registros, mas o arquivo gerado não substitui necessariamente um backup completo.',
+        steps: [
+          'Use Exportar tudo para baixar o JSON dos registros de notas disponíveis.',
+          'Para uma nota individual, abra Mais opções e escolha JSON, Markdown ou texto.',
+          'Guarde os arquivos em um local privado e confira se consegue abrir o conteúdo.',
+          'Se anexos, checklists, etiquetas e lembretes forem importantes, confira esses dados separadamente.',
+        ],
+        note: 'A exportação geral atual serializa as notas. Não a trate como cópia integral de todos os anexos e registros relacionados.',
+        keywords: 'backup exportação cópia segurança JSON anexos checklist etiquetas lembretes recuperar',
+      },
+      {
+        title: 'O que o bloqueio de texto não garante',
+        summary: 'O botão de bloqueio na nota não deve ser confundido com uma camada comprovada de criptografia.',
+        steps: [
+          'Use uma senha forte na conta e não compartilhe suas credenciais.',
+          'Encerre a sessão quando usar um dispositivo compartilhado.',
+          'Não guarde segredos críticos supondo que o ícone de bloqueio os criptografe.',
+        ],
+        note: 'O controle de bloqueio não equivale, por si só, a criptografia ponta a ponta, autenticação multifator ou garantia de que o conteúdo não possa ser lido por quem já tem acesso à conta.',
+        keywords: 'bloqueio criptografia criptografar ponta a ponta MFA 2FA senha autenticação segurança',
+      },
+    ],
+  },
+  {
+    id: 'principles',
+    title: 'Filosofia do RiseGoat',
+    description: 'Clareza, conhecimento, relações, atenção e ação como princípios de uso.',
+    icon: Network,
+    articles: [
+      {
+        title: 'Capturar, conectar, agir e aprender',
+        summary: 'A ferramenta ganha valor quando as informações ajudam você a decidir ou fazer algo melhor.',
+        steps: [
+          'Capturar tira uma ideia importante da cabeça e a coloca em um lugar confiável.',
+          'Organizar dá contexto para recuperar a ideia depois.',
+          'Conectar ajuda a enxergar como uma nota se relaciona a outras informações.',
+          'Agir transforma a conclusão em uma tarefa, conversa, teste ou decisão.',
+          'Aprender é registrar o resultado e atualizar o que você acreditava antes.',
+        ],
+        tip: 'Nem toda nota precisa virar um projeto. Algumas existem apenas para preservar uma memória, uma referência ou uma reflexão útil.',
+        keywords: 'filosofia capturar conectar visualizar agir transformar memória extensão da mente',
+      },
+      {
+        title: 'Cinco pilares para orientar suas notas',
+        summary: 'Use estes pilares como lentes para revisar o que você está aprendendo e construindo.',
+        steps: [
+          'Mente: registre reflexões, perguntas e lições aprendidas.',
+          'Conhecimento: guarde referências, fontes, conceitos e conexões entre ideias.',
+          'Rede: acompanhe compromissos e relações de colaboração de forma respeitosa.',
+          'Atenção: registre prioridades e reduza o que compete por sua energia.',
+          'Valor: conecte habilidades e projetos aos problemas reais que deseja resolver.',
+        ],
+        tip: 'Os pilares são uma estrutura pessoal de reflexão, não recursos automáticos ou promessas de resultados financeiros.',
+        keywords: 'cinco pilares mente conhecimento rede atenção dinheiro valor riqueza disciplina',
+      },
+      {
+        title: 'Mantenha o sistema simples o bastante para usar',
+        summary: 'Um sistema de organização só ajuda se você consegue mantê-lo no cotidiano.',
+        steps: [
+          'Capture a informação assim que for prático.',
+          'Use um título útil e o contexto mínimo necessário.',
+          'Organize quando surgir uma necessidade real de encontrar ou executar algo.',
+          'Revise as notas importantes em um ritmo que caiba na sua rotina.',
+          'Mude a estrutura se ela começar a atrapalhar em vez de ajudar.',
+        ],
+        tip: 'O RiseGoat não garante poder, influência ou riqueza. Ele ajuda a preservar o que importa para que você possa pensar e agir com mais clareza.',
+        keywords: 'simplicidade disciplina filosofia consistência rotina clareza atenção propósito',
+      },
+    ],
+  },
+  {
     id: 'troubleshoot',
     title: 'Quando algo não funciona',
     description: 'Verificações rápidas para os recursos que dependem do navegador ou do dispositivo.',
@@ -465,6 +676,28 @@ export function HelpCenter({ open, onClose, onCreateNote, onOpenMap }: HelpCente
     }
   };
 
+  const exportGuide = () => {
+    const lines: string[] = ['# Central de Ajuda do RiseGoat', ''];
+    for (const category of helpCategories) {
+      lines.push('## ' + category.title, category.description, '');
+      for (const article of category.articles) {
+        lines.push('### ' + article.title, article.summary, '');
+        lines.push(...article.steps.map(step => '- ' + step), '');
+        if (article.tip) lines.push('**Dica prática:** ' + article.tip, '');
+        if (article.note) lines.push('**Importante:** ' + article.note, '');
+      }
+      lines.push('');
+    }
+    const url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'guia-risegoat.md';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   if (!open) return null;
 
   return (
@@ -480,11 +713,11 @@ export function HelpCenter({ open, onClose, onCreateNote, onOpenMap }: HelpCente
             <span className="help-center-mark"><CircleHelp size={19} /></span>
             <div>
               <p>RISEGOAT · CENTRAL DE AJUDA</p>
-              <h2 id="help-center-title">Use o Notas ao máximo.</h2>
-              <span>Guias práticos para capturar, organizar e encontrar suas ideias.</span>
+              <h2 id="help-center-title">Use o RiseGoat ao máximo.</h2>
+              <span>Capture, organize e conecte informações para transformar ideias em ação.</span>
             </div>
           </div>
-          <button type="button" className="help-center-close" onClick={onClose} aria-label="Fechar ajuda" title="Fechar ajuda"><X size={19} /></button>
+          <div className="help-center-header-actions"><button type="button" className="help-center-export" onClick={exportGuide}><Download size={15} /><span>Exportar guia</span></button><button type="button" className="help-center-close" onClick={onClose} aria-label="Fechar ajuda" title="Fechar ajuda"><X size={19} /></button></div>
         </header>
 
         <div className="help-center-search-wrap">
@@ -542,6 +775,7 @@ export function HelpCenter({ open, onClose, onCreateNote, onOpenMap }: HelpCente
                     article={article}
                     categoryTitle={article.categoryTitle}
                     number={index + 1}
+                    defaultOpen
                   />
                 ))}
               </>
@@ -556,7 +790,7 @@ export function HelpCenter({ open, onClose, onCreateNote, onOpenMap }: HelpCente
                   <span className="help-center-count">{activeCategory.articles.length} guias</span>
                 </div>
                 {activeCategory.articles.map((article, index) => (
-                  <HelpArticleCard key={article.title} article={article} number={index + 1} />
+                  <HelpArticleCard key={article.title} article={article} number={index + 1} defaultOpen={index === 0} />
                 ))}
               </>
             )}
@@ -582,26 +816,29 @@ function HelpArticleCard({
   article,
   number,
   categoryTitle,
+  defaultOpen = false,
 }: {
   article: HelpArticle;
   number: number;
   categoryTitle?: string;
+  defaultOpen?: boolean;
 }) {
   return (
-    <article className="help-center-article">
-      <div className="help-center-article-top">
+    <details className="help-center-article" open={defaultOpen}>
+      <summary className="help-center-article-top">
         <span className="help-center-article-number">{String(number).padStart(2, '0')}</span>
         <div>
           {categoryTitle && <span className="help-center-result-category">{categoryTitle}</span>}
           <h4>{article.title}</h4>
           <p>{article.summary}</p>
         </div>
-      </div>
+        <ChevronDown className="help-center-article-chevron" size={16} />
+      </summary>
       <ol>
         {article.steps.map((step, index) => <li key={index}>{step}</li>)}
       </ol>
       {article.tip && <div className="help-center-tip"><Sparkles size={15} /><p><strong>Dica prática</strong>{article.tip}</p></div>}
       {article.note && <div className="help-center-note"><CircleHelp size={15} /><p><strong>Importante</strong>{article.note}</p></div>}
-    </article>
+    </details>
   );
 }
