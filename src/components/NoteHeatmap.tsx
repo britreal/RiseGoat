@@ -204,7 +204,7 @@ export function NoteHeatmap({ activity, dailyItems, checklistItems, noteTitle, d
   };
 
   const dialog = statsOpen && typeof document !== 'undefined' ? createPortal(
-    <div className="note-heatmap-dialog-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) setStatsOpen(false); }}>
+    <div className={dark ? 'note-heatmap-dialog-backdrop is-dark' : 'note-heatmap-dialog-backdrop'} onMouseDown={event => { if (event.target === event.currentTarget) setStatsOpen(false); }}>
       <section className="note-heatmap-dialog" role="dialog" aria-modal="true" aria-labelledby="note-heatmap-stats-title" onClick={event => event.stopPropagation()}>
         <header className="note-heatmap-dialog-header">
           <div className="note-heatmap-dialog-brand"><span className="note-heatmap-dialog-flame"><Flame size={17}/></span><span>Estatísticas do Calor</span></div>
