@@ -311,15 +311,15 @@ const helpCategories: HelpCategory[] = [
         keywords: 'exportar exportação download JSON Markdown txt texto backup cópia',
       },
       {
-        title: 'Importe dados do Google Keep',
-        summary: 'A opção Importar Takeout aceita arquivos JSON ou HTML compatíveis com exportações do Google Keep.',
+        title: 'Importe arquivos do Google Takeout',
+        summary: 'A opção Importar Takeout aceita arquivos JSON e HTML. A importação depende do formato e dos campos presentes em cada arquivo.',
         steps: [
           'Exporte seus dados do Google Keep usando o Google Takeout.',
           'Na área lateral do Notas, escolha Importar Takeout.',
           'Selecione os arquivos JSON ou HTML que deseja importar.',
           'Revise as notas importadas e ajuste pastas, etiquetas e títulos quando necessário.',
         ],
-        note: 'A importação depende do formato do arquivo. Guarde o arquivo original até confirmar que os dados importantes chegaram corretamente.',
+        note: 'Na importação JSON, o app lê os campos title e content. Alguns arquivos do Google Keep usam textContent no lugar de content e podem entrar incompletos. Confira o resultado e guarde o arquivo original até validar os dados.',
         keywords: 'importar takeout Google Keep JSON HTML migração transferência',
       },
       {
