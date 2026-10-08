@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export type Route = { name: 'landing' } | { name: 'auth' } | { name: 'notes' } | { name: 'settings' };
+export type Route = { name: 'landing' } | { name: 'auth' } | { name: 'notes' } | { name: 'map' } | { name: 'settings' };
 
 function parseRoute(): Route {
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
@@ -8,6 +8,7 @@ function parseRoute(): Route {
   const current = path !== '/' ? path : hash;
   if (current === '/auth') return { name: 'auth' };
   if (current === '/notes') return { name: 'notes' };
+  if (current === '/map') return { name: 'map' };
   if (current === '/settings') return { name: 'settings' };
   return { name: 'landing' };
 }
