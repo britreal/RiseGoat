@@ -113,7 +113,7 @@ export function NotesPage(){
     setTemplateCreating(templateId);
     let createdFolderId:string|null=null;
     let createdNoteIds:string[]=[];
-    let createdLabelIds:string[]=[];
+    const createdLabelIds:string[]=[];
     try{
       const folderResult=await supabase.from('note_folders').insert({
         user_id:user.id,name:template.name,position:folders.length,color:template.color,icon:template.icon
