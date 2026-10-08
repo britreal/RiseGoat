@@ -1465,41 +1465,41 @@
 .note-heatmap-task-empty{margin:0;color:#999;font-size:10px;line-height:1.5}
 .note-heatmap-dialog-footnote{display:flex;align-items:flex-start;gap:8px;color:#969696;font-size:10px;line-height:1.5}
 .note-heatmap-dialog-footnote svg{flex:0 0 14px;margin-top:1px}
-.notes-shell.is-dark .note-heatmap-dialog{
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-dialog{
   border-color:rgba(255,255,255,.10);
   background:#1e1e20;
   color:#f5f5f7;
 }
-.notes-shell.is-dark .note-heatmap-dialog-brand,
-.notes-shell.is-dark .note-heatmap-peak strong{color:#e4e4e7}
-.notes-shell.is-dark .note-heatmap-dialog-title>span,
-.notes-shell.is-dark .note-heatmap-intensity-top p,
-.notes-shell.is-dark .note-heatmap-peak,
-.notes-shell.is-dark .note-heatmap-task,
-.notes-shell.is-dark .note-heatmap-history-name{color:#a1a1aa}
-.notes-shell.is-dark .note-heatmap-dialog-close,
-.notes-shell.is-dark .note-heatmap-stat-icon,
-.notes-shell.is-dark .note-heatmap-period-tabs,
-.notes-shell.is-dark .note-heatmap-period-kpis>div{background:#2b2b2e;color:#ddd}
-.notes-shell.is-dark .note-heatmap-stat-card,
-.notes-shell.is-dark .note-heatmap-period-panel,
-.notes-shell.is-dark .note-heatmap-checklist-panel{border-color:rgba(255,255,255,.08);background:#252527}
-.notes-shell.is-dark .note-heatmap-stat-label,
-.notes-shell.is-dark .note-heatmap-stat-card small,
-.notes-shell.is-dark .note-heatmap-period-kpis span,
-.notes-shell.is-dark .note-heatmap-section-kicker,
-.notes-shell.is-dark .note-heatmap-history-days,
-.notes-shell.is-dark .note-heatmap-no-data,
-.notes-shell.is-dark .note-heatmap-task-empty,
-.notes-shell.is-dark .note-heatmap-dialog-footnote{color:#999}
-.notes-shell.is-dark .note-heatmap-intensity-panel{border-color:rgba(234,88,12,.16);background:linear-gradient(135deg,#30251f,#252527 75%)}
-.notes-shell.is-dark .note-heatmap-period-tabs button.active{background:#3c3c40;color:#fff}
-.notes-shell.is-dark .note-heatmap-history-bar,
-.notes-shell.is-dark .note-heatmap-progress{background:#39393c}
-.notes-shell.is-dark .note-heatmap-task-list{border-color:rgba(255,255,255,.07);background:#202022}
-.notes-shell.is-dark .note-heatmap-task-list h4 span{background:#36363a;color:#ccc}
-.notes-shell.is-dark .note-heatmap-progress-pill{background:#402b20;color:#fb923c}
-.notes-shell.is-dark .note-heatmap-dialog-flame{background:#402b20;color:#fb923c}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-dialog-brand,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-peak strong{color:#e4e4e7}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-dialog-title>span,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-intensity-top p,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-peak,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-task,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-history-name{color:#a1a1aa}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-dialog-close,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-stat-icon,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-period-tabs,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-period-kpis>div{background:#2b2b2e;color:#ddd}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-stat-card,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-period-panel,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-checklist-panel{border-color:rgba(255,255,255,.08);background:#252527}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-stat-label,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-stat-card small,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-period-kpis span,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-section-kicker,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-history-days,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-no-data,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-task-empty,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-dialog-footnote{color:#999}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-intensity-panel{border-color:rgba(234,88,12,.16);background:linear-gradient(135deg,#30251f,#252527 75%)}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-period-tabs button.active{background:#3c3c40;color:#fff}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-history-bar,
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-progress{background:#39393c}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-task-list{border-color:rgba(255,255,255,.07);background:#202022}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-task-list h4 span{background:#36363a;color:#ccc}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-progress-pill{background:#402b20;color:#fb923c}
+.note-heatmap-dialog-backdrop.is-dark .note-heatmap-dialog-flame{background:#402b20;color:#fb923c}
 @keyframes heatmap-fade-in{from{opacity:0}to{opacity:1}}
 @media(max-width:680px){
   .note-heatmap-dialog-backdrop{align-items:flex-end;padding:0}
