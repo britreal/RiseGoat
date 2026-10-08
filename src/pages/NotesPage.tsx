@@ -230,7 +230,7 @@ export function NotesPage(){
     }
     const currentFolderIds=folderIdsFor(note);
     const toAdd=nextFolderIds.filter(id=>!currentFolderIds.includes(id));
-    if(toAdd.length){const {error:e}=await supabase.from('note_folder_links').insert(toAdd.map(folder_id=>({note_id:noteId,folder_id})));if(e){setError('Não foi possível vincular as pastas selecionadas. '+e.message);return;}}
+    if(toAdd.length){const {error:e}=await supabase.from('note_folder_links').insert(toAdd.map(folder_id=>({note_id:noteId,folder_id})));if(e){setError('Não foi possível vincular as pastas selecionadas. '+e.message);return;}setFolderLinks(v=>({...v,[noteId]:Array.from(new Set([...(v[noteId]??currentFolderIds),...toAdd]))}));}
     const toRemove=currentFolderIds.filter(id=>!nextFolderIds.includes(id));
     if(toRemove.length){const {error:e}=await supabase.from('note_folder_links').delete().eq('note_id',noteId).in('folder_id',toRemove);if(e){setError('Não foi possível remover uma das pastas. '+e.message);return;}}
     const {error:e}=await supabase.from('notes').update({folder_id:nextFolderIds[0]??null}).eq('id',noteId);
