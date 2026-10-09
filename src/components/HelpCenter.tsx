@@ -107,6 +107,17 @@ const helpCategories: HelpCategory[] = [
         keywords: 'cartão card prévia itens interagir marcar checklist',
       },
       {
+        title: 'Formate o texto de uma nota',
+        summary: 'O editor de texto oferece formatação básica para destacar informações e inserir links.',
+        steps: [
+          'Abra uma nota do tipo Texto.',
+          'Use a barra de formatação para aplicar negrito, itálico ou sublinhado.',
+          'Use o controle de link para inserir um endereço web.',
+          'Para exportar uma nota como Markdown, abra Mais opções e escolha Markdown.',
+        ],
+        keywords: 'formatar texto negrito itálico sublinhado link editor Markdown',
+      },
+      {
         title: 'Adicione contexto a uma nota',
         summary: 'Uma nota útil deve ajudar seu eu do futuro a entender por que aquela informação importa.',
         steps: [
@@ -136,6 +147,17 @@ const helpCategories: HelpCategory[] = [
         ],
         tip: 'Prefira poucas pastas claras, como Pessoal, Estudos e Projetos. Não é preciso criar uma pasta para cada pequena ideia.',
         keywords: 'pasta criar mover atribuir renomear excluir categoria',
+      },
+      {
+        title: 'Comece com um modelo de pasta',
+        summary: 'Os modelos criam uma estrutura inicial com notas, checklists, etiquetas e conexões.',
+        steps: [
+          'Na seção Pastas da barra lateral, clique no botão ao lado do título Pastas.',
+          'Escolha uma estrutura pronta ou crie uma pasta vazia.',
+          'Revise as notas e conexões criadas pelo modelo e adapte-as ao seu trabalho.',
+        ],
+        tip: 'Um modelo é um ponto de partida. Exclua ou edite o que não fizer sentido para seu sistema.',
+        keywords: 'modelo modelos pasta template estrutura pronta criar pasta checklist etiqueta conexões',
       },
       {
         title: 'Use etiquetas para temas que se cruzam',
@@ -403,7 +425,7 @@ const helpCategories: HelpCategory[] = [
         steps: [
           'Confira se abriu a nota correta e se o conteúdo pode ser compartilhado.',
           'Digite com cuidado o e-mail da pessoa convidada.',
-          'Considere que os convites de colaboração atuais concedem acesso de edição.',
+          'Confira o nível escolhido no convite: pode editar ou somente leitura.',
           'Compartilhe apenas com pessoas que realmente precisam desse conteúdo.',
         ],
         note: 'O proprietário pode cancelar convites pendentes e revogar participantes. A revogação não apaga cópias que alguém tenha feito enquanto tinha acesso.',
