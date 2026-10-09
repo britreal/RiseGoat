@@ -1528,3 +1528,10 @@
   .note-heatmap-dialog-backdrop{animation:none}
   .note-heatmap-progress>span,.note-heatmap-open-stats{transition:none}
 }
+
+/* Checklist item controls and top-toolbar Help action */
+.checklist-editor .check-row{grid-template-columns:24px minmax(0,1fr) 28px 28px}
+.checklist-editor .check-row .delete-check-item{color:#a0a0a0}
+.checklist-editor .check-row .delete-check-item:hover{color:#b42318;background:rgba(180,35,24,.08)}
+.notes-shell.is-dark .checklist-editor .check-row .delete-check-item:hover{color:#ff9b91;background:rgba(255,100,90,.13)}
+@media(max-width:520px){.notes-toolbar-actions .notes-icon-button.notes-help-button{display:grid!important}}
