@@ -37,15 +37,15 @@ const palette:Record<NoteColor,string> = {
 const plain = (html:string) => html.replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
 
 function arrangeGraphPositions(notes:Note[],links:NoteLink[],startX=0,startY=0):Record<string,Point>{
-  const noteById=new Map(notes.map(note=>[note.id,note]));
-  const adjacency=new Map<string,Set<string>>(notes.map(note=>[note.id,new Set<string>()]));
+  const noteById=new Map<string,Note>(notes.map(note=>[note.id,note] as const));
+  const adjacency=new Map<string,Set<string>>(notes.map(note=>[note.id,new Set<string>()] as const));
   for(const link of links){
     if(!adjacency.has(link.source_note_id)||!adjacency.has(link.target_note_id))continue;
     adjacency.get(link.source_note_id)!.add(link.target_note_id);
     adjacency.get(link.target_note_id)!.add(link.source_note_id);
   }
   const compare=(a:string,b:string)=>(adjacency.get(b)?.size??0)-(adjacency.get(a)?.size??0)
-    ||(noteById.get(a)?.title||'').localeCompare(noteById.get(b)?.title||'','pt-BR');
+    ||(noteById.get(a)?.title||'').localeCompare(noteById.get(b)?.title||'','pt-BR')||a.localeCompare(b);
   const remaining=new Set(notes.map(note=>note.id));
   const components:string[][]=[];
   while(remaining.size){
