@@ -21,7 +21,8 @@ type NoteCollaborator={id:string;note_id:string;user_id:string|null;invited_emai
 type Folder={id:string;user_id:string;name:string;position:number;created_at:string;updated_at:string;color:string;icon:'folder'|'network'|'key-round'|'book-open'};
 const colorOptions:{key:Color;label:string;hex:string}[]=[{key:'default',label:'Neutro',hex:'#ffffff'},{key:'warm',label:'Creme',hex:'#f7f1e5'},{key:'yellow',label:'Amarelo',hex:'#fff4b8'},{key:'orange',label:'Pêssego',hex:'#ffe1c7'},{key:'red',label:'Coral',hex:'#f3d4cf'},{key:'pink',label:'Rosa',hex:'#f5dce7'},{key:'purple',label:'Lilás',hex:'#e8def7'},{key:'indigo',label:'Índigo',hex:'#dce2f8'},{key:'blue',label:'Azul',hex:'#d9e9f7'},{key:'teal',label:'Menta',hex:'#d7efe9'},{key:'green',label:'Verde',hex:'#dcefdc'},{key:'gray',label:'Cinza',hex:'#e8e9e7'}];
 const types:{key:NoteType;label:string;icon:any}[]=[{key:'text',label:'Texto',icon:FileText},{key:'checklist',label:'Checklist',icon:CheckSquare},{key:'image',label:'Imagem',icon:ImagePlus}];
-const plain=(s:string)=>s.replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+const plain=(s:string)=>s.replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'\"').replace(/&#39;|&#x27;/g,\"'\").replace(/&amp;/g,'&').replace(/\s+/g,' ').trim();
+const escapeKeepText=(s:string)=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');
 const localDateKey=(date=new Date())=>`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 function heatmapDailyItems(note:Note):Record<string,string[]>{
   const raw=note.metadata?.heatmap_daily_items;
@@ -675,7 +676,8 @@ function recordStop(){if(speech.current){speech.current.active=false;try{speech.
           for(const source of list){
             const item=(source&&typeof source==='object'?source:{}) as Record<string,any>;
             const title=typeof item.title==='string'?item.title.trim():'';
-            const content=(typeof item.content==='string'&&item.content.trim())?item.content:(typeof item.textContent==='string'?item.textContent:'');
+            const rawContent=(typeof item.content==='string'&&item.content.trim())?item.content:(typeof item.textContent==='string'?item.textContent:'');
+            const content=escapeKeepText(rawContent);
             const listContent=Array.isArray(item.listContent)?item.listContent:null;
             if(!title&&!content&&(!listContent||listContent.length===0))continue;
             const isChecklist=Boolean(listContent);
