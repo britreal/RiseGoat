@@ -1589,3 +1589,29 @@
 @keyframes settings-overlay-in{from{opacity:0}to{opacity:1}}
 @media(max-width:600px){.settings-overlay{padding:0}.settings-dialog{width:100%;height:100dvh;max-height:100dvh;border:0;border-radius:0}.settings-header{padding:calc(14px + env(safe-area-inset-top)) 15px 13px;gap:10px}.settings-header-mark{width:36px;height:36px;flex-basis:36px}.settings-heading h1{font-size:17px}.settings-main{padding:17px 14px calc(18px + env(safe-area-inset-bottom))}.settings-section{margin-bottom:18px}.settings-account{align-items:center;flex-direction:row}.settings-danger,.settings-install{width:auto;justify-content:center}.settings-group>button{min-height:54px}}
 @media(prefers-reduced-motion:reduce){.settings-overlay{animation:none}}
+
+
+/* Bulk actions in the trash */
+.notes-content.trash-view .note-card-select-check{opacity:1;pointer-events:auto;border:0;padding:0;cursor:pointer}
+.notes-content.trash-view .note-card-select-check:focus-visible{outline:2px solid #64748b;outline-offset:2px}
+.notes-content.trash-view .note-card-select-check:not(.selected){background:rgba(255,255,255,.94);border:1px solid #d5d7da;color:#777}
+.trash-bulk-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:-6px 0 18px;padding:12px 14px;border:1px solid rgba(0,0,0,.09);border-radius:14px;background:rgba(255,255,255,.7);font-size:12px}
+.trash-select-all{display:inline-flex;align-items:center;gap:8px;color:inherit;cursor:pointer;white-space:nowrap}
+.trash-select-all input{width:16px;height:16px;margin:0;accent-color:#171717;cursor:pointer}
+.trash-selection-count{color:#858585;white-space:nowrap}
+.trash-delete-warning{color:#a83a32}
+.trash-bulk-toolbar button{min-height:34px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 11px;border:1px solid rgba(0,0,0,.1);border-radius:10px;background:rgba(255,255,255,.86);color:#555;font:inherit;font-weight:600;cursor:pointer}
+.trash-bulk-toolbar .trash-selection-count{margin-right:auto}
+.trash-bulk-toolbar button.trash-delete-button{border-color:rgba(180,35,24,.16);background:#fff0ef;color:#b42318}
+.trash-bulk-toolbar button:disabled{opacity:.42;cursor:not-allowed}
+.trash-bulk-toolbar button:focus-visible{outline:2px solid #64748b;outline-offset:2px}
+.notes-shell.is-dark .trash-bulk-toolbar{border-color:rgba(255,255,255,.12);background:rgba(35,35,37,.78)}
+.notes-shell.is-dark .trash-bulk-toolbar button{border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#ddd}
+.notes-shell.is-dark .trash-bulk-toolbar button.trash-delete-button{background:rgba(180,35,24,.18);color:#ffaaa3}
+.notes-shell.is-dark .notes-content.trash-view .note-card-select-check:not(.selected){background:#242426;border-color:#555;color:#aaa}
+@media(max-width:640px){
+  .trash-bulk-toolbar{gap:9px;padding:11px}
+  .trash-selection-count{margin-right:0}
+  .trash-delete-warning{width:100%;order:3}
+  .trash-bulk-toolbar button{flex:1}
+}
