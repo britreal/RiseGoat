@@ -19,6 +19,7 @@ type LabelLink = { note_id:string; label_id:string };
 type Checklist = { note_id:string; is_completed:boolean };
 type NoteLink = { id:string; source_note_id:string; target_note_id:string; relation_type:string; created_at:string };
 type Point = { x:number; y:number };
+const EMPTY_POSITIONS:Record<string,Point>={};
 
 type NoteNodeData = {
   title:string; preview:string; color:NoteColor; noteType:NoteType; isPinned:boolean;
@@ -319,7 +320,7 @@ export function GraphPage() {
 
   const defaultPositions = useMemo(() => {
     const unpositioned=notes.filter(note=>!positions[note.id]);
-    if(!unpositioned.length)return {};
+    if(!unpositioned.length)return EMPTY_POSITIONS;
     const positioned=notes.filter(note=>positions[note.id]);
     if(!positioned.length)return arrangeGraphPositions(unpositioned,noteLinks);
     const maxX=Math.max(...positioned.map(note=>positions[note.id].x));
