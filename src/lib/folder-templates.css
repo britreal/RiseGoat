@@ -61,3 +61,23 @@
 @media(max-width:850px){.folder-templates-grid{grid-template-columns:1fr}.folder-template-card{padding:15px}.folder-template-description{min-height:0}.folder-template-purpose{margin-top:6px}.folder-template-preview{margin-bottom:14px}.folder-templates-dialog{max-height:calc(100dvh - 26px)}}
 @media(max-width:600px){.folder-templates-overlay{padding:0}.folder-templates-dialog{width:100%;height:100dvh;max-height:100dvh;border-radius:0;border:0}.folder-templates-header{padding:calc(16px + env(safe-area-inset-top)) 15px 14px;gap:10px}.folder-templates-header-mark{width:37px;height:37px;flex-basis:37px;border-radius:11px}.folder-templates-heading h2{font-size:21px}.folder-templates-heading p{font-size:11px}.folder-templates-content{padding:17px 13px calc(20px + env(safe-area-inset-bottom))}.folder-template-card{border-radius:13px}.folder-template-card h3{font-size:16px}}
 @media(prefers-reduced-motion:reduce){.folder-templates-overlay{animation:none}.folder-template-spinner{animation:none}.folder-template-preview summary svg{transition:none}}
+
+/* Create a folder from scratch in the same template library */
+.folder-template-custom-create{display:grid;grid-template-columns:40px minmax(160px,.85fr) minmax(250px,1.3fr);align-items:center;gap:12px;margin-bottom:16px;padding:14px;border:1px solid rgba(0,0,0,.085);border-radius:15px;background:#fff}
+.folder-template-custom-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:11px;background:#f0f0ed;color:#333}
+.folder-template-custom-copy{display:grid;gap:4px;min-width:0}
+.folder-template-custom-copy strong{font-size:12px}
+.folder-template-custom-copy span{color:#777;font-size:10px;line-height:1.45}
+.folder-template-custom-form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;min-width:0}
+.folder-template-custom-form input{min-width:0;width:100%;box-sizing:border-box;padding:10px 11px;border:1px solid rgba(0,0,0,.12);border-radius:10px;background:#fafaf8;color:#222;font:inherit;font-size:11px;outline:none}
+.folder-template-custom-form input:focus{border-color:#777;box-shadow:0 0 0 3px rgba(0,0,0,.045)}
+.folder-template-custom-form button{display:flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:10px;background:#191919;color:white;padding:9px 11px;font:inherit;font-size:10px;font-weight:650;white-space:nowrap;cursor:pointer}
+.folder-template-custom-form button:disabled{opacity:.45;cursor:not-allowed}
+.notes-shell.is-dark .folder-template-custom-create{background:#252527;border-color:rgba(255,255,255,.1)}
+.notes-shell.is-dark .folder-template-custom-icon{background:#343437;color:#f5f5f7}
+.notes-shell.is-dark .folder-template-custom-copy strong{color:#f4f4f6}
+.notes-shell.is-dark .folder-template-custom-copy span{color:#aaaab0}
+.notes-shell.is-dark .folder-template-custom-form input{background:#1d1d1f;border-color:rgba(255,255,255,.13);color:#f5f5f7}
+.notes-shell.is-dark .folder-template-custom-form button{background:#f1f1f1;color:#181818}
+@media(max-width:850px){.folder-template-custom-create{grid-template-columns:38px minmax(0,1fr)}.folder-template-custom-form{grid-column:1/-1}}
+@media(max-width:600px){.folder-template-custom-create{gap:9px;padding:12px}.folder-template-custom-form{grid-template-columns:minmax(0,1fr)}.folder-template-custom-form button{min-height:38px}}
