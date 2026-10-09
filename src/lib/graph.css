@@ -14,7 +14,7 @@
 .graph-toolbar .graph-organize-button:hover{background:#fff;border-color:rgba(0,0,0,.15)}
 .graph-toolbar .graph-organize-button:disabled{opacity:.48;cursor:not-allowed}
 .graph-toolbar button:focus-visible,.graph-controls-row select:focus-visible,.graph-back:focus-visible,.graph-detail-header button:focus-visible{outline:2px solid #64748b;outline-offset:2px}
-.graph-note-node{box-sizing:border-box;height:180px;min-height:180px;display:flex;flex-direction:column;overflow:hidden}
+.graph-note-node{box-sizing:border-box;height:180px;min-height:180px;display:flex;flex-direction:column}
 .graph-note-node strong{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere}
 .graph-note-node p{-webkit-line-clamp:2;overflow-wrap:anywhere}
 .graph-node-meta{margin-top:auto;padding-top:9px;max-height:36px;overflow:hidden}
