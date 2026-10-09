@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { BookOpen, CheckSquare, ChevronDown, ChevronRight, FolderPlus, KeyRound, Network, ShieldAlert, X, type LucideIcon } from 'lucide-react';
 import { folderTemplates, type FolderTemplate, type FolderTemplateIcon } from '@/lib/folderTemplates';
 import '@/lib/folder-templates.css';
@@ -7,6 +8,7 @@ type FolderTemplatesModalProps = {
   busyTemplateId: string | null;
   onClose: () => void;
   onCreate: (templateId: string) => Promise<void>;
+  onCreateCustom: (name: string) => Promise<void>;
 };
 
 const iconMap: Record<FolderTemplateIcon, LucideIcon> = {
@@ -24,7 +26,9 @@ function templateCounts(template: FolderTemplate) {
   };
 }
 
-export function FolderTemplatesModal({ open, busyTemplateId, onClose, onCreate }: FolderTemplatesModalProps) {
+export function FolderTemplatesModal({ open, busyTemplateId, onClose, onCreate, onCreateCustom }: FolderTemplatesModalProps) {
+  const [customFolderName, setCustomFolderName] = useState('');
+  useEffect(() => { if (open) setCustomFolderName(''); }, [open]);
   if (!open) return null;
   const busy = busyTemplateId !== null;
 
@@ -36,7 +40,7 @@ export function FolderTemplatesModal({ open, busyTemplateId, onClose, onCreate }
           <div className="folder-templates-heading">
             <span className="folder-templates-eyebrow">RISEGOAT · ORGANIZAÇÃO</span>
             <h2 id="folder-templates-title">Pasta Template</h2>
-            <p>Crie uma estrutura pronta para começar, com notas, checklists, etiquetas e conexões no Mapa.</p>
+            <p>Comece com uma pasta vazia ou escolha uma estrutura pronta com notas, checklists, etiquetas e conexões.</p>
           </div>
           <button type="button" className="folder-templates-close" onClick={onClose} disabled={busy} aria-label="Fechar"><X size={18}/></button>
         </header>
@@ -44,10 +48,25 @@ export function FolderTemplatesModal({ open, busyTemplateId, onClose, onCreate }
         <div className="folder-templates-content">
           <div className="folder-templates-intro">
             <div>
-              <strong>Escolha uma estrutura</strong>
-              <span>Cada modelo cria uma pasta separada. Você pode editar tudo depois.</span>
+              <strong>Comece do seu jeito</strong>
+              <span>Crie uma pasta vazia ou use um modelo pronto. Você pode editar tudo depois.</span>
             </div>
-            <span className="folder-templates-count">{folderTemplates.length} modelos</span>
+            <span className="folder-templates-count">{folderTemplates.length} modelos prontos</span>
+          </div>
+
+          <div className="folder-template-custom-create">
+            <div className="folder-template-custom-icon"><FolderPlus size={19}/></div>
+            <div className="folder-template-custom-copy">
+              <strong>Criar do zero</strong>
+              <span>Uma pasta vazia, com o nome que você escolher.</span>
+            </div>
+            <form className="folder-template-custom-form" onSubmit={event => { event.preventDefault(); if (!busy && customFolderName.trim()) void onCreateCustom(customFolderName.trim()); }}>
+              <input type="text" value={customFolderName} onChange={event => setCustomFolderName(event.target.value)} maxLength={80} aria-label="Nome da pasta" placeholder="Nome da nova pasta" required disabled={busy}/>
+              <button type="submit" disabled={busy || !customFolderName.trim()}>
+                {busyTemplateId === '__custom__' ? <span className="folder-template-spinner"/> : <FolderPlus size={14}/>}
+                {busyTemplateId === '__custom__' ? 'Criando pasta…' : 'Criar pasta'}
+              </button>
+            </form>
           </div>
 
           <div className="folder-templates-grid">
