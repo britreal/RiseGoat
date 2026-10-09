@@ -170,7 +170,7 @@ const helpCategories: HelpCategory[] = [
           'Use Excluir definitivamente apenas quando tiver certeza de que não precisa mais dela.',
         ],
         note: 'A exclusão definitiva não pode ser desfeita.',
-        keywords: 'lixeira excluir apagar restaurar recuperar permanente 30 dias',
+        keywords: 'lixeira excluir apagar restaurar recuperar permanente',
       },
     ],
   },
