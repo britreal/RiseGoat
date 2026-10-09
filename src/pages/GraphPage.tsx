@@ -435,12 +435,12 @@ export function GraphPage() {
   },[]);
 
   const arrangeMap = useCallback(async()=>{
-    if(!visibleNotes.length)return;
-    const next={...positions,...arrangeGraphPositions(visibleNotes,noteLinks)};
+    if(!notes.length)return;
+    const next={...positions,...arrangeGraphPositions(notes,noteLinks)};
     setPositions(next);
     await saveGraph(next);
     window.setTimeout(()=>window.dispatchEvent(new CustomEvent('graph-fit-view')),80);
-  },[visibleNotes,noteLinks,positions,saveGraph]);
+  },[notes,noteLinks,positions,saveGraph]);
 
   if (loading) return <div className="graph-shell graph-loading"><div className="graph-loading-orb"/><strong>Montando seu mapa…</strong><span>Carregando suas notas e conexões.</span></div>;
 
@@ -455,7 +455,7 @@ export function GraphPage() {
         <div className="graph-toolbar">
           <button className={cn(mode==='global'&&'active')} onClick={()=>setModeSafely('global')}>Tudo</button>
           <button className={cn(mode==='local'&&'active')} onClick={()=>setModeSafely('local')}>Local</button>
-          <button className="graph-organize-button" title="Organizar as notas visíveis sem sobreposição" onClick={()=>void arrangeMap()} disabled={saving||visibleNotes.length===0}><LayoutGrid size={14}/><span>Organizar</span></button>
+          <button className="graph-organize-button" title="Organizar o mapa inteiro sem sobreposição" onClick={()=>void arrangeMap()} disabled={saving||notes.length===0}><LayoutGrid size={14}/><span>Organizar</span></button>
           <button className="graph-icon-button" title="Ajustar ao conteúdo" onClick={()=>window.dispatchEvent(new CustomEvent('graph-fit-view'))}><Maximize2 size={16}/></button>
         </div>
       </header>
