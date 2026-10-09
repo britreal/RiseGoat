@@ -329,11 +329,9 @@ export function GraphPage() {
   },[notes,positions,noteLinks]);
 
   useEffect(()=>{
-    if(!notes.length)return;
-    setPositions(current=>{
-      const missing=Object.keys(defaultPositions).some(id=>!current[id]);
-      return missing?{...defaultPositions,...current}:current;
-    });
+    if(!notes.length||!Object.keys(defaultPositions).length)return;
+    setPositions(current=>({...defaultPositions,...current}));
+    window.setTimeout(()=>window.dispatchEvent(new CustomEvent('graph-fit-view')),100);
   },[notes.length,defaultPositions]);
 
   const graphNodes = useMemo(() => visibleNotes.map(note => {
