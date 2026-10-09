@@ -107,6 +107,17 @@ const helpCategories: HelpCategory[] = [
         keywords: 'cartão card prévia itens interagir marcar checklist',
       },
       {
+        title: 'Formate o texto de uma nota',
+        summary: 'O editor de texto oferece formatação básica para destacar informações e inserir links.',
+        steps: [
+          'Abra uma nota do tipo Texto.',
+          'Use a barra de formatação para aplicar negrito, itálico ou sublinhado.',
+          'Use o controle de link para inserir um endereço web.',
+          'Para exportar uma nota como Markdown, abra Mais opções e escolha Markdown.',
+        ],
+        keywords: 'formatar texto negrito itálico sublinhado link editor Markdown',
+      },
+      {
         title: 'Adicione contexto a uma nota',
         summary: 'Uma nota útil deve ajudar seu eu do futuro a entender por que aquela informação importa.',
         steps: [
@@ -136,6 +147,17 @@ const helpCategories: HelpCategory[] = [
         ],
         tip: 'Prefira poucas pastas claras, como Pessoal, Estudos e Projetos. Não é preciso criar uma pasta para cada pequena ideia.',
         keywords: 'pasta criar mover atribuir renomear excluir categoria',
+      },
+      {
+        title: 'Comece com um modelo de pasta',
+        summary: 'Os modelos criam uma estrutura inicial com notas, checklists, etiquetas e conexões.',
+        steps: [
+          'Na seção Pastas da barra lateral, clique no botão ao lado do título Pastas.',
+          'Escolha uma estrutura pronta ou crie uma pasta vazia.',
+          'Revise as notas e conexões criadas pelo modelo e adapte-as ao seu trabalho.',
+        ],
+        tip: 'Um modelo é um ponto de partida. Exclua ou edite o que não fizer sentido para seu sistema.',
+        keywords: 'modelo modelos pasta template estrutura pronta criar pasta checklist etiqueta conexões',
       },
       {
         title: 'Use etiquetas para temas que se cruzam',
@@ -169,7 +191,7 @@ const helpCategories: HelpCategory[] = [
           'Abra o menu de ações do cartão para restaurar uma nota.',
           'Use Excluir definitivamente apenas quando tiver certeza de que não precisa mais dela.',
         ],
-        note: 'A exclusão definitiva não pode ser desfeita.',
+        note: 'As notas ficam na Lixeira até serem restauradas, excluídas manualmente ou removidas definitivamente após 30 dias.',
         keywords: 'lixeira excluir apagar restaurar recuperar permanente',
       },
     ],
@@ -290,6 +312,18 @@ const helpCategories: HelpCategory[] = [
         note: 'Convites exigem uma nota já salva. Compartilhe apenas com pessoas que devem ter acesso ao conteúdo.',
         keywords: 'compartilhar enviar convidar colaborador email edição conjunta sincronizar',
       },
+      {
+        title: 'Gerencie quem tem acesso',
+        summary: 'O proprietário pode conferir os convites e os participantes de uma nota compartilhada.',
+        steps: [
+          'Abra a nota e escolha Compartilhar.',
+          'Veja quem aceitou o convite e a permissão de cada participante.',
+          'Use Revogar para remover o acesso de um participante.',
+          'Em Convites pendentes, escolha Cancelar para invalidar um convite que ainda não foi aceito.',
+        ],
+        note: 'Revogar o acesso não apaga cópias que alguém já tenha feito enquanto tinha acesso à nota.',
+        keywords: 'acesso permissão revogar remover colaborador cancelar convite compartilhar proprietário',
+      },
     ],
   },
   {
@@ -299,15 +333,16 @@ const helpCategories: HelpCategory[] = [
     icon: ShieldCheck,
     articles: [
       {
-        title: 'Exporte suas notas',
-        summary: 'Mantenha uma cópia dos registros importantes fora do app.',
+        title: 'Faça um backup completo',
+        summary: 'Exporte suas notas e os dados relacionados em um arquivo JSON que também inclui os anexos.',
         steps: [
-          'Na área lateral, escolha Exportar tudo para baixar um arquivo JSON das notas.',
-          'Dentro de uma nota, abra Mais opções para exportar aquela nota como JSON, Markdown ou texto.',
-          'Guarde a cópia em um local privado e organizado.',
+          'Na barra lateral, escolha Exportar backup completo.',
+          'O arquivo reúne notas, checklists, etiquetas, pastas, lembretes, conexões, colaboradores, convites e anexos.',
+          'Imagens e arquivos são embutidos no JSON em Base64. Por isso, o arquivo pode ficar grande se você tiver muitos anexos.',
+          'Dentro de uma nota, Mais opções também permite exportar apenas aquela nota como JSON, Markdown ou texto.',
+          'Guarde o backup em um local privado. Ele pode conter informações pessoais e conteúdo compartilhado.',
         ],
-        tip: 'Faça uma exportação antes de grandes reorganizações. Um arquivo exportado contém informação pessoal, então evite enviá-lo a lugares públicos.',
-        keywords: 'exportar exportação download JSON Markdown txt texto backup cópia',
+        keywords: 'exportar exportação download JSON Markdown txt backup cópia anexos checklist etiquetas pastas lembretes',
       },
       {
         title: 'Importe arquivos do Google Takeout',
@@ -318,8 +353,30 @@ const helpCategories: HelpCategory[] = [
           'Selecione os arquivos JSON ou HTML que deseja importar.',
           'Revise as notas importadas e ajuste pastas, etiquetas e títulos quando necessário.',
         ],
-        note: 'Na importação JSON, o app lê os campos title e content. Alguns arquivos do Google Keep usam textContent no lugar de content e podem entrar incompletos. Confira o resultado e guarde o arquivo original até validar os dados.',
+        note: 'O importador aceita title e content ou textContent. Notas do tipo lista em listContent são importadas como checklists, preservando itens marcados e subitens quando disponíveis. Mantenha o arquivo original até confirmar a migração.',
         keywords: 'importar takeout Google Keep JSON HTML migração transferência',
+      },
+      {
+        title: 'Crie uma conta ou recupere a senha',
+        summary: 'A tela de acesso permite criar uma conta e solicitar a redefinição da senha por e-mail.',
+        steps: [
+          'Na tela de entrada, escolha Criar conta e informe seu e-mail e uma senha com pelo menos seis caracteres.',
+          'Se a confirmação de e-mail for solicitada, abra a mensagem recebida para concluir o cadastro.',
+          'Se esquecer a senha, escolha Esqueci minha senha e solicite o link de redefinição.',
+          'Abra o link recebido e escolha uma nova senha.',
+        ],
+        keywords: 'criar conta cadastro entrar login esquecer senha recuperar senha redefinir e-mail confirmação',
+      },
+      {
+        title: 'Exclua notas e entenda os limites da conta',
+        summary: 'A exclusão de notas está disponível; a exclusão completa da conta ainda não é oferecida pela interface.',
+        steps: [
+          'Para remover uma nota, envie-a para a Lixeira.',
+          'Na Lixeira, restaure notas quando necessário ou exclua-as definitivamente depois de confirmar.',
+          'Notas na Lixeira são removidas permanentemente após 30 dias quando os dados são carregados.',
+        ],
+        note: 'A interface atual não oferece uma opção de autoexclusão completa da conta. Excluir uma nota não equivale a excluir a conta inteira.',
+        keywords: 'excluir apagar nota conta dados pessoais lixeira 30 dias recuperar',
       },
       {
         title: 'Instale o Notas como aplicativo',
@@ -341,16 +398,6 @@ const helpCategories: HelpCategory[] = [
           'Se estiver em um computador compartilhado, feche a sessão e não deixe o navegador aberto com sua conta.',
         ],
         keywords: 'aparência sistema claro escuro conta logout sair sessão configurações',
-      },
-      {
-        title: 'Entenda o bloqueio de texto',
-        summary: 'O controle de bloqueio indica o estado do texto na interface.',
-        steps: [
-          'Abra uma nota e procure o ícone de bloqueio no editor.',
-          'Use o controle para bloquear ou desbloquear o texto conforme o comportamento da interface.',
-        ],
-        note: 'Esse recurso não deve ser tratado como criptografia ou como substituto de senha, conta segura e controle de acesso. Não coloque segredos críticos supondo que esse botão os criptografa.',
-        keywords: 'bloquear bloqueio privacidade segurança senha criptografia proteger',
       },
     ],
   },
@@ -378,34 +425,21 @@ const helpCategories: HelpCategory[] = [
         steps: [
           'Confira se abriu a nota correta e se o conteúdo pode ser compartilhado.',
           'Digite com cuidado o e-mail da pessoa convidada.',
-          'Considere que os convites de colaboração atuais concedem acesso de edição.',
+          'Confira o nível escolhido no convite: pode editar ou somente leitura.',
           'Compartilhe apenas com pessoas que realmente precisam desse conteúdo.',
         ],
-        note: 'A interface atual não oferece um painel completo para listar e revogar todos os acessos. Não use o compartilhamento para material que exija permissões granulares ou revogação garantida.',
+        note: 'O proprietário pode cancelar convites pendentes e revogar participantes. A revogação não apaga cópias que alguém tenha feito enquanto tinha acesso.',
         keywords: 'OPSEC compartilhar convite edição acesso colaborador email permissões revogar remover',
       },
       {
-        title: 'Tenha cópias e saiba o que elas incluem',
-        summary: 'Exportar ajuda a manter registros, mas o arquivo gerado não substitui necessariamente um backup completo.',
+        title: 'Use o modo Somente leitura',
+        summary: 'O modo Somente leitura ajuda a evitar alterações acidentais no editor.',
         steps: [
-          'Use Exportar tudo para baixar o JSON dos registros de notas disponíveis.',
-          'Para uma nota individual, abra Mais opções e escolha JSON, Markdown ou texto.',
-          'Guarde os arquivos em um local privado e confira se consegue abrir o conteúdo.',
-          'Se anexos, checklists, etiquetas e lembretes forem importantes, confira esses dados separadamente.',
+          'Abra uma nota e ative o ícone de olho para entrar em Somente leitura.',
+          'Para voltar a editar, desative o modo pelo mesmo controle.',
         ],
-        note: 'A exportação geral atual serializa as notas. Não a trate como cópia integral de todos os anexos e registros relacionados.',
-        keywords: 'backup exportação cópia segurança JSON anexos checklist etiquetas lembretes recuperar',
-      },
-      {
-        title: 'O que o bloqueio de texto não garante',
-        summary: 'O botão de bloqueio na nota não deve ser confundido com uma camada comprovada de criptografia.',
-        steps: [
-          'Use uma senha forte na conta e não compartilhe suas credenciais.',
-          'Encerre a sessão quando usar um dispositivo compartilhado.',
-          'Não guarde segredos críticos supondo que o ícone de bloqueio os criptografe.',
-        ],
-        note: 'O controle de bloqueio não equivale, por si só, a criptografia ponta a ponta, autenticação multifator ou garantia de que o conteúdo não possa ser lido por quem já tem acesso à conta.',
-        keywords: 'bloqueio criptografia criptografar ponta a ponta MFA 2FA senha autenticação segurança',
+        note: 'Somente leitura é um bloqueio de edição na interface, não criptografa nem oculta o conteúdo. Use o compartilhamento para definir quem pode editar e encerre a sessão em dispositivos compartilhados.',
+        keywords: 'somente leitura editar modo visualização alteração acidental olho',
       },
     ],
   },
@@ -415,6 +449,17 @@ const helpCategories: HelpCategory[] = [
     description: 'Verificações rápidas para problemas comuns nas notas e no Mapa.',
     icon: CircleHelp,
     articles: [
+      {
+        title: 'Conexão, limites e suporte',
+        summary: 'Saiba o que a interface atual confirma e o que ela ainda não informa.',
+        steps: [
+          'Mantenha uma conexão com a internet para carregar as notas e sincronizar alterações com a conta.',
+          'O app não oferece garantia de funcionamento completo offline; instalar como PWA não significa que todos os dados estarão disponíveis sem conexão.',
+          'A interface atual não publica números oficiais de limite de notas ou tamanho de anexos, nem apresenta planos ou preços.',
+          'Não há um canal de suporte de contato exibido dentro do app. A Central de Ajuda não inventa um endereço de e-mail ou prazo de resposta.',
+        ],
+        keywords: 'internet offline sincronização dispositivos limite tamanho anexo planos preços contato suporte',
+      },
       {
         title: 'Uma notificação ou lembrete não chegou',
         summary: 'O recebimento depende das permissões do navegador e de como o dispositivo mantém o app em execução.',
@@ -508,7 +553,7 @@ export function HelpCenter({ open, onClose, onCreateNote, onOpenMap }: HelpCente
   };
 
   const exportGuide = () => {
-    const lines: string[] = ['# Central de Ajuda do RiseGoat', ''];
+    const lines: string[] = ['# Central de Ajuda do RiseGoat Notas', ''];
     for (const category of helpCategories) {
       lines.push('## ' + category.title, category.description, '');
       for (const article of category.articles) {
@@ -543,8 +588,8 @@ export function HelpCenter({ open, onClose, onCreateNote, onOpenMap }: HelpCente
           <div className="help-center-brand">
             <span className="help-center-mark"><CircleHelp size={19} /></span>
             <div>
-              <p>RISEGOAT · CENTRAL DE AJUDA</p>
-              <h2 id="help-center-title">Use o RiseGoat ao máximo.</h2>
+              <p>RISEGOAT NOTAS · CENTRAL DE AJUDA</p>
+              <h2 id="help-center-title">Use o RiseGoat Notas ao máximo.</h2>
               <span>Capture, organize e conecte informações para transformar ideias em ação.</span>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
-import { Archive, BookOpen, Bold, Check, CheckSquare, CircleHelp, ChevronDown, ChevronLeft, Clock3, Command, Copy, Download, Eraser, FileDown, FileText, Filter, Flame, Folder, FolderPlus, Grid2X2, ImagePlus, Italic, KeyRound, Link2, List, Loader2, Lock, LockOpen, Mail, MapPin, Map, Menu, Mic, Network, MoreHorizontal, Palette, Pencil, Pin, Plus, Printer, RotateCcw, Search, Send, Settings, Share2, Square, Sun, Moon, Tag, Trash2, Underline, Upload, X } from 'lucide-react';
+import { Archive, BookOpen, Bold, Check, CheckSquare, CircleHelp, ChevronDown, ChevronLeft, Clock3, Command, Copy, Download, Eraser, FileDown, FileText, Filter, Flame, Folder, FolderPlus, Grid2X2, ImagePlus, Italic, KeyRound, Link2, List, Loader2, Eye, EyeOff, Mail, MapPin, Map, Menu, Mic, Network, MoreHorizontal, Palette, Pencil, Pin, Plus, Printer, RotateCcw, Search, Send, Settings, Share2, Square, Sun, Moon, Tag, Trash2, Underline, Upload, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { HelpCenter } from '@/components/HelpCenter';
 import { FolderTemplatesModal } from '@/components/FolderTemplatesModal';
@@ -16,10 +16,13 @@ type Label={id:string;user_id:string;name:string;color:Color};
 type Checklist={id:string;note_id:string;parent_id:string|null;title:string;is_completed:boolean;position:number};
 type Attachment={id:string;note_id:string;user_id:string;attachment_type:'image'|'audio'|'drawing'|'file';file_path:string|null;file_name:string;mime_type:string;size_bytes:number;transcript:string;signed_url?:string};
 type Reminder={id:string;note_id:string;user_id:string;reminder_type:'datetime'|'location';remind_at:string|null;location_lat:number|null;location_lng:number|null;location_radius_m:number|null;location_trigger:'arrive'|'leave'|null;repeat_rule:string|null;title:string;completed_at:string|null};
+type NoteShareInvite={id:string;note_id:string;inviter_id:string;email:string;role:string;expires_at:string;accepted_at:string|null;created_at:string};
+type NoteCollaborator={id:string;note_id:string;user_id:string|null;invited_email:string;role:string;status:string;created_at:string;accepted_at:string|null};
 type Folder={id:string;user_id:string;name:string;position:number;created_at:string;updated_at:string;color:string;icon:'folder'|'network'|'key-round'|'book-open'};
 const colorOptions:{key:Color;label:string;hex:string}[]=[{key:'default',label:'Neutro',hex:'#ffffff'},{key:'warm',label:'Creme',hex:'#f7f1e5'},{key:'yellow',label:'Amarelo',hex:'#fff4b8'},{key:'orange',label:'Pêssego',hex:'#ffe1c7'},{key:'red',label:'Coral',hex:'#f3d4cf'},{key:'pink',label:'Rosa',hex:'#f5dce7'},{key:'purple',label:'Lilás',hex:'#e8def7'},{key:'indigo',label:'Índigo',hex:'#dce2f8'},{key:'blue',label:'Azul',hex:'#d9e9f7'},{key:'teal',label:'Menta',hex:'#d7efe9'},{key:'green',label:'Verde',hex:'#dcefdc'},{key:'gray',label:'Cinza',hex:'#e8e9e7'}];
 const types:{key:NoteType;label:string;icon:any}[]=[{key:'text',label:'Texto',icon:FileText},{key:'checklist',label:'Checklist',icon:CheckSquare},{key:'image',label:'Imagem',icon:ImagePlus}];
-const plain=(s:string)=>s.replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+const plain=(s:string)=>s.replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;|&#x27;/g,"'").replace(/&amp;/g,'&').replace(/\s+/g,' ').trim();
+const escapeKeepText=(s:string)=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const localDateKey=(date=new Date())=>`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 function heatmapDailyItems(note:Note):Record<string,string[]>{
   const raw=note.metadata?.heatmap_daily_items;
@@ -77,16 +80,17 @@ export function NotesPage({initialSettingsOpen=false}:{initialSettingsOpen?:bool
   const [typeFilter,setTypeFilter]=useState<NoteType|'all'>('all'),[colorFilter,setColorFilter]=useState<Color|'all'>('all'),[labelFilter,setLabelFilter]=useState('all'),[reminderFilter,setReminderFilter]=useState('all'),[filters,setFilters]=useState(false);
   const [labels,setLabels]=useState<Label[]>([]),[links,setLinks]=useState<Record<string,string[]>>({}),[check,setCheck]=useState<Record<string,Checklist[]>>({}),[files,setFiles]=useState<Record<string,Attachment[]>>({}),[reminders,setReminders]=useState<Reminder[]>([]),[folders,setFolders]=useState<Folder[]>([]),[folderLinks,setFolderLinks]=useState<Record<string,string[]>>({});
   const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[newMenu,setNewMenu]=useState(false),[more,setMore]=useState(false),[share,setShare]=useState(false),[reminder,setReminder]=useState(false),[labelPanel,setLabelPanel]=useState(false),[theme,setTheme]=useState<'system'|'light'|'dark'>((localStorage.getItem('notes-theme') as any)||'system'),[systemDark,setSystemDark]=useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
-  const [shareEmail,setShareEmail]=useState(''),[newLabel,setNewLabel]=useState(''),[remindAt,setRemindAt]=useState(''),[repeat,setRepeat]=useState('none'),[locationTrigger,setLocationTrigger]=useState<'arrive'|'leave'>('arrive'),[recording,setRecording]=useState(false),[seconds,setSeconds]=useState(0),[drawTool,setDrawTool]=useState<'pen'|'marker'|'eraser'>('pen');
+  const [shareEmail,setShareEmail]=useState(''),[shareMessage,setShareMessage]=useState(''),[inviteRole,setInviteRole]=useState<'editor'|'viewer'>('editor'),[shareAccess,setShareAccess]=useState<{invites:NoteShareInvite[];collaborators:NoteCollaborator[]}>({invites:[],collaborators:[]}),[shareAccessLoading,setShareAccessLoading]=useState(false),[exportingAll,setExportingAll]=useState(false),[newLabel,setNewLabel]=useState(''),[remindAt,setRemindAt]=useState(''),[repeat,setRepeat]=useState('none'),[locationTrigger,setLocationTrigger]=useState<'arrive'|'leave'>('arrive'),[recording,setRecording]=useState(false),[seconds,setSeconds]=useState(0),[drawTool,setDrawTool]=useState<'pen'|'marker'|'eraser'>('pen');
   const [quickAction,setQuickAction]=useState<{id:string;type:'palette'|'reminder'|'labels'|'folder'|'more'}|null>(null),[quickReminderAt,setQuickReminderAt]=useState(''),[quickRepeat,setQuickRepeat]=useState('none'),[quickNewLabel,setQuickNewLabel]=useState(''),[folderMenuId,setFolderMenuId]=useState<string|null>(null),[folderEditId,setFolderEditId]=useState<string|null>(null),[folderDraft,setFolderDraft]=useState(''),[folderDeleteId,setFolderDeleteId]=useState<string|null>(null),[labelEditId,setLabelEditId]=useState<string|null>(null),[labelDraft,setLabelDraft]=useState(''),[permanentDeleteId,setPermanentDeleteId]=useState<string|null>(null),[titleDraft,setTitleDraft]=useState('');
   const [editorType,setEditorType]=useState<NoteType>('text');
+  const [sharedNoteRole,setSharedNoteRole]=useState<string|null>(null);
   const [selectedTrashIds,setSelectedTrashIds]=useState<string[]>([]),[trashDeleteConfirm,setTrashDeleteConfirm]=useState(false),[trashBulkDeleting,setTrashBulkDeleting]=useState(false);
   const [helpOpen,setHelpOpen]=useState(false),[templatesOpen,setTemplatesOpen]=useState(false),[templateCreating,setTemplateCreating]=useState<string|null>(null),[settingsOpen,setSettingsOpen]=useState(initialSettingsOpen);
   const editorRef=useRef<HTMLDivElement|null>(null),canvasRef=useRef<HTMLCanvasElement|null>(null),mediaRef=useRef<MediaRecorder|null>(null),chunks=useRef<Blob[]>([]),speech=useRef<any>(null),timerRef=useRef<number|null>(null),saveRef=useRef<number|null>(null);
   const heatmapItemsRef=useRef<Record<string,Record<string,string[]>>>({});
   const heatmapSaveQueueRef=useRef<Record<string,Promise<void>>>({});
   const folderIdsFor=(note:Note|null|undefined):string[]=>note?(folderLinks[note.id]??(note.folder_id?[note.folder_id]:[])):[]; 
-  const selected=notes.find(n=>n.id===selectedId)??null,dark=theme==='dark'||(theme==='system'&&systemDark),selectedLocked=selected?.metadata?.locked===true,selectedHeatEnabled=selected?.metadata?.heatmap_enabled===true,selectedFolders=folders.filter(f=>folderIdsFor(selected).includes(f.id)),activeFolder=folders.find(f=>f.id===folderId)??null;
+  const selected=notes.find(n=>n.id===selectedId)??null,dark=theme==='dark'||(theme==='system'&&systemDark),selectedReadOnly=selected?.metadata?.readOnly===true||selected?.metadata?.locked===true||Boolean(selected&&user&&selected.user_id!==user.id&&sharedNoteRole!=='editor'),selectedHeatEnabled=selected?.metadata?.heatmap_enabled===true,selectedFolders=folders.filter(f=>folderIdsFor(selected).includes(f.id)),activeFolder=folders.find(f=>f.id===folderId)??null;
 
   const closeSettings=useCallback(()=>{setSettingsOpen(false);if(window.location.pathname==='/settings'){window.history.pushState({},'', '/notes');window.dispatchEvent(new PopStateEvent('popstate'));}},[]);
 
@@ -323,7 +327,7 @@ export function NotesPage({initialSettingsOpen=false}:{initialSettingsOpen?:bool
     return selected;
   }
   async function copyText(note:Note){const text=plain(note.content);if(!text){setError('Esta nota ainda não tem texto para copiar.');return}try{await navigator.clipboard.writeText(text);setError('Texto copiado.');setTimeout(()=>setError(''),1200)}catch{setError('Não foi possível copiar o texto.')}}
-  async function toggleTextLock(){if(!selected)return;await update({metadata:{...selected.metadata,locked:!selectedLocked}})}
+  async function toggleReadOnly(){if(!selected)return;const metadata={...selected.metadata};delete metadata.locked;metadata.readOnly=!selectedReadOnly;await update({metadata})}
   async function toggleHeatmap(){
     if(!selected)return;
     const enable=!selectedHeatEnabled;
@@ -364,6 +368,11 @@ export function NotesPage({initialSettingsOpen=false}:{initialSettingsOpen?:bool
   }
   async function loadSelected(id:string){
     if(isDraftNote(id))return;
+    const noteForAccess=notes.find(note=>note.id===id);
+    if(!noteForAccess||noteForAccess.user_id===user?.id){setSharedNoteRole(null)}else if(user){
+      const {data:access}=await supabase.from('note_collaborators').select('role').eq('note_id',id).eq('user_id',user.id).eq('status','accepted').maybeSingle();
+      setSharedNoteRole(access?.role==='editor'?'editor':'viewer');
+    }
     const [c,a]=await Promise.all([supabase.from('note_checklist_items').select('*').eq('note_id',id).order('position'),supabase.from('note_attachments').select('*').eq('note_id',id).order('created_at',{ascending:false})]);
     if(c.data)setCheck(v=>({...v,[id]:c.data as Checklist[]}));
     if(a.data){const arr=await Promise.all((a.data as Attachment[]).map(async x=>x.file_path?({...x,signed_url:(await supabase.storage.from('notes-media').createSignedUrl(x.file_path,3600)).data?.signedUrl}):x));setFiles(v=>({...v,[id]:arr}))}
@@ -530,10 +539,201 @@ function recordStop(){if(speech.current){speech.current.active=false;try{speech.
   async function fireReminder(r:Reminder){if('Notification' in window&&Notification.permission!=='granted')await Notification.requestPermission();if('Notification' in window&&Notification.permission==='granted')new Notification('Notas',{body:r.title||'Você tem uma nota para lembrar.'});if(r.repeat_rule&&r.repeat_rule!=='none'&&r.remind_at){const d=new Date(r.remind_at);if(r.repeat_rule==='daily')d.setDate(d.getDate()+1);if(r.repeat_rule==='weekly')d.setDate(d.getDate()+7);if(r.repeat_rule==='monthly')d.setMonth(d.getMonth()+1);await supabase.from('note_reminders').update({remind_at:d.toISOString()}).eq('id',r.id);setReminders(v=>v.map(x=>x.id===r.id?{...x,remind_at:d.toISOString()}:x))}else{await supabase.from('note_reminders').update({completed_at:new Date().toISOString()}).eq('id',r.id);setReminders(v=>v.map(x=>x.id===r.id?{...x,completed_at:new Date().toISOString()}:x))}}
   async function addReminder(kind:'datetime'|'location'){if(!selected||!user)return;if(isDraftNote(selected.id)){setError('Adicione conteúdo à nota antes de criar um lembrete.');return;}if(kind==='datetime'&&!remindAt)return;if('Notification'in window&&Notification.permission==='default')await Notification.requestPermission();const payload:any={note_id:selected.id,user_id:user.id,reminder_type:kind,title:selected.title||'Lembrete',repeat_rule:repeat==='none'?null:repeat};if(kind==='datetime')payload.remind_at=new Date(remindAt).toISOString();else await new Promise<void>(resolve=>navigator.geolocation.getCurrentPosition(async p=>{payload.location_lat=p.coords.latitude;payload.location_lng=p.coords.longitude;payload.location_radius_m=250;payload.location_trigger=locationTrigger;resolve()}));const {data,error:e}=await supabase.from('note_reminders').insert(payload).select().single();if(e)setError(e.message);else{setReminders(v=>[...v,data as Reminder]);setReminder(false);await update({reminder_at:kind==='datetime'?payload.remind_at:null})}}
   async function shareNote(){if(!selected)return;const t=(selected.title+'\n\n'+plain(selected.content)).trim();if(navigator.share){try{await navigator.share({title:selected.title||'Nota',text:t})}catch{}}else{await navigator.clipboard?.writeText(t);window.open('mailto:?subject='+encodeURIComponent(selected.title||'Nota')+'&body='+encodeURIComponent(t),'_blank')}}
-  async function invite(e:FormEvent){e.preventDefault();if(!selected||!user||!shareEmail.trim())return;if(isDraftNote(selected.id)){setError('Salve algum conteúdo antes de compartilhar a nota.');return;}const token=crypto.randomUUID().replace(/-/g,'');const {data,error:err}=await supabase.from('note_share_invites').insert({note_id:selected.id,inviter_id:user.id,email:shareEmail.trim().toLowerCase(),role:'editor',token}).select().single();if(err){setError(err.message);return}const url=location.origin+'/notes?invite='+data.token;window.open('mailto:'+encodeURIComponent(shareEmail)+'?subject='+encodeURIComponent('Convite para uma nota')+'&body='+encodeURIComponent('Abra e aceite este convite: '+url),'_blank');setShareEmail('')}
+  async function loadShareAccess(noteId:string){
+    if(!user||!selected||selected.id!==noteId||selected.user_id!==user.id)return;
+    setShareAccessLoading(true);
+    const [invitesResult,collaboratorsResult]=await Promise.all([
+      supabase.from('note_share_invites').select('id,note_id,inviter_id,email,role,expires_at,accepted_at,created_at').eq('note_id',noteId).eq('inviter_id',user.id).order('created_at',{ascending:false}),
+      supabase.from('note_collaborators').select('id,note_id,user_id,invited_email,role,status,created_at,accepted_at').eq('note_id',noteId).order('created_at',{ascending:false}),
+    ]);
+    if(invitesResult.error||collaboratorsResult.error){
+      setShareMessage('Não foi possível carregar os acessos desta nota. Tente novamente.');
+    }else{
+      setShareAccess({invites:(invitesResult.data??[]) as NoteShareInvite[],collaborators:(collaboratorsResult.data??[]) as NoteCollaborator[]});
+    }
+    setShareAccessLoading(false);
+  }
+
+  async function revokeCollaboratorAccess(collaboratorId:string){
+    if(!selected||!user||selected.user_id!==user.id)return;
+    const {error:e}=await supabase.from('note_collaborators').delete().eq('id',collaboratorId).eq('note_id',selected.id);
+    if(e){setShareMessage('Não foi possível revogar este acesso.');return;}
+    setShareAccess(v=>({...v,collaborators:v.collaborators.filter(c=>c.id!==collaboratorId)}));
+    setShareMessage('Acesso removido.');
+  }
+
+  async function cancelShareInvite(inviteId:string){
+    if(!selected||!user||selected.user_id!==user.id)return;
+    const expiresAt=new Date(Date.now()-1000).toISOString();
+    const {error:e}=await supabase.from('note_share_invites').update({expires_at:expiresAt}).eq('id',inviteId).eq('note_id',selected.id).eq('inviter_id',user.id);
+    if(e){setShareMessage('Não foi possível cancelar este convite.');return;}
+    setShareAccess(v=>({...v,invites:v.invites.map(i=>i.id===inviteId?{...i,expires_at:expiresAt}:i)}));
+    setShareMessage('Convite cancelado.');
+  }
+
+  async function invite(e:FormEvent){
+    e.preventDefault();
+    if(!selected||!user||!shareEmail.trim())return;
+    if(selected.user_id!==user.id){setShareMessage('Somente o proprietário pode convidar ou remover participantes.');return;}
+    if(isDraftNote(selected.id)){setShareMessage('Salve algum conteúdo antes de compartilhar a nota.');return;}
+    const email=shareEmail.trim().toLowerCase();
+    const token=crypto.randomUUID().replace(/-/g,'');
+    const {data,error:err}=await supabase.from('note_share_invites').insert({note_id:selected.id,inviter_id:user.id,email,role:inviteRole,token}).select().single();
+    if(err){setShareMessage('Não foi possível criar o convite. '+err.message);return;}
+    const url=location.origin+'/notes?invite='+data.token;
+    window.open('mailto:'+encodeURIComponent(email)+'?subject='+encodeURIComponent('Convite para uma nota')+'&body='+encodeURIComponent('Abra e aceite este convite: '+url),'_blank');
+    setShareEmail('');
+    setShareMessage('Convite criado. O link expira em 7 dias.');
+    await loadShareAccess(selected.id);
+  }
   function exportOne(f:'json'|'md'|'txt'){if(!selected)return;const p=plain(selected.content),n=selected.title||'nota';if(f==='json')download(new Blob([JSON.stringify(selected,null,2)],{type:'application/json'}),n+'.json');if(f==='md')download(new Blob(['# '+n+'\n\n'+p],{type:'text/markdown'}),n+'.md');if(f==='txt')download(new Blob([p],{type:'text/plain'}),n+'.txt')}
-  function exportAll(){download(new Blob([JSON.stringify(notes,null,2)],{type:'application/json'}),'notas-export.json')}
-  async function importTakeout(filesList:FileList|null){if(!user||!filesList)return;for(const file of Array.from(filesList)){try{if(file.name.toLowerCase().endsWith('.json')){const raw=JSON.parse(await file.text());const list=Array.isArray(raw)?raw:[raw];for(const item of list){const {title,content}=item as any;if(title||content)await supabase.from('notes').insert({user_id:user.id,title:title||'Importado',content:content||'',note_type:'text',metadata:{source:'google-takeout'}})}}else if(file.name.toLowerCase().endsWith('.html')||file.type==='text/html'){const html=await file.text(),doc=new DOMParser().parseFromString(html,'text/html'),title=doc.querySelector('title')?.textContent||doc.querySelector('h1')?.textContent||file.name,content=sanitizeHtml(doc.body?.innerHTML||'');await supabase.from('notes').insert({user_id:user.id,title,content,note_type:'text',metadata:{source:'google-takeout-html'}})}}catch{setError('Não foi possível importar '+file.name)}}await load()}
+  async function exportAll(){
+    if(!user||exportingAll)return;
+    setExportingAll(true);
+    setError('');
+    try{
+      const {data:noteData,error:notesError}=await supabase.from('notes').select('*').eq('user_id',user.id).order('created_at');
+      if(notesError)throw notesError;
+      const exportedNotes=(noteData??[]) as Note[];
+      const noteIds=exportedNotes.map(note=>note.id);
+      const noteIdSet=new Set(noteIds);
+      const [labelResult,folderResult,checklistResult,attachmentResult,reminderResult,labelLinkResult,folderLinkResult,noteLinkResult,inviteResult,collaboratorResult]=await Promise.all([
+        supabase.from('note_labels').select('*').eq('user_id',user.id),
+        supabase.from('note_folders').select('*').eq('user_id',user.id),
+        supabase.from('note_checklist_items').select('*'),
+        supabase.from('note_attachments').select('*'),
+        supabase.from('note_reminders').select('*').eq('user_id',user.id),
+        supabase.from('note_label_links').select('*'),
+        supabase.from('note_folder_links').select('*'),
+        supabase.from('note_links').select('*'),
+        supabase.from('note_share_invites').select('id,note_id,inviter_id,email,role,expires_at,accepted_at,created_at').eq('inviter_id',user.id),
+        supabase.from('note_collaborators').select('id,note_id,user_id,invited_email,role,status,created_at,accepted_at'),
+      ]);
+      const results=[labelResult,folderResult,checklistResult,attachmentResult,reminderResult,labelLinkResult,folderLinkResult,noteLinkResult,inviteResult,collaboratorResult];
+      const failed=results.find(result=>result.error);
+      if(failed?.error)throw new Error(failed.error.message);
+      const ownedLabelIds=new Set((labelResult.data??[]).map((row:any)=>row.id));
+      const ownedFolderIds=new Set((folderResult.data??[]).map((row:any)=>row.id));
+      const checklistItems=(checklistResult.data??[]).filter((row:any)=>noteIdSet.has(row.note_id));
+      const labelLinks=(labelLinkResult.data??[]).filter((row:any)=>noteIdSet.has(row.note_id)&&ownedLabelIds.has(row.label_id));
+      const folderLinks=(folderLinkResult.data??[]).filter((row:any)=>noteIdSet.has(row.note_id)&&ownedFolderIds.has(row.folder_id));
+      const noteLinks=(noteLinkResult.data??[]).filter((row:any)=>noteIdSet.has(row.source_note_id)&&noteIdSet.has(row.target_note_id));
+      const attachments=(attachmentResult.data??[]).filter((row:any)=>noteIdSet.has(row.note_id));
+      const attachmentFiles=[];
+      for(const attachment of attachments as Attachment[]){
+        let fileBase64:string|null=null;
+        if(attachment.file_path){
+          const {data:fileData,error:fileError}=await supabase.storage.from('notes-media').download(attachment.file_path);
+          if(fileError||!fileData)throw new Error('Não foi possível baixar o anexo "'+(attachment.file_name||'sem nome')+'". O backup foi cancelado para não gerar um arquivo incompleto.');
+          const bytes=new Uint8Array(await fileData.arrayBuffer());
+          let binary='';
+          for(let offset=0;offset<bytes.length;offset+=0x8000)binary+=String.fromCharCode(...bytes.subarray(offset,Math.min(offset+0x8000,bytes.length)));
+          fileBase64=btoa(binary);
+        }
+        attachmentFiles.push({...attachment,file_base64:fileBase64});
+      }
+      const backup={
+        format:'risegoat-notas-backup',
+        version:1,
+        exported_at:new Date().toISOString(),
+        notes:exportedNotes,
+        folders:folderResult.data??[],
+        note_folder_links:folderLinks,
+        labels:labelResult.data??[],
+        note_label_links:labelLinks,
+        checklist_items:checklistItems,
+        reminders:(reminderResult.data??[]).filter((row:any)=>noteIdSet.has(row.note_id)),
+        note_links:noteLinks,
+        attachments:attachmentFiles,
+        collaborators:(collaboratorResult.data??[]).filter((row:any)=>noteIdSet.has(row.note_id)),
+        share_invites:(inviteResult.data??[]).filter((row:any)=>noteIdSet.has(row.note_id)),
+      };
+      const filename='risegoat-notas-backup-'+new Date().toISOString().slice(0,10)+'.json';
+      download(new Blob([JSON.stringify(backup)],{type:'application/json;charset=utf-8'}),filename);
+    }catch(error){
+      setError(error instanceof Error?'Não foi possível gerar o backup completo. '+error.message:'Não foi possível gerar o backup completo.');
+    }finally{
+      setExportingAll(false);
+    }
+  }
+
+  async function importTakeout(filesList:FileList|null){
+    if(!user||!filesList)return;
+    setError('');
+    const failures:string[]=[];
+    let imported=0;
+    const colorMap:Record<string,Color>={default:'default',red:'red',orange:'orange',yellow:'yellow',green:'green',teal:'teal',blue:'blue',dark_blue:'indigo',purple:'purple',pink:'pink',brown:'warm',gray:'gray'};
+    const keepItemText=(entry:any):string=>{
+      if(typeof entry?.text==='string')return entry.text;
+      if(typeof entry?.text?.text==='string')return entry.text.text;
+      return '';
+    };
+    for(const file of Array.from(filesList)){
+      try{
+        if(file.name.toLowerCase().endsWith('.json')){
+          const raw=JSON.parse(await file.text());
+          const list=Array.isArray(raw)?raw:[raw];
+          for(const source of list){
+            const item=(source&&typeof source==='object'?source:{}) as Record<string,any>;
+            const title=typeof item.title==='string'?item.title.trim():'';
+            const rawContent=(typeof item.content==='string'&&item.content.trim())?item.content:(typeof item.textContent==='string'?item.textContent:'');
+            const content=escapeKeepText(rawContent);
+            const listContent=Array.isArray(item.listContent)?item.listContent:null;
+            if(!title&&!content&&(!listContent||listContent.length===0))continue;
+            const isChecklist=Boolean(listContent);
+            const color=typeof item.color==='string'?colorMap[item.color.toLowerCase()]||'default':'default';
+            const trashed=item.isTrashed===true;
+            const row={
+              user_id:user.id,
+              title:title||'Importado',
+              content:isChecklist?'':content,
+              note_type:isChecklist?'checklist':'text',
+              color,
+              is_pinned:item.isPinned===true,
+              is_archived:item.isArchived===true,
+              is_deleted:trashed,
+              deleted_at:trashed?new Date().toISOString():null,
+              metadata:{source:'google-takeout',google_keep_color:typeof item.color==='string'?item.color:null},
+              created_at:Number.isFinite(Number(item.createdTimestampUsec))?new Date(Number(item.createdTimestampUsec)/1000).toISOString():undefined,
+              updated_at:Number.isFinite(Number(item.userEditedTimestampUsec))?new Date(Number(item.userEditedTimestampUsec)/1000).toISOString():new Date().toISOString(),
+            };
+            if(!row.created_at)delete (row as any).created_at;
+            const {data:inserted,error:insertError}=await supabase.from('notes').insert(row).select('id').single();
+            if(insertError||!inserted)throw new Error(insertError?.message||'Não foi possível salvar a nota importada.');
+            if(isChecklist&&listContent?.length){
+              const checklistRows:any[]=[];
+              let position=0;
+              for(const entry of listContent){
+                const parentId=crypto.randomUUID();
+                checklistRows.push({id:parentId,note_id:inserted.id,parent_id:null,title:keepItemText(entry),is_completed:entry?.isChecked===true||entry?.checked===true,position:position++});
+                const children=Array.isArray(entry?.childListItems)?entry.childListItems:[];
+                for(const child of children){
+                  checklistRows.push({id:crypto.randomUUID(),note_id:inserted.id,parent_id:parentId,title:keepItemText(child),is_completed:child?.isChecked===true||child?.checked===true,position:position++});
+                }
+              }
+              const {error:checkError}=await supabase.from('note_checklist_items').insert(checklistRows);
+              if(checkError){
+                await supabase.from('notes').delete().eq('id',inserted.id).eq('user_id',user.id);
+                throw new Error('Não foi possível importar a checklist: '+checkError.message);
+              }
+            }
+            imported++;
+          }
+        }else if(file.name.toLowerCase().endsWith('.html')||file.type==='text/html'){
+          const html=await file.text(),doc=new DOMParser().parseFromString(html,'text/html');
+          const title=doc.querySelector('title')?.textContent||doc.querySelector('h1')?.textContent||file.name;
+          const content=sanitizeHtml(doc.body?.innerHTML||'');
+          const {error:insertError}=await supabase.from('notes').insert({user_id:user.id,title,content,note_type:'text',metadata:{source:'google-takeout-html'}});
+          if(insertError)throw insertError;
+          imported++;
+        }
+      }catch(error){
+        failures.push(file.name+': '+(error instanceof Error?error.message:'erro desconhecido'));
+      }
+    }
+    await load();
+    if(failures.length)setError('Importadas '+imported+' notas. Alguns arquivos falharam: '+failures.join('; '));
+  }
   async function copyDocs(note:Note|null=selected){if(!note)return;await navigator.clipboard?.writeText((note.title+'\n\n'+plain(note.content)).trim());window.open('https://docs.google.com/document/create','_blank');setQuickAction(null);setMore(false)}
   async function removeNoteById(id:string){const ok=await updateNoteById(id,{is_deleted:true,deleted_at:new Date().toISOString()});if(ok){if(selectedId===id)closeEditor();setQuickAction(null)}}
   async function restoreNoteById(id:string){const note=notes.find(x=>x.id===id);if(!note||note.user_id!==user?.id)return;const ok=await updateNoteById(id,{is_deleted:false,deleted_at:null});if(ok){setQuickAction(null);setPermanentDeleteId(null)}}
@@ -591,7 +791,7 @@ function recordStop(){if(speech.current){speech.current.active=false;try{speech.
         <button className={cn('notes-nav-item',filter==='trash'&&'active')} onClick={()=>{setFilter('trash');setFolderId(null);closeEditor()}}><Trash2 size={16}/><span>Lixeira</span></button>
       </nav>
       
-      <div className="notes-sidebar-extra"><button onClick={()=>setFilters(v=>!v)}><Filter size={14}/> Filtros</button><button onClick={exportAll}><Download size={14}/> Exportar tudo</button><label className="notes-import-button"><Upload size={14}/> Importar Takeout<input hidden type="file" multiple accept=".json,.html,text/html,application/json" onChange={e=>void importTakeout(e.target.files)}/></label><button onClick={()=>setSettingsOpen(true)}><Settings size={14}/> Configurações</button></div>
+      <div className="notes-sidebar-extra"><button onClick={()=>setFilters(v=>!v)}><Filter size={14}/> Filtros</button><button type="button" onClick={()=>void exportAll()} disabled={exportingAll}>{exportingAll?<Loader2 size={14}/>:<Download size={14}/>} {exportingAll?'Preparando backup…':'Exportar backup completo'}</button><label className="notes-import-button"><Upload size={14}/> Importar Takeout<input hidden type="file" multiple accept=".json,.html,text/html,application/json" onChange={e=>void importTakeout(e.target.files)}/></label><button onClick={()=>setSettingsOpen(true)}><Settings size={14}/> Configurações</button></div>
     </aside>
     <div className="notes-mobile-backdrop" onClick={()=>document.querySelector(".notes-sidebar")?.classList.remove("mobile-open")} />
     <main className="notes-main"><header className="notes-toolbar"><button className="notes-menu-button" onClick={()=>document.querySelector('.notes-sidebar')?.classList.toggle('mobile-open')}><Menu size={18}/></button><div className="notes-search"><Search size={17}/><input id="notes-search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar notas..." /><kbd><Command size={11}/>K</kbd></div><div className="notes-toolbar-actions"><button className={cn('notes-icon-button',view==='grid'&&'active')} onClick={()=>setView('grid')}><Grid2X2 size={17}/></button><button className={cn('notes-icon-button',view==='list'&&'active')} onClick={()=>setView('list')}><List size={17}/></button><button className="notes-primary" onClick={()=>void create('text')}><Plus size={16}/><span>Nova</span></button><button className="notes-icon-button notes-help-button" title="Ajuda" aria-label="Abrir ajuda" onClick={()=>setHelpOpen(true)}><CircleHelp size={17}/></button><button className="notes-icon-button" title={dark?'Modo claro':'Modo escuro'} onClick={()=>setTheme(theme==='system'?'dark':theme==='dark'?'light':'system')}>{dark?<Moon size={17}/>:<Sun size={17}/>}</button></div></header>
@@ -605,16 +805,16 @@ function recordStop(){if(speech.current){speech.current.active=false;try{speech.
         <button className="notes-mobile-tab" onClick={()=>document.querySelector('.notes-sidebar')?.classList.add('mobile-open')}><Menu size={19}/><span>Mais</span></button>
       </nav>
     <HelpCenter open={helpOpen} onClose={()=>setHelpOpen(false)} onCreateNote={()=>void create('text')} onOpenMap={()=>{window.history.pushState({},'', '/map');window.dispatchEvent(new PopStateEvent('popstate'))}} /><FolderTemplatesModal open={templatesOpen} busyTemplateId={templateCreating} onClose={()=>setTemplatesOpen(false)} onCreate={createFolderTemplate} onCreateCustom={createFolderFromScratch} /><SettingsPage open={settingsOpen} onClose={closeSettings} onThemeChange={setTheme} />
-    {selected&&<div className="notes-editor-overlay" onMouseDown={e=>{if(e.currentTarget===e.target)closeEditor()}}><section className={cn('notes-editor','note-color-'+selected.color)}>
-      <header className="notes-editor-header"><button className="notes-icon-button" onClick={closeEditor}><ChevronLeft size={18}/></button><div className="editor-actions"><span className="editor-date">Criada em {new Date(selected.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</span><span className={cn(selectedLocked&&'locked-status')}>{selectedLocked?'Bloqueado':saving?'Salvando…':'Salvo'}</span><button className={cn('notes-icon-button',selected.is_pinned&&'active')} title={selected.is_pinned?'Desafixar':'Fixar'} onClick={()=>void update({is_pinned:!selected.is_pinned})}><Pin size={17}/></button><button className="notes-icon-button" title={selected.is_archived?'Restaurar para notas':'Arquivar'} onClick={()=>{void update({is_archived:!selected.is_archived});if(selected.is_archived)closeEditor()}}>{selected.is_archived?<RotateCcw size={17}/>:<Archive size={17}/>}</button><button className="notes-icon-button" onClick={()=>setReminder(v=>!v)}><Clock3 size={17}/></button><button className="notes-icon-button" onClick={()=>setShare(v=>!v)}><Share2 size={17}/></button><button className="notes-icon-button" onClick={()=>setLabelPanel(v=>!v)}><Tag size={17}/></button><button className="notes-icon-button" title={selectedFolders.length?selectedFolders.map(folder=>folder.name).join(', '):'Vincular pastas'} onClick={()=>setQuickAction(v=>v?.id===selected.id&&v.type==='folder'?null:{id:selected.id,type:'folder'})}><Folder size={17}/></button>{quickAction?.id===selected.id&&quickAction.type==='folder'&&<div className="note-quick-popover editor-folder-popover" onClick={e=>e.stopPropagation()}><div className="editor-folder-summary"><strong>Pastas vinculadas</strong><span>{folderIdsFor(selected).length} selecionada(s)</span></div><div className="quick-label-list folder-multi-select">{folders.map(f=>{const assigned=folderIdsFor(selected).includes(f.id);return <button type="button" key={f.id} aria-pressed={assigned} className={cn(assigned&&'active')} onClick={()=>{const current=folderIdsFor(selected);void assignFolders(selected.id,assigned?current.filter(id=>id!==f.id):[...current,f.id])}}>{assigned?<CheckSquare size={13}/>:<Square size={13}/>}<Folder size={12}/><span>{f.name}</span></button>})}{folders.length===0&&<p className="folder-multi-empty">Crie uma pasta na barra lateral para começar.</p>}</div><p className="editor-folder-help">Você pode vincular uma nota a várias pastas.</p></div>}<button className={cn('notes-icon-button','heatmap-toggle',selectedHeatEnabled&&'active')} type="button" title={selectedHeatEnabled?'Desativar calor':'Ativar calor'} aria-label={selectedHeatEnabled?'Desativar calor':'Ativar calor'} aria-pressed={selectedHeatEnabled} onClick={()=>void toggleHeatmap()}><Flame size={17}/></button><button className="notes-icon-button" title="Copiar texto" onClick={()=>void copyText(selected)}><Copy size={17}/></button><button className={cn('notes-icon-button',selectedLocked&&'active')} title={selectedLocked?'Desbloquear texto':'Bloquear texto'} onClick={()=>void toggleTextLock()}>{selectedLocked?<Lock size={17}/>:<LockOpen size={17}/>}</button><button className="notes-icon-button" onClick={()=>setMore(v=>!v)}><MoreHorizontal size={17}/></button><button className="notes-icon-button danger" onClick={()=>void remove()}><Trash2 size={17}/></button></div></header>
-      <div className="editor-type-tabs">{types.map(t=><button key={t.key} className={editorType===t.key?'active':''} onClick={()=>{setEditorType(t.key);void update({note_type:t.key})}}><t.icon size={14}/>{t.label}</button>)}</div>
+    {selected&&<div className="notes-editor-overlay" onMouseDown={e=>{if(e.currentTarget===e.target)closeEditor()}}><section className={cn('notes-editor','note-color-'+selected.color,selectedReadOnly&&'is-read-only',selectedReadOnly&&selected.user_id!==user?.id&&'is-shared-read-only')}>
+      <header className="notes-editor-header"><button className="notes-icon-button" onClick={closeEditor}><ChevronLeft size={18}/></button><div className="editor-actions"><span className="editor-date">Criada em {new Date(selected.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</span><span className={cn(selectedReadOnly&&'locked-status')}>{selectedReadOnly?'Somente leitura':saving?'Salvando…':'Salvo'}</span><button className={cn('notes-icon-button',selected.is_pinned&&'active')} title={selected.is_pinned?'Desafixar':'Fixar'} onClick={()=>void update({is_pinned:!selected.is_pinned})}><Pin size={17}/></button><button className="notes-icon-button" title={selected.is_archived?'Restaurar para notas':'Arquivar'} onClick={()=>{void update({is_archived:!selected.is_archived});if(selected.is_archived)closeEditor()}}>{selected.is_archived?<RotateCcw size={17}/>:<Archive size={17}/>}</button><button className="notes-icon-button" onClick={()=>setReminder(v=>!v)}><Clock3 size={17}/></button><button className="notes-icon-button" title="Compartilhar e gerenciar acessos" onClick={()=>{const next=!share;setShare(next);if(next&&selected&&!isDraftNote(selected.id)){setShareMessage('');void loadShareAccess(selected.id)}}}><Share2 size={17}/></button><button className="notes-icon-button" onClick={()=>setLabelPanel(v=>!v)}><Tag size={17}/></button><button className="notes-icon-button" title={selectedFolders.length?selectedFolders.map(folder=>folder.name).join(', '):'Vincular pastas'} onClick={()=>setQuickAction(v=>v?.id===selected.id&&v.type==='folder'?null:{id:selected.id,type:'folder'})}><Folder size={17}/></button>{quickAction?.id===selected.id&&quickAction.type==='folder'&&<div className="note-quick-popover editor-folder-popover" onClick={e=>e.stopPropagation()}><div className="editor-folder-summary"><strong>Pastas vinculadas</strong><span>{folderIdsFor(selected).length} selecionada(s)</span></div><div className="quick-label-list folder-multi-select">{folders.map(f=>{const assigned=folderIdsFor(selected).includes(f.id);return <button type="button" key={f.id} aria-pressed={assigned} className={cn(assigned&&'active')} onClick={()=>{const current=folderIdsFor(selected);void assignFolders(selected.id,assigned?current.filter(id=>id!==f.id):[...current,f.id])}}>{assigned?<CheckSquare size={13}/>:<Square size={13}/>}<Folder size={12}/><span>{f.name}</span></button>})}{folders.length===0&&<p className="folder-multi-empty">Crie uma pasta na barra lateral para começar.</p>}</div><p className="editor-folder-help">Você pode vincular uma nota a várias pastas.</p></div>}<button className={cn('notes-icon-button','heatmap-toggle',selectedHeatEnabled&&'active')} type="button" title={selectedHeatEnabled?'Desativar calor':'Ativar calor'} aria-label={selectedHeatEnabled?'Desativar calor':'Ativar calor'} aria-pressed={selectedHeatEnabled} onClick={()=>void toggleHeatmap()}><Flame size={17}/></button><button className="notes-icon-button" title="Copiar texto" onClick={()=>void copyText(selected)}><Copy size={17}/></button>{(selected.user_id===user?.id||sharedNoteRole==='editor')&&<button className={cn('notes-icon-button',selectedReadOnly&&'active')} title={selectedReadOnly?'Desativar somente leitura':'Ativar somente leitura'} aria-pressed={selectedReadOnly} onClick={()=>void toggleReadOnly()}>{selectedReadOnly?<EyeOff size={17}/>:<Eye size={17}/>}</button>}<button className="notes-icon-button" onClick={()=>setMore(v=>!v)}><MoreHorizontal size={17}/></button><button className="notes-icon-button danger" onClick={()=>void remove()}><Trash2 size={17}/></button></div></header>
+      <div className="editor-type-tabs">{types.map(t=><button key={t.key} className={editorType===t.key?'active':''} disabled={selectedReadOnly} onClick={()=>{setEditorType(t.key);void update({note_type:t.key})}}><t.icon size={14}/>{t.label}</button>)}</div>
       {more&&<div className="notes-popover editor-menu"><button onClick={()=>window.print()}><Printer size={15}/> Imprimir</button><button onClick={()=>void shareNote()}><Send size={15}/> Enviar / compartilhar</button><button onClick={()=>void copyDocs()}><FileText size={15}/> Copiar para Google Docs</button><button onClick={()=>exportOne('md')}><FileDown size={15}/> Markdown</button><button onClick={()=>exportOne('txt')}><Download size={15}/> Texto</button><button onClick={()=>exportOne('json')}><FileDown size={15}/> JSON</button></div>}
-      {share&&<div className="notes-popover share-panel"><h3>Compartilhar</h3><p>Envie um convite por e-mail. A edição conjunta sincroniza pelo banco em tempo real.</p><form onSubmit={invite}><input type="email" required value={shareEmail} onChange={e=>setShareEmail(e.target.value)} placeholder="email@exemplo.com"/><button className="notes-primary"><Mail size={14}/> Criar convite</button></form></div>}
+      {share&&<div className="notes-popover share-panel"><h3>Compartilhar nota</h3><p>Veja quem tem acesso, convide por e-mail e revogue acessos quando necessário.</p>{selected.user_id===user?.id?<><form onSubmit={invite}><input type="email" required value={shareEmail} onChange={e=>setShareEmail(e.target.value)} placeholder="email@exemplo.com"/><select value={inviteRole} onChange={e=>setInviteRole(e.target.value==='viewer'?'viewer':'editor')} aria-label="Permissão do convite"><option value="editor">Pode editar</option><option value="viewer">Somente leitura</option></select><button className="notes-primary"><Mail size={14}/> Criar convite</button></form><div className="share-access-section"><strong>Quem tem acesso</strong>{shareAccessLoading?<p>Carregando acessos…</p>:<>{shareAccess.collaborators.filter(c=>c.status==='accepted').map(c=><div className="share-access-row" key={c.id}><div><span>{c.invited_email||'Colaborador'}</span><small>{c.role==='editor'?'Pode editar':'Somente leitura'}</small></div><button type="button" className="danger" onClick={()=>void revokeCollaboratorAccess(c.id)}>Revogar</button></div>)}{shareAccess.collaborators.filter(c=>c.status==='accepted').length===0&&<p>Ninguém aceitou o convite ainda.</p>}</>}{!shareAccessLoading&&<><strong className="share-access-subheading">Convites pendentes</strong>{shareAccess.invites.filter(i=>!i.accepted_at&&Date.parse(i.expires_at)>Date.now()).map(i=><div className="share-access-row" key={i.id}><div><span>{i.email}</span><small>{i.role==='editor'?'Pode editar':'Somente leitura'} · expira {new Date(i.expires_at).toLocaleDateString('pt-BR')}</small></div><button type="button" className="danger" onClick={()=>void cancelShareInvite(i.id)}>Cancelar</button></div>)}{shareAccess.invites.filter(i=>!i.accepted_at&&Date.parse(i.expires_at)>Date.now()).length===0&&<p>Não há convites pendentes.</p>}</>}</div>{shareMessage&&<p className="share-access-message" role="status">{shareMessage}</p>}</>:<p>Você pode visualizar esta nota compartilhada, mas apenas o proprietário gerencia os convites e acessos.</p>}{selected.user_id!==user?.id&&shareMessage&&<p className="share-access-message" role="status">{shareMessage}</p>}</div>}
       {reminder&&<div className="notes-popover reminder-panel"><label>Data e hora<input type="datetime-local" value={remindAt} onChange={e=>setRemindAt(e.target.value)}/></label><label>Repetição<select value={repeat} onChange={e=>setRepeat(e.target.value)}><option value="none">Não repetir</option><option value="daily">Diária</option><option value="weekly">Semanal</option><option value="monthly">Mensal</option></select></label><button onClick={()=>void addReminder('datetime')}>Salvar lembrete</button><div className="location-choice"><button className={locationTrigger==='arrive'?'active':''} onClick={()=>setLocationTrigger('arrive')}>Ao chegar</button><button className={locationTrigger==='leave'?'active':''} onClick={()=>setLocationTrigger('leave')}>Ao sair</button></div><button onClick={()=>void addReminder('location')}><MapPin size={14}/> Lembrete por localização</button></div>}
       {labelPanel&&<div className="notes-popover labels-panel"><div className="label-manager-list">{labels.map(l=>labelEditId===l.id?<div className="label-manager-row editing" key={l.id}><input autoFocus value={labelDraft} onChange={e=>setLabelDraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')void saveLabelEdit(l);if(e.key==='Escape'){setLabelEditId(null);setLabelDraft('')}}}/><button className="label-manager-save" title="Salvar" onClick={()=>void saveLabelEdit(l)}><Check size={14}/></button><button className="label-manager-cancel" title="Cancelar" onClick={()=>{setLabelEditId(null);setLabelDraft('')}}><X size={14}/></button></div>:<div className="label-manager-row" key={l.id}><button className={cn('label-manager-name',(links[selected.id]??[]).includes(l.id)&&'active')} onClick={()=>void toggleLabel(l.id)}>{l.name}</button><button className="label-manager-icon" title="Editar tag" onClick={()=>beginEditLabel(l)}><Pencil size={13}/></button><button className="label-manager-icon danger" title="Excluir tag" onClick={()=>void deleteLabel(l)}><Trash2 size={13}/></button></div>)}</div><div className="label-create"><input value={newLabel} onChange={e=>setNewLabel(e.target.value)} placeholder="Nova tag"/><button onClick={()=>void addLabel()} title="Criar tag"><Plus size={14}/></button></div></div>}
-      <input className="notes-title-input" value={titleDraft} readOnly={selectedLocked} onChange={e=>setTitleDraft(e.target.value)} onBlur={()=>{if(selected&&!selectedLocked&&titleDraft!==selected.title)void update({title:titleDraft})}} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();e.currentTarget.blur()}}} placeholder="Título"/>
-      {editorType==='text'&&<>{!selectedLocked&&<div className="editor-formatbar"><button onClick={()=>document.execCommand('bold')}><Bold size={15}/></button><button onClick={()=>document.execCommand('italic')}><Italic size={15}/></button><button onClick={()=>document.execCommand('underline')}><Underline size={15}/></button><button onClick={()=>{const u=prompt('URL do link');if(u)document.execCommand('createLink',false,u)}}><Link2 size={15}/></button></div>}<div className={cn('notes-body-editor',selectedLocked&&'is-locked')} key={selected.id} ref={e=>{editorRef.current=e;if(e&&!e.dataset.ready){e.innerHTML=sanitizeHtml(selected.content||'');e.dataset.ready='1'}}} contentEditable={!selectedLocked} suppressContentEditableWarning onPaste={e=>{e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain'))}} onInput={e=>queue({content:sanitizeHtml(e.currentTarget.innerHTML)})} data-placeholder={selectedLocked?'Texto bloqueado':'Escreva o que estiver pensando…'}/></>}
-      {editorType==='checklist'&&<div className="checklist-editor">{(check[selected.id]??[]).sort((a,b)=>a.position-b.position).map(i=><div className={cn('check-row',i.parent_id&&'subitem')} key={i.id}><button className={cn('check-box',i.is_completed&&'done')} onClick={()=>void saveItem(i,{is_completed:!i.is_completed})}>{i.is_completed&&<Check size={13}/>}</button><input value={i.title} onChange={e=>setCheck(v=>({...v,[selected.id]:(v[selected.id]??[]).map(x=>x.id===i.id?{...x,title:e.target.value}:x)}))} onBlur={e=>void saveItem(i,{title:e.target.value})} placeholder="Item"/><button type="button" title="Adicionar subitem" aria-label="Adicionar subitem" onClick={()=>void addItem(i.id)}><Plus size={14}/></button><button type="button" className="delete-check-item" title="Excluir item e subitens" aria-label="Excluir item e subitens" onClick={()=>void deleteChecklistItem(i)}><Trash2 size={14}/></button></div>)}<button className="add-check" onClick={()=>void addItem(null)}><Plus size={15}/> Adicionar item</button></div>}
+      <input className="notes-title-input" value={titleDraft} readOnly={selectedReadOnly} onChange={e=>setTitleDraft(e.target.value)} onBlur={()=>{if(selected&&!selectedReadOnly&&titleDraft!==selected.title)void update({title:titleDraft})}} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();e.currentTarget.blur()}}} placeholder="Título"/>
+      {editorType==='text'&&<>{!selectedReadOnly&&<div className="editor-formatbar"><button onClick={()=>document.execCommand('bold')}><Bold size={15}/></button><button onClick={()=>document.execCommand('italic')}><Italic size={15}/></button><button onClick={()=>document.execCommand('underline')}><Underline size={15}/></button><button onClick={()=>{const u=prompt('URL do link');if(u)document.execCommand('createLink',false,u)}}><Link2 size={15}/></button></div>}<div className={cn('notes-body-editor',selectedReadOnly&&'is-locked')} key={selected.id} ref={e=>{editorRef.current=e;if(e&&!e.dataset.ready){e.innerHTML=sanitizeHtml(selected.content||'');e.dataset.ready='1'}}} contentEditable={!selectedReadOnly} suppressContentEditableWarning onPaste={e=>{e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain'))}} onInput={e=>queue({content:sanitizeHtml(e.currentTarget.innerHTML)})} data-placeholder={selectedReadOnly?'Somente leitura ativado':'Escreva o que estiver pensando…'}/></>}
+      {editorType==='checklist'&&<div className="checklist-editor">{(check[selected.id]??[]).sort((a,b)=>a.position-b.position).map(i=><div className={cn('check-row',i.parent_id&&'subitem')} key={i.id}><button className={cn('check-box',i.is_completed&&'done')} disabled={selectedReadOnly} onClick={()=>void saveItem(i,{is_completed:!i.is_completed})}>{i.is_completed&&<Check size={13}/>}</button><input value={i.title} readOnly={selectedReadOnly} onChange={e=>setCheck(v=>({...v,[selected.id]:(v[selected.id]??[]).map(x=>x.id===i.id?{...x,title:e.target.value}:x)}))} onBlur={e=>void saveItem(i,{title:e.target.value})} placeholder="Item"/><button type="button" title="Adicionar subitem" aria-label="Adicionar subitem" disabled={selectedReadOnly} onClick={()=>void addItem(i.id)}><Plus size={14}/></button><button type="button" className="delete-check-item" title="Excluir item e subitens" aria-label="Excluir item e subitens" disabled={selectedReadOnly} onClick={()=>void deleteChecklistItem(i)}><Trash2 size={14}/></button></div>)}<button className="add-check" disabled={selectedReadOnly} onClick={()=>void addItem(null)}><Plus size={15}/> Adicionar item</button></div>}
       {editorType==='image'&&<div className="media-note"><label className="notes-primary"><ImagePlus size={15}/> Foto / câmera<input hidden type="file" accept="image/*" capture="environment" onChange={img}/></label>{(files[selected.id]??[]).filter(x=>x.attachment_type==='image').map(a=><div className="attachment-card" key={a.id}>{a.signed_url&&<img src={a.signed_url} alt={a.file_name}/>}<div className="attachment-actions"><button onClick={()=>void extractOcr(a)}>Extrair texto</button><button onClick={()=>void downloadFile(a)}><Download size={14}/> Baixar</button><button className="danger" title="Excluir imagem" onClick={()=>void removeAttachment(a)}><Trash2 size={14}/> Excluir</button></div></div>)}</div>}
       {editorType==='audio'&&<div className="audio-editor"><button className={cn('record-button',recording&&'stop')} onClick={()=>recording?recordStop():void recordStart()}>{recording?<Square size={17}/>:<Mic size={20}/>}</button><strong>{recording?'Gravando…':'Gravar áudio'}</strong><span>{String(Math.floor(seconds/60)).padStart(2,'0')}:{String(seconds%60).padStart(2,'0')}</span><label className="audio-upload-label"><Upload size={14}/> Adicionar arquivo de áudio<input hidden type="file" accept="audio/*" onChange={e=>{const f=e.target.files?.[0];if(f&&selected)void uploadAttachment(selected.id,f,'audio');e.currentTarget.value=''}}/></label><p>{selected.transcript||'A transcrição aparece aqui quando o navegador oferecer reconhecimento de voz.'}</p>{(files[selected.id]??[]).filter(x=>x.attachment_type==='audio').map(a=><div className="audio-item" key={a.id}><audio controls src={a.signed_url}/>{a.transcript&&<small>{a.transcript}</small>}</div>)}</div>}
       {editorType==='drawing'&&<div className="drawing-editor"><div className="drawing-toolbar"><button className={drawTool==='pen'?'active':''} onClick={()=>setDrawTool('pen')}>Caneta</button><button className={drawTool==='marker'?'active':''} onClick={()=>setDrawTool('marker')}>Marcador</button><button className={drawTool==='eraser'?'active':''} onClick={()=>setDrawTool('eraser')}><Eraser size={14}/> Borracha</button><button onClick={()=>void saveDraw()}><Check size={14}/> Salvar</button></div><canvas ref={canvasRef} width={1200} height={650} onPointerDown={drawDown} onPointerMove={drawMove} className="drawing-canvas"/></div>}
