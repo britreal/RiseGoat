@@ -3,7 +3,7 @@ import {
   Background, BackgroundVariant, Controls, Handle, MiniMap, Panel, Position, ReactFlow, useReactFlow,
   type Connection, type Node, type NodeProps, type OnEdgesDelete,
 } from '@xyflow/react';
-import { ArrowLeft, ExternalLink, Link2, Maximize2, Search, Unlink, X } from 'lucide-react';
+import { ArrowLeft, ExternalLink, LayoutGrid, Link2, Maximize2, Search, Unlink, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
@@ -34,6 +34,76 @@ const palette:Record<NoteColor,string> = {
   pink:'#f5dce7', red:'#f3d4cf', orange:'#ffe1c7', teal:'#d7efe9', indigo:'#dce2f8', gray:'#e8e9e7',
 };
 const plain = (html:string) => html.replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+
+function arrangeGraphPositions(notes:Note[],links:NoteLink[],startX=0,startY=0):Record<string,Point>{
+  const noteById=new Map(notes.map(note=>[note.id,note]));
+  const adjacency=new Map<string,Set<string>>(notes.map(note=>[note.id,new Set<string>()]));
+  for(const link of links){
+    if(!adjacency.has(link.source_note_id)||!adjacency.has(link.target_note_id))continue;
+    adjacency.get(link.source_note_id)!.add(link.target_note_id);
+    adjacency.get(link.target_note_id)!.add(link.source_note_id);
+  }
+  const compare=(a:string,b:string)=>(adjacency.get(b)?.size??0)-(adjacency.get(a)?.size??0)
+    ||(noteById.get(a)?.title||'').localeCompare(noteById.get(b)?.title||'','pt-BR');
+  const remaining=new Set(notes.map(note=>note.id));
+  const components:string[][]=[];
+  while(remaining.size){
+    const seed=[...remaining].sort(compare)[0];
+    const queue=[seed],component:string[]=[];
+    remaining.delete(seed);
+    while(queue.length){
+      const id=queue.shift()!;
+      component.push(id);
+      for(const neighbor of adjacency.get(id)??[]){
+        if(!remaining.has(neighbor))continue;
+        remaining.delete(neighbor);
+        queue.push(neighbor);
+      }
+    }
+    components.push(component);
+  }
+  components.sort((a,b)=>b.length-a.length||compare(a[0],b[0]));
+  const placed:Record<string,Point>={};
+  let rowX=startX,rowY=startY,rowHeight=0;
+  const maxRowWidth=startX+3000;
+  for(const component of components){
+    const root=[...component].sort(compare)[0];
+    const componentIds=new Set(component);
+    const levels=new Map<string,number>([[root,0]]);
+    const queue=[root];
+    while(queue.length){
+      const id=queue.shift()!;
+      for(const neighbor of adjacency.get(id)??[]){
+        if(!componentIds.has(neighbor)||levels.has(neighbor))continue;
+        levels.set(neighbor,(levels.get(id)??0)+1);
+        queue.push(neighbor);
+      }
+    }
+    const layers=new Map<number,string[]>();
+    for(const id of component){
+      const level=levels.get(id)??0;
+      if(!layers.has(level))layers.set(level,[]);
+      layers.get(level)!.push(id);
+    }
+    const maxDepth=Math.max(...layers.keys());
+    const maxLayerSize=Math.max(...[...layers.values()].map(layer=>layer.length));
+    const componentWidth=maxDepth*360+250;
+    const componentHeight=Math.max(180,maxLayerSize*250);
+    if(rowX>startX&&rowX+componentWidth>maxRowWidth){
+      rowX=startX;
+      rowY+=rowHeight+120;
+      rowHeight=0;
+    }
+    for(const [depth,layer] of layers){
+      layer.sort(compare);
+      const firstY=rowY+(maxLayerSize-layer.length)*125;
+      layer.forEach((id,index)=>{placed[id]={x:rowX+depth*360,y:firstY+index*250};});
+    }
+    rowHeight=Math.max(rowHeight,componentHeight);
+    rowX+=componentWidth+150;
+  }
+  return placed;
+}
 
 function NoteNode({ data, selected }: NodeProps<NoteNode>) {
   const total = data.checklistTotal;
@@ -248,14 +318,22 @@ export function GraphPage() {
   const visibleNotes = useMemo(()=>baseNotes.filter(note=>localIds.has(note.id)),[baseNotes,localIds]);
 
   const defaultPositions = useMemo(() => {
-    const map:Record<string,Point> = {};
-    const cols = Math.max(3, Math.ceil(Math.sqrt(Math.max(visibleNotes.length,1))));
-    visibleNotes.forEach((note,index)=>{
-      if (positions[note.id]) return;
-      map[note.id] = { x:(index % cols)*330, y:Math.floor(index / cols)*220 };
+    const unpositioned=notes.filter(note=>!positions[note.id]);
+    if(!unpositioned.length)return {};
+    const positioned=notes.filter(note=>positions[note.id]);
+    if(!positioned.length)return arrangeGraphPositions(unpositioned,noteLinks);
+    const maxX=Math.max(...positioned.map(note=>positions[note.id].x));
+    const minY=Math.min(...positioned.map(note=>positions[note.id].y));
+    return arrangeGraphPositions(unpositioned,noteLinks,maxX+360,minY);
+  },[notes,positions,noteLinks]);
+
+  useEffect(()=>{
+    if(!notes.length)return;
+    setPositions(current=>{
+      const missing=Object.keys(defaultPositions).some(id=>!current[id]);
+      return missing?{...defaultPositions,...current}:current;
     });
-    return map;
-  },[visibleNotes,positions]);
+  },[notes.length,defaultPositions]);
 
   const graphNodes = useMemo(() => visibleNotes.map(note => {
     const counts = checklistByNote[note.id] ?? {done:0,total:0};
@@ -305,10 +383,10 @@ export function GraphPage() {
   },[]);
 
   const onNodeDragStop = useCallback((_event:any,node:any) => {
-    const next = {...positions,[node.id]:{x:node.position.x,y:node.position.y}};
+    const next = {...defaultPositions,...positions,[node.id]:{x:node.position.x,y:node.position.y}};
     setPositions(next);
     scheduleSave(next);
-  },[positions,scheduleSave]);
+  },[defaultPositions,positions,scheduleSave]);
 
   const onConnect = useCallback(async (connection:Connection) => {
     if (!connection.source || !connection.target || connection.source === connection.target) return;
@@ -357,6 +435,14 @@ export function GraphPage() {
     viewportRef.current = viewport;
   },[]);
 
+  const arrangeMap = useCallback(async()=>{
+    if(!visibleNotes.length)return;
+    const next={...positions,...arrangeGraphPositions(visibleNotes,noteLinks)};
+    setPositions(next);
+    await saveGraph(next);
+    window.setTimeout(()=>window.dispatchEvent(new CustomEvent('graph-fit-view')),80);
+  },[visibleNotes,noteLinks,positions,saveGraph]);
+
   if (loading) return <div className="graph-shell graph-loading"><div className="graph-loading-orb"/><strong>Montando seu mapa…</strong><span>Carregando suas notas e conexões.</span></div>;
 
   return (
@@ -370,6 +456,7 @@ export function GraphPage() {
         <div className="graph-toolbar">
           <button className={cn(mode==='global'&&'active')} onClick={()=>setModeSafely('global')}>Tudo</button>
           <button className={cn(mode==='local'&&'active')} onClick={()=>setModeSafely('local')}>Local</button>
+          <button className="graph-organize-button" title="Organizar as notas visíveis sem sobreposição" onClick={()=>void arrangeMap()} disabled={saving||visibleNotes.length===0}><LayoutGrid size={14}/><span>Organizar</span></button>
           <button className="graph-icon-button" title="Ajustar ao conteúdo" onClick={()=>window.dispatchEvent(new CustomEvent('graph-fit-view'))}><Maximize2 size={16}/></button>
         </div>
       </header>
