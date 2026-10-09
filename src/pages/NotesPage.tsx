@@ -94,7 +94,7 @@ export function NotesPage({initialSettingsOpen=false}:{initialSettingsOpen?:bool
   useEffect(()=>{localStorage.setItem('notes-theme',theme)},[theme]);
   useEffect(()=>{const m=window.matchMedia('(prefers-color-scheme: dark)'),f=()=>setSystemDark(m.matches);m.addEventListener?.('change',f);return()=>m.removeEventListener?.('change',f)},[]);
   useEffect(()=>{setTitleDraft(selected?.title??'');},[selectedId]);
-  useEffect(()=>{if(filter!=='trash'){setSelectedTrashIds([]);setTrashDeleteConfirm(false)}},[filter]);
+  useEffect(()=>{setSelectedTrashIds([]);setTrashDeleteConfirm(false)},[filter,query,typeFilter,colorFilter,labelFilter,reminderFilter,folderId]);
   function discardEmptyDraft(){
     if(!selected||!isDraftNote(selected.id))return;
     const hasChecklist=(check[selected.id]??[]).some(i=>i.title.trim());
