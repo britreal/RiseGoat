@@ -180,8 +180,13 @@ export function LandingPage() {
       </main>
 
       <footer className="landing-footer">
-        <span>Notas</span>
-        <span>Um lugar para pensar.</span>
+        <span>RiseGoat</span>
+        <span>Uma sala menor. Mais contexto.</span>
+        <nav className="landing-legal-links" aria-label="Links institucionais">
+          <a href="/termos">Termos de uso</a>
+          <a href="/privacidade">Privacidade</a>
+          <a href="/sobre">Sobre</a>
+        </nav>
       </footer>
     </div>
   );
