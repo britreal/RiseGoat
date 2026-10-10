@@ -58,7 +58,7 @@ async function saveCheckpoint() {
 
 async function requestJson(url, extraHeaders = {}) {
   const headers = {
-    'User-Agent': process.env.SEC_USER_AGENT || 'RiseGoat Tabuleiro contact: admin@risegoat.com',
+    'User-Agent': process.env.SEC_USER_AGENT || 'RiseGoat Tabuleiro',
     Accept: 'application/json',
     ...extraHeaders,
   };
@@ -177,10 +177,13 @@ async function enrichWikidata() {
 }
 
 async function enrichSec() {
+  if (!process.env.SEC_USER_AGENT || !process.env.SEC_USER_AGENT.includes('@')) {
+    throw new Error('Configure SEC_USER_AGENT com um identificador de aplicação e um contato de e-mail válido, exigidos pela SEC.');
+  }
   const { data: companies, error } = await db().from('magnate_empresas')
     .select('id,nome,magnate_id,tipo,fonte').limit(1000);
   if (error) throw error;
-  const directory = await requestJson('https://www.sec.gov/files/company_tickers.json');
+  const directory = await requestJson('https://www.sec.gov/files/company_tickers.json', { 'User-Agent': process.env.SEC_USER_AGENT });
   const tickers = Object.values(directory);
   for (const company of companies ?? []) {
     const match = tickers.find((item) => normalize(item.title) === normalize(company.nome));
