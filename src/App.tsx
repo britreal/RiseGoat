@@ -12,6 +12,8 @@ const NotesPage = lazy(() => import('@/pages/NotesPage').then((m) => ({ default:
 const GraphPage = lazy(() => import('@/pages/GraphPage').then((m) => ({ default: m.GraphPage })));
 const NetworkPage = lazy(() => import('@/pages/NetworkPage').then((m) => ({ default: m.NetworkPage })));
 const TabuleiroPage = lazy(() => import('@/pages/TabuleiroPage').then((m) => ({ default: m.TabuleiroPage })));
+const InfoPage = lazy(() => import('@/pages/InfoPage').then((m) => ({ default: m.InfoPage })));
+const DeleteAccountPage = lazy(() => import('@/pages/DeleteAccountPage').then((m) => ({ default: m.DeleteAccountPage })));
 
 function AppContent() {
   const { route, navigate } = useRouter();
@@ -20,8 +22,9 @@ function AppContent() {
   useEffect(() => {
     if (loading) return;
     if (route.name === 'auth' && session) { navigate('/notes'); return; }
+    if (route.name === 'waitlist' && session) { navigate('/network'); return; }
     if (route.name === 'landing' && session) { navigate('/notes'); return; }
-    if ((route.name === 'notes' || route.name === 'map' || route.name === 'network' || route.name === 'settings') && !session) navigate('/auth');
+    if ((route.name === 'notes' || route.name === 'map' || route.name === 'network' || route.name === 'settings' || route.name === 'delete-account') && !session) navigate('/auth');
   }, [route.name, session, loading, navigate]);
 
   useEffect(() => {
@@ -30,7 +33,7 @@ function AppContent() {
   }, [route.name]);
 
   if (loading) return <Spinner />;
-  return <Suspense fallback={<Spinner />}>{route.name === 'landing' ? <LandingPage /> : route.name === 'auth' ? <AuthPage /> : route.name === 'map' ? <GraphPage /> : route.name === 'network' ? <NetworkPage /> : route.name === 'tabuleiro' ? <TabuleiroPage slug={route.slug} view={route.view} /> : route.name === 'settings' ? <NotesPage initialSettingsOpen /> : <NotesPage />}</Suspense>;
+  return <Suspense fallback={<Spinner />}>{route.name === 'landing' ? <LandingPage /> : route.name === 'auth' ? <AuthPage /> : route.name === 'waitlist' ? <AuthPage initialWaitlist /> : route.name === 'terms' ? <InfoPage page="terms" /> : route.name === 'privacy' ? <InfoPage page="privacy" /> : route.name === 'about' ? <InfoPage page="about" /> : route.name === 'delete-account' ? <DeleteAccountPage /> : route.name === 'map' ? <GraphPage /> : route.name === 'network' ? <NetworkPage /> : route.name === 'tabuleiro' ? <TabuleiroPage slug={route.slug} view={route.view} /> : route.name === 'settings' ? <NotesPage initialSettingsOpen /> : <NotesPage />}</Suspense>;
 }
 
 function App() { return <AuthProvider><AppContent /></AuthProvider>; }
