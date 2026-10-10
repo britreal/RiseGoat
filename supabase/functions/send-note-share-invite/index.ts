@@ -27,13 +27,20 @@ Deno.serve(async(req:Request)=>{
   }
   const {data:note,error:noteError}=await db.from('notes').select('id,user_id').eq('id',invite.note_id).maybeSingle();
   if(noteError||!note||note.user_id!==authData.user.id)return json(403,{error:'Você não pode enviar convite para esta nota.'});
+  const {error:logError}=await db.from('note_share_email_events').upsert({event_key:invite.id,status:'sending',error_code:null,provider_message_id:null,updated_at:new Date().toISOString()},{onConflict:'event_key'});
+  if(logError){
+    await db.from('note_share_invites').update({expires_at:new Date(0).toISOString()}).eq('id',invite.id).eq('inviter_id',authData.user.id);
+    return json(500,{error:'Não foi possível registrar o envio. O convite foi expirado.'});
+  }
 
   if(!resendKey||!fromEmail){
+    await db.from('note_share_email_events').update({status:'failed',error_code:'provider_not_configured',updated_at:new Date().toISOString()}).eq('event_key',invite.id);
     await db.from('note_share_invites').update({expires_at:new Date(0).toISOString()}).eq('id',invite.id).eq('inviter_id',authData.user.id);
     return json(503,{error:'RESEND_API_KEY e RESEND_FROM_EMAIL precisam estar configurados. O convite foi expirado para não ficar pendente sem entrega.'});
   }
   const {data:registered,error:registeredError}=await db.rpc('auth_email_exists',{p_email:invite.email});
   if(registeredError){
+    await db.from('note_share_email_events').update({status:'failed',error_code:'auth_email_lookup_failed',updated_at:new Date().toISOString()}).eq('event_key',invite.id);
     await db.from('note_share_invites').update({expires_at:new Date(0).toISOString()}).eq('id',invite.id).eq('inviter_id',authData.user.id);
     return json(500,{error:'Não foi possível preparar o link seguro. O convite foi expirado.'});
   }
@@ -45,6 +52,7 @@ Deno.serve(async(req:Request)=>{
   });
   const actionLink=linkData?.properties?.action_link;
   if(linkError||!actionLink){
+    await db.from('note_share_email_events').update({status:'failed',error_code:'auth_link_generation_failed',updated_at:new Date().toISOString()}).eq('event_key',invite.id);
     await db.from('note_share_invites').update({expires_at:new Date(0).toISOString()}).eq('id',invite.id).eq('inviter_id',authData.user.id);
     return json(502,{error:'Não foi possível gerar o link de autenticação. O convite foi expirado.'});
   }
@@ -56,10 +64,14 @@ Deno.serve(async(req:Request)=>{
       body:JSON.stringify({from:fromEmail,to:[invite.email],subject:'Você recebeu um convite para uma nota RiseGoat',html})
     });
     if(!response.ok){
+      await db.from('note_share_email_events').update({status:'failed',error_code:'resend_delivery_failed',updated_at:new Date().toISOString()}).eq('event_key',invite.id);
       await db.from('note_share_invites').update({expires_at:new Date(0).toISOString()}).eq('id',invite.id).eq('inviter_id',authData.user.id);
       return json(502,{error:'O provedor não confirmou o envio. O convite foi expirado.'});
     }
+    const delivery=await response.json().catch(()=>({}));
+    await db.from('note_share_email_events').update({status:'sent',sent_at:new Date().toISOString(),provider_message_id:typeof delivery.id==='string'?delivery.id:null,error_code:null,updated_at:new Date().toISOString()}).eq('event_key',invite.id);
   }catch{
+    await db.from('note_share_email_events').update({status:'failed',error_code:'resend_network_error',updated_at:new Date().toISOString()}).eq('event_key',invite.id);
     await db.from('note_share_invites').update({expires_at:new Date(0).toISOString()}).eq('id',invite.id).eq('inviter_id',authData.user.id);
     return json(502,{error:'Falha no envio do e-mail. O convite foi expirado.'});
   }
