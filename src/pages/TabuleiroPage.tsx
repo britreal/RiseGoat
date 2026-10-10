@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { ArrowLeft, ArrowRight, BarChart3, Check, Download, ExternalLink, Eye, EyeOff, FilePlus2, Filter, Loader2, Network, Plus, RefreshCw, ShieldCheck, Users, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BarChart3, Download, Eye, EyeOff, FilePlus2, Loader2, Network, Plus, ShieldCheck, Users, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { FiltrosTabuleiro, EMPTY_TABULEIRO_FILTERS } from '@/components/FiltrosTabuleiro';
+import { FiltrosTabuleiro } from '@/components/FiltrosTabuleiro';
 import { MagnateCard } from '@/components/MagnateCard';
 import { MagnateDetalhe } from '@/components/MagnateDetalhe';
 import { TabuleiroGrafo } from '@/components/TabuleiroGrafo';
@@ -11,7 +11,7 @@ import {
   insertMagnate, listMagnates, recordMagnateView, updateMagnatePublicVisibility,
 } from '@/lib/tabuleiro';
 import { supabase } from '@/lib/supabase';
-import type { Magnate, MagnateSector, MagnateViewMetric, MemberCircle, TabuleiroFilters } from '@/types/tabuleiro';
+import type { Magnate, MagnateConnection, MagnateSector, MagnateViewMetric, MemberCircle, TabuleiroFilters } from '@/types/tabuleiro';
 import '@/lib/tabuleiro.css';
 
 type Props={slug?:string;view?:'list'|'graph'};
@@ -63,7 +63,7 @@ export function TabuleiroPage({slug,view='list'}:Props){
   const [memberMetrics,setMemberMetrics]=useState<MagnateViewMetric[]>([]);
   const [loadingMetrics,setLoadingMetrics]=useState(false);
   const [graphNodes,setGraphNodes]=useState<Magnate[]>([]);
-  const [graphEdges,setGraphEdges]=useState<Awaited<ReturnType<typeof listMagnates>> extends never ? never : import('@/types/tabuleiro').MagnateConnection[]>([]);
+  const [graphEdges,setGraphEdges]=useState<MagnateConnection[]>([]);
   const [graphLoading,setGraphLoading]=useState(false);
   const [adding,setAdding]=useState(false);
   const [newName,setNewName]=useState('');
@@ -123,7 +123,7 @@ export function TabuleiroPage({slug,view='list'}:Props){
       if(edgesResult.error)throw edgesResult.error;
       const loaded=(nodesResult.data||[]) as Magnate[];
       setGraphNodes(isMember?loaded:loaded.filter(row=>row.visivel_publico));
-      setGraphEdges((edgesResult.data||[]) as import('@/types/tabuleiro').MagnateConnection[]);
+      setGraphEdges((edgesResult.data||[]) as MagnateConnection[]);
     }).catch(error=>{if(!cancelled)setPageError(error instanceof Error?error.message:'Não foi possível construir o grafo.')})
       .finally(()=>{if(!cancelled)setGraphLoading(false)});
     return()=>{cancelled=true};
