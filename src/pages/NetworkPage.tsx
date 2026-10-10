@@ -248,7 +248,7 @@ export function NetworkPage(){
       const invite=Array.isArray(inviteData)?inviteData[0]:inviteData;
       if(issueError||!invite){setError('Solicitação aprovada, mas não foi possível emitir o convite. '+(issueError?.message||''));await load();setInviteBusy(null);return;}
       const {error:mailError}=await supabase.auth.signInWithOtp({email:invite.invite_email,options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+'/notes?membership_invite='+encodeURIComponent(invite.invite_token)}});
-      if(mailError){setError('Acesso aprovado, mas o e-mail mágico não foi enviado. Verifique o SMTP transacional do Supabase. '+mailError.message);}
+      if(mailError){await supabase.rpc('revoke_member_access_invite',{p_invite_id:invite.invite_id});setError('Acesso aprovado, mas o e-mail mágico não foi enviado. Verifique o SMTP transacional do Supabase. '+mailError.message);}
       else feedback('Acesso aprovado e magic link enviado para '+invite.invite_email+'.');
     }else feedback('Solicitação recusada.');
     await load();setInviteBusy(null);
@@ -259,7 +259,7 @@ export function NetworkPage(){
     const invite=Array.isArray(inviteData)?inviteData[0]:inviteData;
     if(issueError||!invite){setError(issueError?.message||'Não foi possível emitir o convite.');setInviteBusy(null);return;}
     const {error:mailError}=await supabase.auth.signInWithOtp({email:invite.invite_email,options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+'/notes?membership_invite='+encodeURIComponent(invite.invite_token)}});
-    if(mailError)setError('Não foi possível enviar o magic link. Verifique o SMTP transacional do Supabase. '+mailError.message);
+    if(mailError){await supabase.rpc('revoke_member_access_invite',{p_invite_id:invite.invite_id});setError('Não foi possível enviar o magic link. Verifique o SMTP transacional do Supabase. '+mailError.message);}
     else feedback('Magic link enviado para '+invite.invite_email+'.');
     await load();setInviteBusy(null);
   }
