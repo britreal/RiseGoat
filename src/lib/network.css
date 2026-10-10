@@ -55,3 +55,11 @@
 .network-shared-note-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:12px}
 .network-shared-note-actions button{display:inline-flex;align-items:center;gap:6px}
 @media(max-width:520px){.network-form-actions>*{flex:1}.network-shared-note-actions>*{flex:1}}
+
+.network-applicant-context{margin:7px 0 0;padding:8px 10px;border:1px solid #ecece5;border-radius:9px;background:#fafaf7;color:#62645d;font-size:10px;line-height:1.6}
+.network-circle-management-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:13px;padding-top:10px;border-top:1px solid #ededed}
+.network-circle-management-actions>span{font-size:9px;color:#84857d}
+.network-admin-circle-actions{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid #ededed}
+.network-shell.is-dark .network-applicant-context{background:#22231f;border-color:#3b3d35;color:#c0c2b7}
+.network-shell.is-dark .network-circle-management-actions,.network-shell.is-dark .network-admin-circle-actions{border-color:#343630}
+@media(max-width:520px){.network-circle-management-actions>*{flex:1}.network-admin-circle-actions>*{flex:1}}
