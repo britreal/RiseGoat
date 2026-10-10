@@ -119,10 +119,19 @@ CREATE POLICY magnates_auth_read ON public.magnates
   FOR SELECT TO authenticated USING (true);
 
 DROP POLICY IF EXISTS magnates_admin_write ON public.magnates;
-CREATE POLICY magnates_admin_write ON public.magnates
-  FOR ALL TO authenticated
+DROP POLICY IF EXISTS magnates_admin_insert ON public.magnates;
+DROP POLICY IF EXISTS magnates_admin_update ON public.magnates;
+DROP POLICY IF EXISTS magnates_admin_delete ON public.magnates;
+CREATE POLICY magnates_admin_insert ON public.magnates
+  FOR INSERT TO authenticated
+  WITH CHECK (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())));
+CREATE POLICY magnates_admin_update ON public.magnates
+  FOR UPDATE TO authenticated
   USING (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())))
   WITH CHECK (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())));
+CREATE POLICY magnates_admin_delete ON public.magnates
+  FOR DELETE TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())));
 
 DROP POLICY IF EXISTS empresas_public_read ON public.magnate_empresas;
 CREATE POLICY empresas_public_read ON public.magnate_empresas
@@ -136,20 +145,38 @@ CREATE POLICY empresas_auth_read ON public.magnate_empresas
   FOR SELECT TO authenticated USING (true);
 
 DROP POLICY IF EXISTS empresas_admin_write ON public.magnate_empresas;
-CREATE POLICY empresas_admin_write ON public.magnate_empresas
-  FOR ALL TO authenticated
+DROP POLICY IF EXISTS empresas_admin_insert ON public.magnate_empresas;
+DROP POLICY IF EXISTS empresas_admin_update ON public.magnate_empresas;
+DROP POLICY IF EXISTS empresas_admin_delete ON public.magnate_empresas;
+CREATE POLICY empresas_admin_insert ON public.magnate_empresas
+  FOR INSERT TO authenticated
+  WITH CHECK (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())));
+CREATE POLICY empresas_admin_update ON public.magnate_empresas
+  FOR UPDATE TO authenticated
   USING (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())))
   WITH CHECK (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())));
+CREATE POLICY empresas_admin_delete ON public.magnate_empresas
+  FOR DELETE TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())));
 
 DROP POLICY IF EXISTS conexoes_auth_read ON public.magnate_conexoes;
 CREATE POLICY conexoes_auth_read ON public.magnate_conexoes
   FOR SELECT TO authenticated USING (true);
 
 DROP POLICY IF EXISTS conexoes_admin_write ON public.magnate_conexoes;
-CREATE POLICY conexoes_admin_write ON public.magnate_conexoes
-  FOR ALL TO authenticated
+DROP POLICY IF EXISTS conexoes_admin_insert ON public.magnate_conexoes;
+DROP POLICY IF EXISTS conexoes_admin_update ON public.magnate_conexoes;
+DROP POLICY IF EXISTS conexoes_admin_delete ON public.magnate_conexoes;
+CREATE POLICY conexoes_admin_insert ON public.magnate_conexoes
+  FOR INSERT TO authenticated
+  WITH CHECK (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())));
+CREATE POLICY conexoes_admin_update ON public.magnate_conexoes
+  FOR UPDATE TO authenticated
   USING (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())))
   WITH CHECK (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())));
+CREATE POLICY conexoes_admin_delete ON public.magnate_conexoes
+  FOR DELETE TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())));
 
 DROP POLICY IF EXISTS notas_circulo_read ON public.magnate_notas_circulo;
 CREATE POLICY notas_circulo_read ON public.magnate_notas_circulo
