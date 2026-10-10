@@ -6,9 +6,9 @@ import { FEATURES } from '@/lib/features';
 
 type Mode = 'signin' | 'waitlist' | 'forgot' | 'reset';
 
-export function AuthPage() {
+export function AuthPage({ initialWaitlist = false }: { initialWaitlist?: boolean }) {
   const { signIn, resetPassword, updatePassword, recoveryMode } = useAuth();
-  const initialMode: Mode = new URLSearchParams(window.location.search).get('mode') === 'waitlist' && FEATURES.waitlistSignup ? 'waitlist' : recoveryMode ? 'reset' : 'signin';
+  const initialMode: Mode = (initialWaitlist || new URLSearchParams(window.location.search).get('mode') === 'waitlist') && FEATURES.waitlistSignup ? 'waitlist' : recoveryMode ? 'reset' : 'signin';
   const [mode, setMode] = useState<Mode>(initialMode);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
