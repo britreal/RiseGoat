@@ -2,12 +2,13 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2, Eye, EyeOff, KeyRound, Loader2, LockKeyhole, Mail, UserPlus } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { FEATURES } from '@/lib/features';
 
 type Mode = 'signin' | 'waitlist' | 'forgot' | 'reset';
 
 export function AuthPage() {
   const { signIn, resetPassword, updatePassword, recoveryMode } = useAuth();
-  const initialMode: Mode = new URLSearchParams(window.location.search).get('mode') === 'waitlist' ? 'waitlist' : recoveryMode ? 'reset' : 'signin';
+  const initialMode: Mode = new URLSearchParams(window.location.search).get('mode') === 'waitlist' && FEATURES.waitlistSignup ? 'waitlist' : recoveryMode ? 'reset' : 'signin';
   const [mode, setMode] = useState<Mode>(initialMode);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -24,6 +25,7 @@ export function AuthPage() {
   }, [recoveryMode]);
 
   function switchMode(next: Mode) {
+    if (next === 'waitlist' && !FEATURES.waitlistSignup) { setError('A lista de espera está temporariamente fechada.'); return; }
     setMode(next);
     setError(null);
     setMessage(null);
@@ -42,6 +44,7 @@ export function AuthPage() {
     if (mode === 'signin') {
       result = await signIn(email.trim(), password);
     } else if (mode === 'waitlist') {
+      if (!FEATURES.waitlistSignup) { setError('A lista de espera está temporariamente fechada.'); setLoading(false); return; }
       const { error: requestError } = await supabase.rpc('request_membership', {
         p_name: name.trim(),
         p_email: email.trim(),
@@ -114,7 +117,7 @@ export function AuthPage() {
           </form>
 
           <div className="auth-links">
-            {mode === 'signin' && <><button type="button" onClick={() => switchMode('forgot')}>Esqueci minha senha</button><span>·</span><button type="button" onClick={() => switchMode('waitlist')}>Solicitar convite</button></>}
+            {mode === 'signin' && <><button type="button" onClick={() => switchMode('forgot')}>Esqueci minha senha</button>{FEATURES.waitlistSignup&&<><span>·</span><button type="button" onClick={() => switchMode('waitlist')}>Solicitar convite</button></>}</>}
             {(mode === 'waitlist' || mode === 'forgot') && <button type="button" onClick={() => switchMode('signin')}>Já tenho acesso</button>}
             {mode === 'reset' && <button type="button" onClick={() => switchMode('signin')}>Voltar para entrar</button>}
           </div>
