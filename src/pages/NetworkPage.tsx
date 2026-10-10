@@ -293,9 +293,9 @@ export function NetworkPage(){
       const {data:inviteData,error:issueError}=await supabase.rpc('issue_member_access_invite',{p_signup_id:row.id});
       const invite=Array.isArray(inviteData)?inviteData[0]:inviteData;
       if(issueError||!invite){setError('Solicitação aprovada, mas não foi possível emitir o convite. '+(issueError?.message||''));await load();setInviteBusy(null);return;}
-      const {error:mailError}=await supabase.auth.signInWithOtp({email:invite.invite_email,options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+'/notes?membership_invite='+encodeURIComponent(invite.invite_token)}});
-      if(mailError){await supabase.rpc('revoke_member_access_invite',{p_invite_id:invite.invite_id});setError('Acesso aprovado, mas o e-mail mágico não foi enviado. Verifique o SMTP transacional do Supabase. '+mailError.message);}
-      else feedback('Acesso aprovado e magic link enviado para '+invite.invite_email+'.');
+      const {error:mailError}=await supabase.functions.invoke('send-member-access-invite',{body:{invite_id:invite.invite_id,invite_token:invite.invite_token}});
+      if(mailError){setError('Acesso aprovado, mas o convite transacional não foi enviado. Verifique RESEND_API_KEY e RESEND_FROM_EMAIL no Supabase. '+mailError.message);}
+      else feedback('Acesso aprovado e convite transacional enviado para '+invite.invite_email+'.');
     }else feedback('Solicitação recusada.');
     await load();setInviteBusy(null);
   }
@@ -304,9 +304,9 @@ export function NetworkPage(){
     const {data:inviteData,error:issueError}=await supabase.rpc('issue_member_access_invite',{p_signup_id:row.id});
     const invite=Array.isArray(inviteData)?inviteData[0]:inviteData;
     if(issueError||!invite){setError(issueError?.message||'Não foi possível emitir o convite.');setInviteBusy(null);return;}
-    const {error:mailError}=await supabase.auth.signInWithOtp({email:invite.invite_email,options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+'/notes?membership_invite='+encodeURIComponent(invite.invite_token)}});
-    if(mailError){await supabase.rpc('revoke_member_access_invite',{p_invite_id:invite.invite_id});setError('Não foi possível enviar o magic link. Verifique o SMTP transacional do Supabase. '+mailError.message);}
-    else feedback('Magic link enviado para '+invite.invite_email+'.');
+    const {error:mailError}=await supabase.functions.invoke('send-member-access-invite',{body:{invite_id:invite.invite_id,invite_token:invite.invite_token}});
+    if(mailError)setError('Não foi possível enviar o convite transacional. Verifique RESEND_API_KEY e RESEND_FROM_EMAIL no Supabase. '+mailError.message);
+    else feedback('Convite transacional enviado para '+invite.invite_email+'.');
     await load();setInviteBusy(null);
   }
 
