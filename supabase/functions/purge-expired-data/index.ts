@@ -43,8 +43,17 @@ async function purgeAccount(db:SupabaseClient,r:{id:string;user_id:string|null;e
  try{
   const {data:userResult,error:userError}=await db.auth.admin.getUserById(uid);
   if(userError||!userResult.user){await db.from('account_deletion_requests').update({status:'completed',completed_at:new Date().toISOString(),user_id:null,email:null,completion_email_status:'not_applicable'}).eq('id',r.id);return {deleted:true,failed:false}}
-  const {data:admin,error:adminError}=await db.from('admin_users').select('user_id').eq('user_id',uid).maybeSingle();if(adminError)throw adminError;
-  if(admin){const {count,error:countError}=await db.from('admin_users').select('user_id',{count:'exact',head:true});if(countError)throw countError;if((count||0)<=1){await db.from('account_deletion_requests').update({status:'blocked',last_error_code:'last_admin_protection'}).eq('id',r.id);return {deleted:false,failed:false}}}
+  const [{data:admin,error:adminError},{data:legacyAdmin,error:legacyError},{data:admins,error:adminsError},{data:legacyAdmins,error:legacyAdminsError}]=await Promise.all([
+   db.from('admin_users').select('user_id').eq('user_id',uid).maybeSingle(),
+   db.from('app_admins').select('user_id').eq('user_id',uid).maybeSingle(),
+   db.from('admin_users').select('user_id').limit(1000),
+   db.from('app_admins').select('user_id').limit(1000)
+  ]);
+  if(adminError||legacyError||adminsError||legacyAdminsError)throw new Error('admin_membership_check_failed');
+  if(admin||legacyAdmin){
+    const adminIds=new Set([...(admins||[]).map((x:{user_id:string})=>x.user_id),...(legacyAdmins||[]).map((x:{user_id:string})=>x.user_id)]);
+    if(adminIds.size<=1){await db.from('account_deletion_requests').update({status:'blocked',last_error_code:'last_admin_protection'}).eq('id',r.id);return {deleted:false,failed:false}}
+  }
   const noteIds:string[]=[];
   for(let offset=0;offset<10000;offset+=500){const {data,error}=await db.from('notes').select('id').eq('user_id',uid).range(offset,offset+499);if(error)throw error;noteIds.push(...(data||[]).map((n:{id:string})=>n.id));if(!data||data.length<500)break}
   await removeFiles(db,await pathsForUser(db,uid,noteIds));
