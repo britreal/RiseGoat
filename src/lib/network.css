@@ -50,3 +50,8 @@
 .network-shell.is-dark .network-member-map-nodes circle.member{fill:#2d322c;stroke:#50564a}
 .network-shell.is-dark .network-member-map-nodes text{fill:#ddd}
 .network-shell.is-dark .network-map-legend{border-color:#333}
+
+.network-form-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.network-shared-note-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:12px}
+.network-shared-note-actions button{display:inline-flex;align-items:center;gap:6px}
+@media(max-width:520px){.network-form-actions>*{flex:1}.network-shared-note-actions>*{flex:1}}
