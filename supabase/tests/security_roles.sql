@@ -4,7 +4,7 @@
 -- only an administrator account. It validates the non-admin authenticated policy path, not a real member session.
 
 begin;
-insert into public.magnates(name,slug,setor,visivel_publico)
+insert into public.magnates(nome,slug,setor,visivel_publico)
 values
   ('RLS test public fixture','__rls_test_public__','test',true),
   ('RLS test private fixture','__rls_test_private__','test',false)
