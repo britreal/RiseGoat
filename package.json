@@ -8,7 +8,14 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "tabuleiro:forbes": "node scripts/tabuleiro/enrich.mjs --provider forbes",
+    "tabuleiro:wikidata": "node scripts/tabuleiro/enrich.mjs --provider wikidata",
+    "tabuleiro:sec": "node scripts/tabuleiro/enrich.mjs --provider sec",
+    "tabuleiro:opensecrets": "node scripts/tabuleiro/enrich.mjs --provider opensecrets",
+    "tabuleiro:propublica": "node scripts/tabuleiro/enrich.mjs --provider propublica",
+    "tabuleiro:conexoes": "node scripts/tabuleiro/enrich.mjs --provider conexoes",
+    "tabuleiro:all": "node scripts/tabuleiro/enrich.mjs --provider all"
   },
   "dependencies": {
     "@babel/runtime": "^7.29.10",
