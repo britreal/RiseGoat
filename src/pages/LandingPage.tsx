@@ -1,14 +1,15 @@
-import { Archive, ArrowRight, AudioLines, Bell, Check, Clock3, Command, FileCheck2, Folder, Grid2X2, ImagePlus, Lock, Menu, MoreHorizontal, Palette, Search, Share2, Sparkles, Tag, X, Plus } from 'lucide-react';
+import { Archive, ArrowRight, AudioLines, Check, Command, FileCheck2, Folder, Grid2X2, ImagePlus, Lock, Menu, MoreHorizontal, Palette, Search, Share2, Sparkles, Tag, Users, X, Plus } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect, useState } from 'react';
+import { FEATURES } from '@/lib/features';
 
 const benefits = [
-  { icon: FileCheck2, title: 'Capture rápido', copy: 'Uma nota aberta em segundos para registrar o que importa agora.' },
-  { icon: Folder, title: 'Organize do seu jeito', copy: 'Pastas, cores e marcadores sem transformar a organização em trabalho.' },
-  { icon: Tag, title: 'Encontre contexto', copy: 'Busque pelo título, conteúdo e tudo o que você já salvou.' },
-  { icon: AudioLines, title: 'Escreva com a voz', copy: 'Grave ideias, mantenha o áudio e transforme fala em texto quando disponível.' },
-  { icon: Bell, title: 'Lembre quando importa', copy: 'Use lembretes para tirar as coisas da cabeça e voltar no momento certo.' },
-  { icon: Lock, title: 'Seu espaço pessoal', copy: 'A experiência começa pela sua conta e fica separada do resto.' },
+  { icon: FileCheck2, title: 'Capture rápido', copy: 'Registre ideias, decisões e listas sem interromper o raciocínio.' },
+  { icon: Folder, title: 'Organize do seu jeito', copy: 'Pastas, cores e marcadores para encontrar contexto sem burocracia.' },
+  { icon: Tag, title: 'Encontre contexto', copy: 'Busca, conexões e um mapa visual para voltar ao que importa.' },
+  { icon: AudioLines, title: 'Registre pela voz', copy: 'Grave áudio e use a transcrição quando o navegador oferecer suporte.' },
+  { icon: Users, title: 'Relações com intenção', copy: 'Círculos privados, salas temáticas e introduções mediadas entre membros.' },
+  { icon: Lock, title: 'Acesso por convite', copy: 'Uma rede curada, com perfil visível apenas quando você decide participar.' },
 ];
 
 function PinDot(){ return <span className="landing-pin-dot" aria-hidden="true" />; }
@@ -18,23 +19,25 @@ export function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    document.title = 'Notas | Seu espaço para pensar';
-    return () => { document.title = 'Notas'; };
+    document.title = 'RiseGoat | Rede privada por convite';
+    return () => { document.title = 'RiseGoat'; };
   }, []);
 
   const action = session ? '/notes' : '/auth';
+  const requestInvite = session ? '/network' : FEATURES.waitlistSignup ? '/auth?mode=waitlist' : '/auth';
 
   return (
     <div className="landing-shell">
       <div className="landing-noise" />
       <header className="landing-nav">
-        <a href="/" className="landing-brand" aria-label="Notas | início">
-          <span className="landing-brand-mark">N</span>
-          <span>Notas</span>
+        <a href="/" className="landing-brand" aria-label="RiseGoat | início">
+          <span className="landing-brand-mark">R</span>
+          <span>RiseGoat</span>
         </a>
 
         <nav className={menuOpen ? 'landing-links open' : 'landing-links'}>
           <a href="#recursos" onClick={() => setMenuOpen(false)}>Recursos</a>
+          {FEATURES.tabuleiro&&<a href="/tabuleiro" onClick={() => setMenuOpen(false)}>Tabuleiro</a>}
           <a href="#filosofia" onClick={() => setMenuOpen(false)}>Filosofia</a>
           <a href={action} className="landing-nav-cta" onClick={() => setMenuOpen(false)}>
             {session ? 'Abrir Notas' : 'Entrar'}
@@ -48,14 +51,14 @@ export function LandingPage() {
       <main>
         <section className="landing-hero">
           <div className="landing-hero-copy">
-            <div className="landing-eyebrow"><Sparkles size={13} /> Para suas ideias</div>
-            <h1>Anote o que importa.<br /><em>Encontre quando precisar.</em></h1>
-            <p>Um lugar simples para guardar ideias, listas, referências e pensamentos. Escreva agora e encontre tudo quando precisar.</p>
+            <div className="landing-eyebrow"><Sparkles size={13} /> Rede privada por convite</div>
+            <h1>Pense com clareza.<br /><em>Construa relações com contexto.</em></h1>
+            <p>Um espaço privado para notas, mapas de ideias e relações de confiança. Entre por convite, compartilhe apenas o que escolher e construa contexto ao longo do tempo.</p>
             <div className="landing-actions">
-              <a href={action} className="landing-primary">Começar a usar <ArrowRight size={17} /></a>
+              <a href={requestInvite} className="landing-primary">{session ? 'Abrir sua rede' : FEATURES.waitlistSignup ? 'Solicitar convite' : 'Entrar'} <ArrowRight size={17} /></a>
               <a href="#recursos" className="landing-secondary">Ver recursos</a>
             </div>
-            <div className="landing-meta"><span><Check size={14} /> Fácil de aprender</span><span><Check size={14} /> Sincroniza automaticamente</span><span><Check size={14} /> Feito para o dia a dia</span></div>
+            <div className="landing-meta"><span><Check size={14} /> Fácil de aprender</span><span><Check size={14} /> Sincroniza automaticamente</span><span><Check size={14} /> Privado por padrão</span></div>
           </div>
 
           <div className="landing-product-wrap" aria-label="Prévia do aplicativo Notas">
@@ -90,26 +93,26 @@ export function LandingPage() {
                       <strong>Uma ideia simples pode mudar tudo.</strong>
                       <p>Não precisa de um sistema complicado. Precisa de um lugar para pensar.</p>
                       <div className="landing-note-tags"><i>ideia</i><i>produto</i></div>
-                      <div className="landing-note-actions"><Palette size={10}/><Clock3 size={10}/><Share2 size={10}/><ImagePlus size={10}/><Archive size={10}/><MoreHorizontal size={10}/></div>
+                      <div className="landing-note-actions"><Palette size={10}/><Share2 size={10}/><ImagePlus size={10}/><Archive size={10}/><MoreHorizontal size={10}/></div>
                     </article>
                     <article className="landing-note-card yellow">
                       <div className="landing-note-top"><span>Hoje</span><small>09:18</small></div>
                       <strong>Lista da manhã</strong>
                       <p>Escrever. Caminhar. Fazer uma coisa importante.</p>
-                      <div className="landing-note-actions"><Palette size={10}/><Clock3 size={10}/><Share2 size={10}/><ImagePlus size={10}/><Archive size={10}/><MoreHorizontal size={10}/></div>
+                      <div className="landing-note-actions"><Palette size={10}/><Share2 size={10}/><ImagePlus size={10}/><Archive size={10}/><MoreHorizontal size={10}/></div>
                     </article>
                     <article className="landing-note-card blue">
                       <div className="landing-note-top"><span>Ontem</span><small>18:05</small></div>
                       <strong>Para lembrar</strong>
                       <p>Voltar para a ideia do produto mínimo e testar com alguém.</p>
                       <div className="landing-note-tags"><i>teste</i></div>
-                      <div className="landing-note-actions"><Palette size={10}/><Clock3 size={10}/><Share2 size={10}/><ImagePlus size={10}/><Archive size={10}/><MoreHorizontal size={10}/></div>
+                      <div className="landing-note-actions"><Palette size={10}/><Share2 size={10}/><ImagePlus size={10}/><Archive size={10}/><MoreHorizontal size={10}/></div>
                     </article>
                     <article className="landing-note-card green">
                       <div className="landing-note-top"><span>Ontem</span><small>16:27</small></div>
                       <strong>Leitura</strong>
                       <p>Uma boa nota preserva contexto, não apenas palavras.</p>
-                      <div className="landing-note-actions"><Palette size={10}/><Clock3 size={10}/><Share2 size={10}/><ImagePlus size={10}/><Archive size={10}/><MoreHorizontal size={10}/></div>
+                      <div className="landing-note-actions"><Palette size={10}/><Share2 size={10}/><ImagePlus size={10}/><Archive size={10}/><MoreHorizontal size={10}/></div>
                     </article>
                   </div>
                 </div>
@@ -139,7 +142,7 @@ export function LandingPage() {
             <div className="landing-editor-toolbar">
               <span className="landing-editor-back">‹</span>
               <div><small>Salvo</small><b>•</b></div>
-              <div className="landing-editor-icons"><PinDot /><Archive size={10}/><Clock3 size={10}/><Share2 size={10}/><Tag size={10}/><Folder size={10}/><MoreHorizontal size={10}/></div>
+              <div className="landing-editor-icons"><PinDot /><Archive size={10}/><Share2 size={10}/><Tag size={10}/><Folder size={10}/><MoreHorizontal size={10}/></div>
             </div>
             <div className="landing-editor-tabs"><span className="active">Texto</span><span>Checklist</span><span>Imagem</span><span>Desenho</span><span>Áudio</span></div>
             <div className="landing-editor-content">
@@ -177,8 +180,13 @@ export function LandingPage() {
       </main>
 
       <footer className="landing-footer">
-        <span>Notas</span>
-        <span>Um lugar para pensar.</span>
+        <span>RiseGoat</span>
+        <span>Uma sala menor. Mais contexto.</span>
+        <nav className="landing-legal-links" aria-label="Links institucionais">
+          <a href="/termos">Termos de uso</a>
+          <a href="/privacidade">Privacidade</a>
+          <a href="/sobre">Sobre</a>
+        </nav>
       </footer>
     </div>
   );

@@ -1,0 +1,66 @@
+# Segurança da RiseGoat
+
+**Estado da auditoria:** 10 de outubro de 2026. Esta página registra o que foi verificado no projeto Supabase \`xofrlyblnsvcjsywynzu\` e o que ainda depende de acesso operacional ao Vercel.
+
+## RLS e políticas
+
+- Foram auditadas 102 tabelas no schema \`public\`: RLS habilitado em 102/102, RLS forçado em 102/102 após a migração \`security_admin_audit_rls_force\`, e nenhuma tabela pública sem política RLS no momento da auditoria.
+- \`admin_users\` é a tabela canônica adicional de administradores. O conteúdo é sincronizado de \`app_admins\` para manter compatibilidade com políticas existentes.
+- \`admin_audit_log\` registra abertura do painel e alterações administrativas de status da lista de espera/convites. O log guarda identificadores e metadados operacionais, nunca texto de notas.
+- \`notes-media\` é privado. Leitura exige o proprietário do caminho ou acesso autorizado à nota através de \`private.user_can_access_note\`. Uploads são restritos ao caminho do usuário autenticado. A política de seleção não concede acesso a \`anon\`.
+- Os buckets legados \`goat-media\` e \`risegoat-media\` continuam públicos, com políticas de leitura pública. Foram identificados na auditoria, mas não alterados porque podem conter assets públicos do site. Rever objetos e uso antes de os tornar privados.
+
+RLS forçado não substitui políticas corretas, controle de papéis ou teste contra os papéis reais da API. Funções \`SECURITY DEFINER\` continuam exigindo revisão individual.
+
+## Service role e variáveis
+
+- O bundle do navegador usa a URL pública e uma chave publishable do Supabase, não a chave \`service_role\`.
+- A pesquisa de código versionado não encontrou \`service_role\` nem \`SUPABASE_SERVICE_ROLE_KEY\` em código frontend.
+- A listagem das variáveis do projeto Vercel não pôde ser verificada por falta de autorização do conector à equipe \`brit-real\`. Portanto, não é correto afirmar que a chave está ausente de todas as variáveis de ambiente.
+- **Não** colocar \`service_role\` em \`VITE_*\`, arquivos versionados, chats, imagens ou builds de navegador. Guardar a chave operacional em um gerenciador de segredos/arquivo criptografado fora do repositório, com acesso restrito. Se a chave já foi exposta em bundle, logs ou Git, rotacioná-la no Supabase e atualizar somente os serviços de servidor que realmente precisem dela.
+- O app normal deve usar a chave publishable e RLS. A chave administrativa só deve existir em automações/backend de servidor ou no cofre operacional offline.
+
+## Resultado dos testes executados
+
+- **RLS:** 102/102 tabelas de `public` com RLS habilitado e forçado; 0 tabelas sem política no momento da verificação.
+- **Anon:** o teste transacional mostrou apenas a fixture pública do Tabuleiro e confirmou ausência de privilégio `SELECT` sobre `public.notes`.
+- **JWT autenticado não-admin (simulado):** 0 notas pessoais, 0 notas de círculo, 0 perfis de membro e 0 eventos de auditoria visíveis.
+- **Admin:** `public.is_admin()` reconheceu a conta configurada, a tabela `admin_users` ficou acessível ao admin e `log_admin_access()` gerou um evento no log.
+- Os dados de teste foram executados em transações revertidas. O log atual contém apenas o evento administrativo criado durante a validação manual.
+- **Limite:** havia uma única conta em `auth.users`, que também é admin. Ainda falta repetir com uma sessão de membro real após a primeira conta de membro ser aprovada.
+
+## Testes obrigatórios de papel
+
+Execute em projeto de staging com dados fictícios antes de cada release:
+
+1. **Anon:** selecionar uma nota privada, perfil não descobrível, convite e log de admin deve retornar zero linhas/erro; o Tabuleiro só pode retornar magnates com \`visivel_publico=true\`.
+2. **Membro A:** só acessa suas notas e anexos; não acessa notas privadas do membro B nem notas de círculo sem adesão aceita; não consegue inserir/alterar registros administrativos.
+3. **Membro de círculo:** depois de aceitar convite, consegue ver o círculo e suas notas colaborativas; um convite pendente não dá acesso ao conteúdo.
+4. **Admin:** consegue revisar fila, emitir/revogar convites, ver logs de auditoria e moderar salas; notas pessoais continuam fora do dashboard de métricas.
+5. **Storage:** downloads anônimos de \`notes-media\` falham; proprietário e colaborador autorizado têm apenas o acesso previsto pela nota.
+6. **Controles negativos:** testar SELECT/INSERT/UPDATE/DELETE e chamadas RPC, não apenas a interface. Repetir após alterações de políticas.
+
+Os testes devem usar sessões e JWTs reais para anon, membro e admin. Uma sessão SQL com privilégios de banco não é evidência suficiente de que a API respeita RLS.
+
+## Avisos restantes
+
+A auditoria do Supabase ainda reportou:
+- extensão \`pg_trgm\` no schema \`public\`;
+- funções \`SECURITY DEFINER\` expostas, incluindo endpoints intencionais da lista de espera e cancelamento da newsletter;
+- proteção contra senhas vazadas desativada.
+
+Não revogar em massa essas funções sem revisar seus chamadores: algumas são parte do fluxo público seguro, enquanto outras podem ser fechadas. Habilitar proteção contra senhas vazadas pelo painel/configuração Auth do Supabase quando o controle estiver disponível.
+
+
+## Convites por e-mail transacional
+
+- \`send-member-access-invite\` valida uma conta administradora, o convite pendente e o token de uso único; gera um link de autenticação via Supabase Auth e envia a mensagem com Resend.
+- \`send-note-share-invite\` valida que o dono da nota está enviando o convite, gera o link de autenticação e envia por Resend sem incluir o título ou o conteúdo da nota na mensagem.
+- \`send-member-invite-email\` envia boas-vindas e notifica quem convidou quando o convite de entrada é aceito.
+- As funções autenticadas usam JWT; os endpoints de evento disparados pelo banco verificam um token de alta entropia guardado no Vault. Segredos nunca são colocados no bundle do browser.
+- \`transactional_email_events\` e \`note_share_email_events\` guardam status, timestamps, código de erro e ID da mensagem do provedor, sem texto das mensagens nem endereços de destinatários.
+- O provedor de e-mail continua condicionado a \`RESEND_API_KEY\` e \`RESEND_FROM_EMAIL\` em secrets de Edge Functions. A entrega só pode ser considerada validada após configuração desses secrets e teste de ponta a ponta.
+
+## Exclusão e lixeira
+
+O agendamento \`risegoat-daily-purge\` chama diariamente \`purge-expired-data\` às 03:15 UTC. O job registra contagens, erros e horários em \`maintenance_job_logs\`. A remoção da lixeira é limitada aos anexos das notas vencidas; a exclusão de conta remove os anexos e as relações que impediriam a remoção do usuário. E-mail final que falhar fica na fila de retry até entrega confirmada; o endereço é removido do registro quando a mensagem for aceita pelo provedor.

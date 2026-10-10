@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "security:public-env": "node scripts/security/check-no-service-role.mjs"
   },
   "dependencies": {
     "@babel/runtime": "^7.29.10",

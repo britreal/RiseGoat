@@ -1,4 +1,4 @@
-export type FolderTemplateIcon = 'network' | 'key-round' | 'book-open';
+export type FolderTemplateIcon = 'network' | 'key-round' | 'book-open' | 'users' | 'target' | 'briefcase';
 export type FolderTemplateNote = {
   key: string;
   title: string;
@@ -8,7 +8,7 @@ export type FolderTemplateNote = {
   checklistItems?: string[];
 };
 export type FolderTemplate = {
-  id: 'teia' | 'acesso' | 'escritor';
+  id: 'teia' | 'acesso' | 'escritor' | 'circulo' | 'decisao' | 'ativo';
   name: string;
   color: string;
   icon: FolderTemplateIcon;
@@ -241,6 +241,160 @@ export const folderTemplates: FolderTemplate[] = [
       { from: 'structure', to: 'writing-editor' },
       { from: 'writing-editor', to: 'metadata' },
       { from: 'metadata', to: 'publication' },
+    ],
+  },
+
+  {
+    id: 'circulo',
+    name: '⭕ CÍRCULO',
+    color: '#2563EB',
+    icon: 'users',
+    description: 'Grupo pequeno, confiança mútua e contribuições com contexto.',
+    purpose: 'Organize um círculo privado de 3 a 12 pessoas. A pasta é pessoal; use os recursos da Rede para o trabalho que será compartilhado de fato.',
+    notes: [
+      {
+        key: 'circle-charter',
+        title: 'Acordos do Círculo',
+        type: 'text',
+        tags: ['circulo', 'acordos'],
+        sections: [
+          { heading: 'Propósito', items: ['Por que este círculo existe:', 'Que tipo de ajuda e contribuição faz sentido:', 'O que fica dentro do grupo:', 'Como lidar com discordâncias:'] },
+          { heading: 'Limites e confiança', items: ['Não repassar notas do grupo sem consentimento.', 'Separar fatos, hipóteses e opiniões.', 'Respeitar um não e a confidencialidade acordada.', 'Revisar periodicamente quem realmente precisa participar.'] },
+        ],
+      },
+      {
+        key: 'circle-roster',
+        title: 'Cartões dos Membros',
+        type: 'text',
+        tags: ['circulo', 'membros'],
+        sections: [
+          { heading: '[Nome do membro]', items: ['Nome e contexto profissional:', 'Cidade / setor:', 'Foco atual declarado:', 'Temas em que aceita conversar:', 'O que oferece ao círculo:', 'O que gostaria de encontrar:', 'Próxima contribuição combinada:'] },
+          { heading: 'Privacidade', items: ['Registre apenas informações fornecidas para este propósito.', 'Não transforme impressões em fatos.', 'Remova dados desnecessários ou desatualizados.'] },
+        ],
+      },
+      {
+        key: 'circle-contributions',
+        title: 'Contribuições da Semana',
+        type: 'checklist',
+        tags: ['circulo', 'contribuicoes'],
+        checklistItems: ['Definir a principal pergunta do encontro', 'Cada membro registrar uma contribuição útil', 'Identificar apresentações consentidas', 'Registrar decisões e responsáveis', 'Confirmar próximos passos'],
+      },
+      {
+        key: 'circle-decisions',
+        title: 'Decisões e Próximos Passos',
+        type: 'text',
+        tags: ['circulo', 'decisoes'],
+        sections: [
+          { heading: '[Data · decisão]', items: ['Contexto compartilhado:', 'Alternativas consideradas:', 'Decisão e justificativa:', 'Responsável:', 'Prazo:', 'Como saberemos que funcionou:', 'Data de revisão:'] },
+        ],
+      },
+      {
+        key: 'circle-review',
+        title: 'Ritual Semanal',
+        type: 'checklist',
+        tags: ['circulo', 'ritual'],
+        checklistItems: ['Revisar os compromissos abertos', 'Identificar quem precisa de uma introdução', 'Compartilhar uma lição prática', 'Atualizar decisões que mudaram', 'Agendar o próximo encontro'],
+      },
+    ],
+    connections: [
+      { from: 'circle-charter', to: 'circle-roster' },
+      { from: 'circle-roster', to: 'circle-contributions' },
+      { from: 'circle-contributions', to: 'circle-decisions' },
+      { from: 'circle-decisions', to: 'circle-review' },
+    ],
+  },
+  {
+    id: 'decisao',
+    name: '🎯 DECISÃO',
+    color: '#7C3AED',
+    icon: 'target',
+    description: 'Transforme decisões difíceis em critérios claros e ações verificáveis.',
+    purpose: 'Uma estrutura para decisões importantes, com alternativas, riscos, responsável e revisão posterior.',
+    notes: [
+      {
+        key: 'decision-brief',
+        title: 'Memorando de Decisão',
+        type: 'text',
+        tags: ['decisao', 'criterios'],
+        sections: [
+          { heading: 'Definição', items: ['Decisão a tomar:', 'Por que agora:', 'Objetivo desejado:', 'Restrições reais:', 'Prazo para decidir:', 'Responsável final:'] },
+          { heading: 'Critérios', items: ['O que precisa ser verdade:', 'O que seria inaceitável:', 'Custos de oportunidade:', 'Qual é o custo de não fazer nada:'] },
+          { heading: 'Reversibilidade', items: ['Fácil ou difícil de reverter:', 'Qual é o menor experimento seguro:', 'Sinal para parar ou mudar de rota:'] },
+        ],
+      },
+      {
+        key: 'decision-options',
+        title: 'Alternativas e Riscos',
+        type: 'text',
+        tags: ['decisao', 'riscos'],
+        sections: [
+          { heading: 'Opção A', items: ['Benefício esperado:', 'Custo e tempo:', 'Risco principal:', 'Evidência disponível:', 'O que ainda precisamos saber:'] },
+          { heading: 'Opção B', items: ['Benefício esperado:', 'Custo e tempo:', 'Risco principal:', 'Evidência disponível:', 'O que ainda precisamos saber:'] },
+          { heading: 'Comparação', items: ['Critérios mais importantes:', 'Hipótese que pode estar errada:', 'Consequência de cada alternativa:'] },
+        ],
+      },
+      {
+        key: 'decision-execution',
+        title: 'Execução da Decisão',
+        type: 'checklist',
+        tags: ['decisao', 'execucao'],
+        checklistItems: ['Registrar a decisão e o motivo', 'Definir responsável e prazo', 'Comunicar quem precisa saber', 'Executar o primeiro passo reversível', 'Marcar a data de revisão', 'Documentar o resultado'],
+      },
+      {
+        key: 'decision-postmortem',
+        title: 'Revisão Pós-Decisão',
+        type: 'text',
+        tags: ['decisao', 'revisao'],
+        sections: [
+          { heading: 'Resultado', items: ['O que esperávamos:', 'O que aconteceu:', 'Quais premissas se confirmaram:', 'O que nos surpreendeu:', 'O que faríamos de outro modo:', 'Lição reutilizável:'] },
+        ],
+      },
+    ],
+    connections: [
+      { from: 'decision-brief', to: 'decision-options' },
+      { from: 'decision-options', to: 'decision-execution' },
+      { from: 'decision-execution', to: 'decision-postmortem' },
+    ],
+  },
+  {
+    id: 'ativo',
+    name: '💼 ATIVO',
+    color: '#047857',
+    icon: 'briefcase',
+    description: 'Inventário de ativos, liquidez, riscos e alavancas disponíveis.',
+    purpose: 'Mantenha um inventário pessoal de ativos e recursos com dados que você escolhe registrar, sem inferências automáticas ou exposição para outros membros.',
+    notes: [
+      {
+        key: 'asset-inventory',
+        title: 'Inventário de Ativos',
+        type: 'text',
+        tags: ['ativo', 'inventario'],
+        sections: [
+          { heading: '[Nome do ativo]', items: ['Categoria:', 'Proprietário / responsável:', 'Valor estimado e data da estimativa:', 'Liquidez e prazo para acesso:', 'Receita ou benefício recorrente:', 'Custos recorrentes:', 'Risco principal:', 'Documento de referência guardado em local seguro:', 'Próxima revisão:'] },
+          { heading: 'Cuidados', items: ['Diferenciar estimativa de valor confirmado.', 'Não registrar senhas, chaves privadas ou números completos de documentos.', 'Restringir o acesso a dados financeiros sensíveis.', 'Atualizar a data de cada estimativa.'] },
+        ],
+      },
+      {
+        key: 'asset-leverage',
+        title: 'Alavancas e Oportunidades',
+        type: 'text',
+        tags: ['ativo', 'alavancas'],
+        sections: [
+          { heading: 'Recursos disponíveis', items: ['Conhecimento ou competência:', 'Tempo disponível:', 'Rede de relações com consentimento:', 'Capital que pode ser alocado:', 'Ferramentas e infraestrutura:', 'Parcerias em avaliação:'] },
+          { heading: 'Possível alavanca', items: ['Qual resultado ela pode ampliar:', 'Esforço inicial:', 'Dependências:', 'Risco de concentração:', 'Experimento de baixo risco:', 'Critério de continuidade:'] },
+        ],
+      },
+      {
+        key: 'asset-review',
+        title: 'Revisão de Portfólio',
+        type: 'checklist',
+        tags: ['ativo', 'revisao'],
+        checklistItems: ['Atualizar valores e datas de referência', 'Revisar liquidez e compromissos próximos', 'Conferir custos recorrentes', 'Reavaliar riscos e concentração', 'Definir uma ação para cada ativo relevante', 'Arquivar dados que não são mais necessários'],
+      },
+    ],
+    connections: [
+      { from: 'asset-inventory', to: 'asset-leverage' },
+      { from: 'asset-leverage', to: 'asset-review' },
     ],
   },
 ];
