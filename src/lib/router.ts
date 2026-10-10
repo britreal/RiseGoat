@@ -1,11 +1,26 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export type Route = { name: 'landing' } | { name: 'auth' } | { name: 'notes' } | { name: 'map' } | { name: 'settings' };
+export type Route =
+  | { name: 'landing' }
+  | { name: 'auth' }
+  | { name: 'notes' }
+  | { name: 'map' }
+  | { name: 'settings' }
+  | { name: 'tabuleiro' }
+  | { name: 'tabuleiro-detail'; slug: string }
+  | { name: 'tabuleiro-graph' };
 
 function parseRoute(): Route {
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
   const hash = window.location.hash.replace(/^#/, '').replace(/\/+$/, '') || '/';
   const current = path !== '/' ? path : hash;
+  if (current === '/tabuleiro/grafo') return { name: 'tabuleiro-graph' };
+  if (current === '/tabuleiro') return { name: 'tabuleiro' };
+  const magnateMatch = current.match(/^\/tabuleiro\/([^/]+)$/);
+  if (magnateMatch) {
+    try { return { name: 'tabuleiro-detail', slug: decodeURIComponent(magnateMatch[1]) }; }
+    catch { return { name: 'landing' }; }
+  }
   if (current === '/auth') return { name: 'auth' };
   if (current === '/notes') return { name: 'notes' };
   if (current === '/map') return { name: 'map' };
