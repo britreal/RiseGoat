@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, CheckSquare, ChevronDown, ChevronRight, FolderPlus, KeyRound, Network, ShieldAlert, X, type LucideIcon } from 'lucide-react';
+import { BookOpen, Briefcase, CheckSquare, ChevronDown, ChevronRight, FolderPlus, KeyRound, Network, ShieldAlert, Target, Users, X, type LucideIcon } from 'lucide-react';
 import { folderTemplates, type FolderTemplate, type FolderTemplateIcon } from '@/lib/folderTemplates';
 import '@/lib/folder-templates.css';
 
@@ -15,6 +15,9 @@ const iconMap: Record<FolderTemplateIcon, LucideIcon> = {
   network: Network,
   'key-round': KeyRound,
   'book-open': BookOpen,
+  users: Users,
+  target: Target,
+  briefcase: Briefcase,
 };
 
 function templateCounts(template: FolderTemplate) {
