@@ -10,7 +10,6 @@ import { SettingsPage } from '@/pages/SettingsPage';
 import { folderTemplates, templateNoteContent } from '@/lib/folderTemplates';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
-import { FEATURES } from '@/lib/features';
 
 type NoteType='text'|'checklist'|'image'|'drawing'|'audio';
 type Color='default'|'warm'|'yellow'|'green'|'blue'|'purple'|'pink'|'red'|'orange'|'teal'|'indigo'|'gray';
