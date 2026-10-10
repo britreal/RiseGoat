@@ -184,6 +184,28 @@ const helpCategories: HelpCategory[] = [
         keywords: 'cor cores paleta fixar fixadas pin arquivar arquivo restaurar',
       },
       {
+        title: 'Anexe arquivos a uma nota',
+        summary: 'Guarde documentos e outros arquivos junto da nota relacionada.',
+        steps: [
+          'Abra a nota em que deseja guardar o arquivo.',
+          'No rodapé do editor, escolha Anexar arquivo e selecione o documento.',
+          'Os arquivos ficam no armazenamento privado da sua conta, com os metadados registrados no banco de dados. Downloads exigem uma sessão autorizada.',
+          'Na lista Arquivos anexados, você pode baixar o arquivo ou excluir os que enviou.',
+        ],
+        keywords: 'anexo anexar arquivo PDF documento upload baixar segurança privado',
+      },
+      {
+        title: 'Salve um card como PNG',
+        summary: 'Exporte uma imagem da nota que você pode compartilhar nas redes sociais.',
+        steps: [
+          'Na grade de notas, abra Mais opções no card.',
+          'Escolha Salvar card como PNG.',
+          'A imagem é gerada em alta resolução, com o card centralizado e margem de 20 px em todos os lados.',
+          'Revise a imagem antes de publicar para confirmar que ela não contém informações privadas.',
+        ],
+        keywords: 'PNG imagem post redes sociais exportar cartão card salvar compartilhar',
+      },
+      {
         title: 'Entenda a Lixeira',
         summary: 'Excluir uma nota não é o mesmo que apagá-la permanentemente.',
         steps: [
