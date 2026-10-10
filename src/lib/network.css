@@ -63,3 +63,23 @@
 .network-shell.is-dark .network-applicant-context{background:#22231f;border-color:#3b3d35;color:#c0c2b7}
 .network-shell.is-dark .network-circle-management-actions,.network-shell.is-dark .network-admin-circle-actions{border-color:#343630}
 @media(max-width:520px){.network-circle-management-actions>*{flex:1}.network-admin-circle-actions>*{flex:1}}
+
+.network-operations-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-6px 0 15px;color:#85857d;font-size:9px}
+.network-operations-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.network-operations-subpanel{min-width:0;border:1px solid #e8e8e2;border-radius:13px;padding:13px;background:#fcfcfa}
+.network-operations-title{display:flex;align-items:center;gap:8px;margin-bottom:10px;color:#64665d}
+.network-operations-title h3{margin:0;font-size:12px;color:#30312c;letter-spacing:-.02em}
+.network-operations-row{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:10px 0;border-top:1px solid #ededed}
+.network-operations-row>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.network-operations-row strong{font-size:10px;color:#45473f}
+.network-operations-row small{font-size:9px;color:#83857c;line-height:1.5;overflow-wrap:anywhere}
+.network-operations-error{color:#a83a2e!important}
+.network-operations-status{flex:0 0 auto;border:1px solid #e1e2da;border-radius:20px;background:#f6f6f2;padding:4px 7px;color:#74766d;font-size:8px;white-space:nowrap}
+.network-operations-status.sent,.network-operations-status.completed{border-color:#d8e7d5;background:#f0f7ee;color:#3e6a43}
+.network-operations-status.failed,.network-operations-status.partial,.network-operations-status.blocked{border-color:#f0d5ce;background:#fff2ef;color:#a53b2b}
+.network-deletion-queue{margin-top:12px}
+.network-shell.is-dark .network-operations-subpanel{background:#22231f;border-color:#393b33}
+.network-shell.is-dark .network-operations-title,.network-shell.is-dark .network-operations-row strong{color:#dbdcd3}
+.network-shell.is-dark .network-operations-row,.network-shell.is-dark .network-operations-toolbar{border-color:#343630;color:#b5b7ac}
+.network-shell.is-dark .network-operations-status{background:#292a24;border-color:#3c3d35;color:#cacbc1}
+@media(max-width:650px){.network-operations-grid{grid-template-columns:1fr}.network-operations-toolbar{align-items:flex-start;flex-direction:column}.network-operations-row{align-items:flex-start}}
