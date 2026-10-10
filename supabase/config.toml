@@ -1,0 +1,10 @@
+project_id = "xofrlyblnsvcjsywynzu"
+
+[functions.request-account-deletion]
+verify_jwt = true
+
+[functions.purge-expired-data]
+verify_jwt = false
+
+[functions.send-member-invite-email]
+verify_jwt = false
