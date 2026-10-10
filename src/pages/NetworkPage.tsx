@@ -7,6 +7,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
+import { FEATURES } from '@/lib/features';
 import '@/lib/network.css';
 
 type Tab='profile'|'people'|'circles'|'rooms'|'admin';
@@ -23,6 +24,7 @@ type WaitlistRow={id:string;name:string;email:string;status:string;created_at:st
 type Activity={id:number;user_id:string;event_type:string;entity_type:string;occurred_at:string;metadata:Record<string,unknown>};
 type Introduction={id:string;requester_id:string;target_user_id:string;topic:string;status:string;created_at:string};
 type Onboarding={id:string;user_id:string;status:string;note:string;created_at:string};
+type AdminAudit={id:number;actor_id:string|null;action_key:string;entity_type:string|null;entity_id:string|null;metadata:Record<string,unknown>;occurred_at:string};
 type CircleStreak={opted_in_members:number;active_members_7d:number;group_active_days_7d:number};
 type MemberMapNode=MemberProfile&{x:number;y:number;label:string};
 type MemberMapEdge={source:string;target:string;circles:string[]};
@@ -51,6 +53,7 @@ export function NetworkPage(){
   const [activity,setActivity]=useState<Activity[]>([]);
   const [introductions,setIntroductions]=useState<Introduction[]>([]);
   const [onboardingRequests,setOnboardingRequests]=useState<Onboarding[]>([]);
+  const [auditLog,setAuditLog]=useState<AdminAudit[]>([]);
   const [referralCode,setReferralCode]=useState('');
   const [circleName,setCircleName]=useState('');
   const [circlePurpose,setCirclePurpose]=useState('');
@@ -107,21 +110,24 @@ export function NetworkPage(){
     if(shareInviteResult.data)setShareInvites(shareInviteResult.data as NoteInvite[]);
     const admin=Boolean(adminResult.data);setIsAdmin(admin);
     if(admin){
-      const [w,a,i,o]=await Promise.all([
+      const [w,a,i,o,log]=await Promise.all([
         supabase.from('waitlist_signups').select('id,name,email,status,created_at,referral_inviter_id,referral_code_id').order('created_at',{ascending:false}).limit(250),
         supabase.from('member_activity_events').select('id,user_id,event_type,entity_type,occurred_at,metadata').order('occurred_at',{ascending:false}).limit(200),
         supabase.from('introduction_requests').select('*').order('created_at',{ascending:false}).limit(100),
-        supabase.from('onboarding_requests').select('*').order('created_at',{ascending:false}).limit(100)
+        supabase.from('onboarding_requests').select('*').order('created_at',{ascending:false}).limit(100),
+        supabase.from('admin_audit_log').select('id,actor_id,action_key,entity_type,entity_id,metadata,occurred_at').order('occurred_at',{ascending:false}).limit(100)
       ]);
       if(w.data)setWaitlist(w.data as WaitlistRow[]);
       if(a.data)setActivity(a.data as Activity[]);
       if(i.data)setIntroductions(i.data as Introduction[]);
       if(o.data)setOnboardingRequests(o.data as Onboarding[]);
+      if(log.data)setAuditLog(log.data as AdminAudit[]);
     }
     setLoading(false);
   };
 
   useEffect(()=>{void load()},[user?.id]);
+  useEffect(()=>{if(isAdmin&&tab==='admin')void supabase.rpc('log_admin_access',{p_section:'network_dashboard'})},[isAdmin,tab]);
 
   const people=useMemo(()=>directory.filter(p=>p.discoverable&&p.user_id!==user?.id),[directory,user?.id]);
   const myCircles=useMemo(()=>circles.filter(c=>c.owner_user_id===user?.id||circleMembers.some(m=>m.circle_id===c.id&&m.user_id===user?.id&&m.status==='accepted')),[circles,circleMembers,user?.id]);
@@ -294,7 +300,7 @@ export function NetworkPage(){
       <div className="network-intro-stats"><span><Users size={15}/>{people.length} perfis visíveis</span><span><Bell size={15}/>{pendingNotices} pendentes</span></div>
     </section>
     <nav className="network-tabs" aria-label="Seções da rede">
-      {([{id:'profile',label:'Meu perfil',icon:UserRound},{id:'people',label:'Membros',icon:Users},{id:'circles',label:'Círculos',icon:Network},{id:'rooms',label:'Salas',icon:MessageSquare},...(isAdmin?[{id:'admin',label:'Administração',icon:ShieldCheck} as const]:[])] as {id:Tab;label:string;icon:any}[]).map(item=><button key={item.id} className={cn(tab===item.id&&'active')} onClick={()=>setTab(item.id)}><item.icon size={16}/>{item.label}{item.id==='admin'&&waitlist.filter(w=>w.status==='pending').length>0&&<span className="network-tab-count">{waitlist.filter(w=>w.status==='pending').length}</span>}</button>)}
+      {([{id:'profile',label:'Meu perfil',icon:UserRound},{id:'people',label:'Membros',icon:Users},...(FEATURES.circles?[{id:'circles',label:'Círculos',icon:Network} as const]:[]),{id:'rooms',label:'Salas',icon:MessageSquare},...(isAdmin?[{id:'admin',label:'Administração',icon:ShieldCheck} as const]:[])] as {id:Tab;label:string;icon:any}[]).map(item=><button key={item.id} className={cn(tab===item.id&&'active')} onClick={()=>setTab(item.id)}><item.icon size={16}/>{item.label}{item.id==='admin'&&waitlist.filter(w=>w.status==='pending').length>0&&<span className="network-tab-count">{waitlist.filter(w=>w.status==='pending').length}</span>}</button>)}
     </nav>
     {error&&<div className="network-alert" role="alert">{error}<button onClick={()=>setError('')} aria-label="Fechar aviso"><X size={15}/></button></div>}
     {message&&<div className="network-success" role="status"><CheckCircle2 size={16}/>{message}</div>}
@@ -336,7 +342,7 @@ export function NetworkPage(){
       <div className="network-panel network-optin-explainer"><ShieldCheck size={19}/><div><strong>Visibilidade não significa acesso às notas</strong><p>O diretório mostra apenas o cartão de membro. Notas privadas, pastas e conexões pessoais continuam isoladas até o próprio membro compartilhá-las.</p></div></div>
     </section>}
 
-    {tab==='circles'&&<div className="network-grid">
+    {FEATURES.circles&&tab==='circles'&&<div className="network-grid">
       <section className="network-panel"><div className="network-panel-heading"><div><span className="network-eyebrow">3 A 12 MEMBROS</span><h2>Círculos privados</h2><p>Grupos pequenos para relações recorrentes e trabalho compartilhado.</p></div><Network size={22}/></div>
         <form className="network-form" onSubmit={createCircle}><label>Nome do círculo<input value={circleName} onChange={e=>setCircleName(e.target.value)} maxLength={80} placeholder="Ex.: Círculo de confiança" required/></label><label>Objetivo<input value={circlePurpose} onChange={e=>setCirclePurpose(e.target.value)} maxLength={500} placeholder="O que este grupo pretende fazer"/></label><button className="network-primary" disabled={inviteBusy==='circle'}><Plus size={15}/>Criar círculo</button></form>
         <div className="network-callout"><LockKeyhole size={15}/>As notas do círculo são uma área colaborativa separada. Nada é copiado das notas pessoais.</div>
@@ -362,6 +368,7 @@ export function NetworkPage(){
       <section className="network-panel"><div className="network-panel-heading"><div><span className="network-eyebrow">CURADORIA MANUAL</span><h2>Lista de espera</h2><p>A aprovação é manual. A pessoa aprovada recebe magic link por e-mail, não acesso público.</p></div><Users size={21}/></div>{waitlist.length===0?<p className="network-muted">Nenhuma solicitação encontrada.</p>:waitlist.map(row=><article className="network-applicant" key={row.id}><div><strong>{row.name}</strong><span>{row.email}</span><small>{new Date(row.created_at).toLocaleDateString('pt-BR')} · {row.status}{row.referral_inviter_id?' · indicação rastreada':''}</small></div><div className="network-applicant-actions">{row.status==='pending'&&<><button className="network-primary compact" disabled={inviteBusy===row.id} onClick={()=>void reviewApplicant(row,true)}><Check size={14}/>Aprovar e enviar link</button><button className="network-danger compact" disabled={inviteBusy===row.id} onClick={()=>void reviewApplicant(row,false)}><X size={14}/>Recusar</button></>}{row.status==='approved'&&<button className="network-secondary compact" disabled={inviteBusy===row.id} onClick={()=>void startAccessInvite(row)}><Send size={14}/>Enviar magic link</button>}</div></article>)}</section>
       <section className="network-panel"><div className="network-panel-heading"><div><span className="network-eyebrow">MODERAÇÃO DE SALAS</span><h2>Moderadores</h2><p>Escolha entre membros que já entraram em cada sala.</p></div><ShieldCheck size={20}/></div>{rooms.map(room=>{const members=roomMembers.filter(member=>member.room_id===room.id);return <article className="network-admin-row" key={room.id}><strong>{room.name}</strong>{members.length===0?<small>Nenhum membro entrou na sala.</small>:<><select className="network-moderator-select" value={roomModeratorSelection[room.id]||''} onChange={e=>setRoomModeratorSelection(v=>({...v,[room.id]:e.target.value}))}><option value="">Selecionar membro…</option>{members.map(member=><option value={member.user_id} key={member.user_id}>{profileById.get(member.user_id)?.display_name||member.user_id.slice(0,8)} · {member.role==='moderator'?'moderador':'membro'}</option>)}</select><div className="network-applicant-actions"><button className="network-secondary compact" disabled={!roomModeratorSelection[room.id]} onClick={()=>void setRoomModerator(room.id,roomModeratorSelection[room.id],'moderator')}>Tornar moderador</button><button className="network-secondary compact" disabled={!roomModeratorSelection[room.id]} onClick={()=>void setRoomModerator(room.id,roomModeratorSelection[room.id],'member')}>Remover permissão</button></div></>}</article>})}</section>
       <section className="network-grid"><div className="network-panel"><div className="network-panel-heading"><div><span className="network-eyebrow">INTRODUÇÕES</span><h2>Pontes solicitadas</h2></div><ArrowUpRight size={20}/></div>{introductions.length===0?<p className="network-muted">Nenhuma solicitação de introdução.</p>:introductions.map(item=><article className="network-admin-row" key={item.id}><strong>{profileById.get(item.requester_id)?.display_name||'Membro'} → {profileById.get(item.target_user_id)?.display_name||'Membro'}</strong><span>{item.topic||'Introdução'} · {item.status}</span><small>{new Date(item.created_at).toLocaleDateString('pt-BR')}</small><button className="network-secondary compact" onClick={async()=>{await supabase.from('introduction_requests').update({status:'introduced',reviewed_by:user.id,reviewed_at:new Date().toISOString()}).eq('id',item.id);feedback('Introdução marcada como realizada.');await load()}}>Marcar como apresentado</button></article>)}</div><div className="network-panel"><div className="network-panel-heading"><div><span className="network-eyebrow">ONBOARDING</span><h2>Conversas pendentes</h2></div><CalendarDays size={20}/></div>{onboardingRequests.length===0?<p className="network-muted">Nenhuma conversa solicitada.</p>:onboardingRequests.map(item=><article className="network-admin-row" key={item.id}><strong>{profileById.get(item.user_id)?.display_name||'Membro'}</strong><span>{item.status}</span><small>{new Date(item.created_at).toLocaleDateString('pt-BR')}</small><button className="network-secondary compact" onClick={async()=>{await supabase.from('onboarding_requests').update({status:'scheduled',reviewed_by:user.id,reviewed_at:new Date().toISOString()}).eq('id',item.id);feedback('Conversa marcada como agendada. Combine o horário por contato direto.');await load()}}>Marcar agendada</button></article>)}</div></section>
+      <section className="network-panel"><div className="network-panel-heading"><div><span className="network-eyebrow">AUDITORIA ADMINISTRATIVA</span><h2>Acessos e ações</h2><p>Registro de entrada no painel e mudanças operacionais. Não armazena conteúdo de notas.</p></div><ShieldCheck size={20}/></div>{auditLog.length===0?<p className="network-muted">Ainda não há eventos registrados.</p>:<div className="network-activity-list">{auditLog.map(entry=><div className="network-activity-row" key={entry.id}><span>{profileById.get(entry.actor_id||'')?.display_name||'Admin'}</span><strong>{entry.action_key.replace(/_/g,' ')}</strong><small>{entry.entity_type||'painel'}{entry.metadata?.section?' · '+String(entry.metadata.section):''} · {new Date(entry.occurred_at).toLocaleString('pt-BR')}</small></div>)}</div>}</section>
       <section className="network-panel"><div className="network-panel-heading"><div><span className="network-eyebrow">METADADOS SOMENTE</span><h2>Atividade recente</h2><p>Eventos como criação de nota, fixação e arquivamento, sem título ou conteúdo.</p></div><LockKeyhole size={20}/></div><div className="network-activity-list">{activity.slice(0,80).map(event=><div className="network-activity-row" key={event.id}><span>{profileById.get(event.user_id)?.display_name||'Membro'}</span><strong>{event.event_type.replace(/_/g,' ')}</strong><small>{typeof event.metadata?.folder_id==='string'?'Pasta vinculada':'Sem detalhe de pasta'} · {new Date(event.occurred_at).toLocaleString('pt-BR')}</small></div>)}</div></section>
     </section>}
     <footer className="network-footer"><span><LockKeyhole size={14}/> Dados privados por padrão</span><button onClick={()=>void load()} disabled={loading}><RefreshCw size={14}/>Atualizar</button></footer>
