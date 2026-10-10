@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
-import { Archive, BookOpen, Bold, Check, CheckSquare, CircleHelp, ChevronDown, ChevronLeft, Clock3, Command, Copy, Download, Eraser, FileDown, FileText, Filter, Flame, Folder, FolderPlus, Grid2X2, ImagePlus, Italic, KeyRound, Link2, List, Loader2, Eye, EyeOff, Mail, MapPin, Map, Menu, Mic, Network, MoreHorizontal, Palette, Pencil, Pin, Plus, Printer, RotateCcw, Search, Send, Settings, Share2, Square, Sun, Moon, Tag, Trash2, Underline, Upload, X } from 'lucide-react';
+import { Archive, BookOpen, Bold, Check, CheckSquare, CircleHelp, ChevronDown, ChevronLeft, Command, Copy, Download, Eraser, FileDown, FileText, Filter, Flame, Folder, FolderPlus, Grid2X2, ImagePlus, Italic, KeyRound, Link2, List, Loader2, Eye, EyeOff, Mail, Map, Menu, Mic, Network, MoreHorizontal, Palette, Pencil, Pin, Plus, Printer, RotateCcw, Search, Send, Settings, Share2, Square, Sun, Moon, Tag, Trash2, Underline, Upload, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { HelpCenter } from '@/components/HelpCenter';
 import { FolderTemplatesModal } from '@/components/FolderTemplatesModal';
@@ -107,15 +107,27 @@ export function NotesPage({initialSettingsOpen=false}:{initialSettingsOpen?:bool
   }
   function closeEditor(){discardEmptyDraft();setSelectedId(null);if(new URLSearchParams(window.location.search).has('note'))window.history.replaceState({},'', '/notes')}
   useEffect(()=>{document.querySelector('.notes-sidebar')?.classList.remove('mobile-open')},[filter,folderId]);
-  useEffect(()=>{if(!selected)return;setMore(false);setShare(false);setReminder(false);setLabelPanel(false);setQuickAction(null);setFolderMenuId(null);setFolderEditId(null);setFolderDeleteId(null);void loadSelected(selected.id)},[selectedId]);
-  useEffect(()=>{const closePanels=(e:PointerEvent)=>{const target=e.target as HTMLElement|null;if(target?.closest('.note-quick-actions,.note-quick-popover,.editor-actions,.notes-popover,.notes-folder-row'))return;setQuickAction(null);setMore(false);setShare(false);setReminder(false);setLabelPanel(false);setFolderMenuId(null)};document.addEventListener('pointerdown',closePanels,true);return()=>document.removeEventListener('pointerdown',closePanels,true)},[]);
+  useEffect(()=>{if(!selected)return;setMore(false);setShare(false);setLabelPanel(false);setQuickAction(null);setFolderMenuId(null);setFolderEditId(null);setFolderDeleteId(null);void loadSelected(selected.id)},[selectedId]);
+  useEffect(()=>{const closePanels=(e:PointerEvent)=>{const target=e.target as HTMLElement|null;if(target?.closest('.note-quick-actions,.note-quick-popover,.editor-actions,.notes-popover,.notes-folder-row'))return;setQuickAction(null);setMore(false);setShare(false);setLabelPanel(false);setFolderMenuId(null)};document.addEventListener('pointerdown',closePanels,true);return()=>document.removeEventListener('pointerdown',closePanels,true)},[]);
   useEffect(()=>{const h=(e:KeyboardEvent)=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();document.getElementById('notes-search')?.focus()}if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='n'){e.preventDefault();void create('text')}if(e.key==='Escape'&&!document.querySelector('.help-center-overlay,.settings-overlay'))closeEditor()};addEventListener('keydown',h);return()=>removeEventListener('keydown',h)},[]);
   useEffect(()=>{if(!user)return;const c=supabase.channel('notes-realtime-'+user.id).on('postgres_changes',{event:'*',schema:'public',table:'notes'},p=>{if(p.eventType==='INSERT'){const n=p.new as Note;if(n.user_id===user.id)setNotes(v=>v.some(x=>x.id===n.id)?v:[n,...v])}else if(p.eventType==='UPDATE'){const n=p.new as Note;setNotes(v=>v.map(x=>x.id===n.id?n:x))}else if(p.eventType==='DELETE'){const n=p.old as Note;setNotes(v=>v.filter(x=>x.id!==n.id))}}).subscribe();return()=>{void supabase.removeChannel(c)}},[user]);
 
   async function load(){
     if(!user)return;setLoading(true);await supabase.from('notes').delete().eq('user_id',user.id).eq('is_deleted',true).lt('deleted_at',new Date(Date.now()-30*24*60*60*1000).toISOString());const [n,l,ll,a,f,cList,fl]=await Promise.all([supabase.from('notes').select('*').order('is_pinned',{ascending:false}).order('sort_order'),supabase.from('note_labels').select('*').eq('user_id',user.id).order('name'),supabase.from('note_label_links').select('*'),supabase.from('note_attachments').select('*').order('created_at',{ascending:false}),supabase.from('note_folders').select('*').eq('user_id',user.id).order('position').order('name'),supabase.from('note_checklist_items').select('*').order('position'),supabase.from('note_folder_links').select('note_id,folder_id')]);
     if(n.error)setError(n.error.message);else {const loadedNotes=(n.data??[]) as Note[];setNotes(loadedNotes);heatmapItemsRef.current=Object.fromEntries(loadedNotes.map(note=>[note.id,heatmapDailyItems(note)]));const requestedNote=new URLSearchParams(window.location.search).get('note');if(requestedNote&&(n.data??[]).some((row:any)=>row.id===requestedNote))setSelectedId(requestedNote)}if(f.error)setError(f.error.message);else setFolders((f.data??[]) as Folder[]);if(l.data)setLabels(l.data as Label[]);if(ll.data){const m:Record<string,string[]>={};for(const x of ll.data as any[])(m[x.note_id]??=[]).push(x.label_id);setLinks(m)}if(a.data){const signed=await Promise.all((a.data as Attachment[]).map(async x=>x.file_path?({...x,signed_url:(await supabase.storage.from('notes-media').createSignedUrl(x.file_path,3600)).data?.signedUrl}):x));const m:Record<string,Attachment[]>={};for(const x of signed)(m[x.note_id]??=[]).push(x);setFiles(m)}if(cList.data){const m:Record<string,Checklist[]>={};for(const x of cList.data as Checklist[])(m[x.note_id]??=[]).push(x);setCheck(m)}if(fl.error)setError(fl.error.message);else{const m:Record<string,string[]>={};for(const x of (fl.data??[]) as {note_id:string;folder_id:string}[])(m[x.note_id]??=[]).push(x.folder_id);for(const row of (n.data??[]) as Note[])if(row.folder_id&&!(m[row.id]??[]).includes(row.folder_id))(m[row.id]??=[]).push(row.folder_id);setFolderLinks(m)}setLoading(false);
-    const invite=new URLSearchParams(location.search).get('invite');if(invite&&user.email){const {data,error:e}=await supabase.rpc('accept_note_share_invite',{p_token:invite});if(!e&&data){history.replaceState({},'', '/notes');setSelectedId(data as string)}else if(e){setError('Não foi possível aceitar este convite.')}}
+    const params=new URLSearchParams(location.search);
+    const invite=params.get('invite');
+    const membershipInvite=params.get('membership_invite');
+    if(membershipInvite&&user.email){
+      const {error:membershipError}=await supabase.rpc('accept_member_access_invite',{p_token:membershipInvite});
+      history.replaceState({},'', '/notes');
+      if(membershipError)setError('A sessão iniciou, mas o convite de acesso precisa ser validado novamente. '+membershipError.message);
+      else setError('Bem-vindo à RiseGoat. Seu acesso foi confirmado.');
+    }else if(invite&&user.email){
+      const {data,error:e}=await supabase.rpc('accept_note_share_invite',{p_token:invite});
+      history.replaceState({},'', '/notes');
+      if(!e&&data)setSelectedId(data as string);else if(e)setError('Não foi possível aceitar este convite. '+e.message);
+    }
   }
   const isDraftNote=(id:string)=>id.startsWith('draft-');
   function noteHasContent(note:Note,force=false){return force||Boolean(note.title.trim()||plain(note.content).trim()||note.transcript.trim()||note.ocr_text.trim())}
@@ -294,7 +306,7 @@ export function NotesPage({initialSettingsOpen=false}:{initialSettingsOpen?:bool
     else setNotes(v=>v.map(item=>item.id===noteId?{...item,folder_id:nextFolderIds[0]??null}:item));
     setFolderLinks(v=>({...v,[noteId]:nextFolderIds}));setQuickAction(null);
   }
-  async function quickShare(note:Note){const t=(note.title+'\n\n'+plain(note.content)).trim()||'Nota';if(navigator.share){try{await navigator.share({title:note.title||'Nota',text:t})}catch{return}}else{await navigator.clipboard?.writeText(t);window.open('mailto:?subject='+encodeURIComponent(note.title||'Nota')+'&body='+encodeURIComponent(t),'_blank')}}
+  async function quickShare(note:Note){const t=(note.title+'\n\n'+plain(note.content)).trim()||'Nota';if(navigator.share){try{await navigator.share({title:note.title||'Nota',text:t});return}catch{return}}try{await navigator.clipboard.writeText(t);setError('Texto copiado. Cole no aplicativo em que deseja compartilhar.');window.setTimeout(()=>setError(''),2200)}catch{setError('Seu navegador não permite compartilhar ou copiar automaticamente.')}}
   async function quickToggleLabel(noteId:string,labelId:string){const arr=links[noteId]??[];if(arr.includes(labelId)){const {error:e}=await supabase.from('note_label_links').delete().eq('note_id',noteId).eq('label_id',labelId);if(e){setError(e.message);return}setLinks(v=>({...v,[noteId]:arr.filter(x=>x!==labelId)}))}else{const {error:e}=await supabase.from('note_label_links').insert({note_id:noteId,label_id:labelId});if(e){setError(e.message);return}setLinks(v=>({...v,[noteId]:[...arr,labelId]}))}}
   async function quickCreateLabel(note:Note){if(!user||!quickNewLabel.trim())return;const {data,error:e}=await supabase.from('note_labels').insert({user_id:user.id,name:quickNewLabel.trim(),color:note.color}).select().single();if(e){setError(e.message);return}setLabels(v=>[...v,data as Label]);await quickToggleLabel(note.id,(data as Label).id);setQuickNewLabel('')}
   function queue(patch:Partial<Note>){
@@ -530,7 +542,7 @@ function recordStop(){if(speech.current){speech.current.active=false;try{speech.
   function drawMove(e:React.PointerEvent<HTMLCanvasElement>){const c=canvasRef.current;if(!c||e.buttons!==1)return;const x=c.getContext('2d')!,r=c.getBoundingClientRect();x.lineTo((e.clientX-r.left)*c.width/r.width,(e.clientY-r.top)*c.height/r.height);x.stroke()}
   async function saveDraw(){if(!user||!selected||!canvasRef.current)return;const b=await new Promise<Blob|null>(r=>canvasRef.current!.toBlob(r,'image/png'));if(!b)return;const f=new File([b],'desenho-'+Date.now()+'.png',{type:'image/png'});await upload(f,'drawing')}
   async function extractOcr(a:Attachment){try{const Detector=(window as any).TextDetector;if(typeof Detector!=='function'){setError('OCR nativo não está disponível neste navegador.');return}if(!a.signed_url||!selected)return;const img=new Image();img.crossOrigin='anonymous';img.src=a.signed_url;await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject});const detector=new Detector();const blocks=await detector.detect(img);const text=blocks.map((b:any)=>b.rawValue||'').join(' ').trim();if(text){await update({ocr_text:(selected.ocr_text?selected.ocr_text+'\n':'')+text});setError('') }else setError('Nenhum texto foi detectado na imagem.')}catch{setError('Não foi possível executar o OCR neste navegador.')}}
-  async function shareNote(){if(!selected)return;const t=(selected.title+'\n\n'+plain(selected.content)).trim();if(navigator.share){try{await navigator.share({title:selected.title||'Nota',text:t})}catch{}}else{await navigator.clipboard?.writeText(t);window.open('mailto:?subject='+encodeURIComponent(selected.title||'Nota')+'&body='+encodeURIComponent(t),'_blank')}}
+  async function shareNote(){if(!selected)return;const t=(selected.title+'\n\n'+plain(selected.content)).trim();if(navigator.share){try{await navigator.share({title:selected.title||'Nota',text:t});return}catch{}}try{await navigator.clipboard.writeText(t);setError('Texto copiado. Cole no aplicativo em que deseja compartilhar.');window.setTimeout(()=>setError(''),2200)}catch{setError('Seu navegador não permite compartilhar ou copiar automaticamente.')}}
   async function loadShareAccess(noteId:string){
     if(!user||!selected||selected.id!==noteId||selected.user_id!==user.id)return;
     setShareAccessLoading(true);
@@ -572,10 +584,15 @@ function recordStop(){if(speech.current){speech.current.active=false;try{speech.
     const token=crypto.randomUUID().replace(/-/g,'');
     const {data,error:err}=await supabase.from('note_share_invites').insert({note_id:selected.id,inviter_id:user.id,email,role:inviteRole,token}).select().single();
     if(err){setShareMessage('Não foi possível criar o convite. '+err.message);return;}
-    const url=location.origin+'/notes?invite='+data.token;
-    window.open('mailto:'+encodeURIComponent(email)+'?subject='+encodeURIComponent('Convite para uma nota')+'&body='+encodeURIComponent('Abra e aceite este convite: '+url),'_blank');
+    const redirectTo=location.origin+'/notes?invite='+encodeURIComponent(data.token);
+    const {error:mailError}=await supabase.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:redirectTo}});
+    if(mailError){
+      await supabase.from('note_share_invites').delete().eq('id',data.id).eq('inviter_id',user.id);
+      setShareMessage('O convite não foi enviado. Verifique a configuração de e-mail transacional do Supabase. '+mailError.message);
+      return;
+    }
     setShareEmail('');
-    setShareMessage('Convite criado. O link expira em 7 dias.');
+    setShareMessage('Magic link enviado para '+email+'. O convite expira em 7 dias.');
     await loadShareAccess(selected.id);
   }
   function exportOne(f:'json'|'md'|'txt'){if(!selected)return;const p=plain(selected.content),n=selected.title||'nota';if(f==='json')download(new Blob([JSON.stringify(selected,null,2)],{type:'application/json'}),n+'.json');if(f==='md')download(new Blob(['# '+n+'\n\n'+p],{type:'text/markdown'}),n+'.md');if(f==='txt')download(new Blob([p],{type:'text/plain'}),n+'.txt')}
