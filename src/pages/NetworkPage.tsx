@@ -91,7 +91,9 @@ export function NetworkPage(){
     if(directoryResult.data)setDirectory(directoryResult.data as MemberProfile[]);
     if(circleResult.data)setCircles(circleResult.data as Circle[]);
     if(circleMemberResult.data)setCircleMembers(circleMemberResult.data as CircleMember[]);
-    const accessibleCircleIds=(circleResult.data as Circle[]|null??[]).filter(circle=>circle.owner_user_id===user.id||(circleMemberResult.data as CircleMember[]|null??[]).some(member=>member.circle_id===circle.id&&member.user_id===user.id&&member.status==='accepted')).map(circle=>circle.id);
+    const loadedCircles=(circleResult.data??[]) as Circle[];
+    const loadedCircleMembers=(circleMemberResult.data??[]) as CircleMember[];
+    const accessibleCircleIds=loadedCircles.filter(circle=>circle.owner_user_id===user.id||loadedCircleMembers.some(member=>member.circle_id===circle.id&&member.user_id===user.id&&member.status==='accepted')).map(circle=>circle.id);
     const streakResults=await Promise.all(accessibleCircleIds.map(async id=>({id,result:await supabase.rpc('get_circle_streak_summary',{p_circle_id:id})})));
     const streakMap:Record<string,CircleStreak>={};
     for(const item of streakResults){const row=Array.isArray(item.result.data)?item.result.data[0]:item.result.data;if(!item.result.error&&row)streakMap[item.id]=row as CircleStreak;}
