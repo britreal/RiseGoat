@@ -12,6 +12,7 @@ const LandingPage = lazy(() => import('@/pages/LandingPage').then((m) => ({ defa
 const NotesPage = lazy(() => import('@/pages/NotesPage').then((m) => ({ default: m.NotesPage })));
 const GraphPage = lazy(() => import('@/pages/GraphPage').then((m) => ({ default: m.GraphPage })));
 const TabuleiroPage = lazy(() => import('@/pages/TabuleiroPage').then((m) => ({ default: m.TabuleiroPage })));
+const TabuleiroRestricted = lazy(() => import('@/pages/TabuleiroPage').then((m) => ({ default: m.TabuleiroRestricted })));
 const MagnateDetalhe = lazy(() => import('@/pages/MagnateDetalhe').then((m) => ({ default: m.MagnateDetalhe })));
 const TabuleiroGrafo = lazy(() => import('@/pages/TabuleiroGrafo').then((m) => ({ default: m.TabuleiroGrafo })));
 
@@ -26,7 +27,6 @@ function AppContent() {
     const isTabuleiroRoute = route.name === 'tabuleiro' || route.name === 'tabuleiro-detail' || route.name === 'tabuleiro-graph';
     if (isTabuleiroRoute && !FEATURES.TABULEIRO) { navigate('/notes'); return; }
     if (route.name === 'tabuleiro-graph' && !FEATURES.TABULEIRO_GRAPH_VIEW) { navigate('/tabuleiro'); return; }
-    if (isTabuleiroRoute && !session && !FEATURES.TABULEIRO_PUBLIC_PREVIEW) { navigate('/auth'); return; }
     if ((route.name === 'notes' || route.name === 'map' || route.name === 'settings') && !session) navigate('/auth');
   }, [route.name, session, loading, navigate]);
 
@@ -38,7 +38,11 @@ function AppContent() {
   }, [route.name]);
 
   if (loading) return <Spinner />;
-  const page = route.name === 'landing' ? <LandingPage />
+  const isTabuleiroRoute = route.name === 'tabuleiro' || route.name === 'tabuleiro-detail' || route.name === 'tabuleiro-graph';
+  const needsTabuleiroAccess = isTabuleiroRoute && !session
+    && (!FEATURES.TABULEIRO_PUBLIC_PREVIEW || route.name === 'tabuleiro-graph');
+  const page = needsTabuleiroAccess ? <TabuleiroRestricted />
+    : route.name === 'landing' ? <LandingPage />
     : route.name === 'auth' ? <AuthPage />
     : route.name === 'map' ? <GraphPage />
     : route.name === 'settings' ? <NotesPage initialSettingsOpen />
