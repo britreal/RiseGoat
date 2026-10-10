@@ -587,7 +587,7 @@ function recordStop(){if(speech.current){speech.current.active=false;try{speech.
     const redirectTo=location.origin+'/notes?invite='+encodeURIComponent(data.token);
     const {error:mailError}=await supabase.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:redirectTo}});
     if(mailError){
-      await supabase.from('note_share_invites').delete().eq('id',data.id).eq('inviter_id',user.id);
+      await supabase.from('note_share_invites').update({expires_at:new Date(0).toISOString()}).eq('id',data.id).eq('inviter_id',user.id);
       setShareMessage('O convite não foi enviado. Verifique a configuração de e-mail transacional do Supabase. '+mailError.message);
       return;
     }
