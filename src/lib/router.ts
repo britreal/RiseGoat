@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export type Route = { name: 'landing' } | { name: 'auth' } | { name: 'notes' } | { name: 'map' } | { name: 'network' } | { name: 'settings' };
+export type Route = { name: 'landing' } | { name: 'auth' } | { name: 'notes' } | { name: 'map' } | { name: 'network' } | { name: 'settings' } | { name: 'tabuleiro'; slug?: string; view?: 'list' | 'graph' };
 
 function parseRoute(): Route {
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
@@ -11,6 +11,10 @@ function parseRoute(): Route {
   if (current === '/map') return { name: 'map' };
   if (current === '/network') return { name: 'network' };
   if (current === '/settings') return { name: 'settings' };
+  if (current === '/tabuleiro/grafo') return { name: 'tabuleiro', view: 'graph' };
+  if (current === '/tabuleiro') return { name: 'tabuleiro', view: 'list' };
+  const tabuleiroDetail = current.match(/^\\/tabuleiro\\/([^/]+)$/);
+  if (tabuleiroDetail) return { name: 'tabuleiro', slug: decodeURIComponent(tabuleiroDetail[1]), view: 'list' };
   return { name: 'landing' };
 }
 
