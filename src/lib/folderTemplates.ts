@@ -8,7 +8,7 @@ export type FolderTemplateNote = {
   checklistItems?: string[];
 };
 export type FolderTemplate = {
-  id: 'teia' | 'acesso' | 'escritor';
+  id: 'teia' | 'acesso' | 'escritor' | 'circulo' | 'decisao' | 'ativo';
   name: string;
   color: string;
   icon: FolderTemplateIcon;
