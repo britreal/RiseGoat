@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Activity, AlertTriangle, CheckCircle2, Clock3, Mail, RefreshCw, ShieldCheck } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import '@/lib/network.css';
@@ -19,7 +19,7 @@ export function AdminOperationsPanel(){
  const [loading,setLoading]=useState(true);
  const [error,setError]=useState('');
  const [refreshedAt,setRefreshedAt]=useState('');
- async function load(){
+ const load=useCallback(async()=>{
   setLoading(true);setError('');
   const [mail,noteShareMail,jobsResult,deleteResult,metricsResult]=await Promise.all([
    supabase.from('transactional_email_events').select('event_key,invite_id,email_type,status,error_code,sent_at,created_at').order('created_at',{ascending:false}).limit(30),
@@ -36,8 +36,8 @@ export function AdminOperationsPanel(){
   if(deleteResult.data)setDeletions(deleteResult.data as DeletionEvent[]);
   if(!metricsResult.error){const row=Array.isArray(metricsResult.data)?metricsResult.data[0]:metricsResult.data;setMetric(row as Metric|null)}
   setRefreshedAt(new Date().toLocaleTimeString('pt-BR'));setLoading(false);
- }
- useEffect(()=>{void load()},[]);
+ },[]);
+ useEffect(()=>{void load()},[load]);
  return <section className="network-panel network-operations-panel">
   <div className="network-panel-heading"><div><span className="network-eyebrow">OPERAÇÃO E SEGURANÇA</span><h2>Saúde dos serviços</h2><p>Estados operacionais e metadados. Endereços de e-mail, conteúdo de nota e segredos não são exibidos.</p></div><ShieldCheck size={20}/></div>
   <div className="network-operations-toolbar"><span>{refreshedAt?'Atualizado às '+refreshedAt:'Aguardando primeira leitura'}</span><button className="network-secondary compact" onClick={()=>void load()} disabled={loading}>{loading?<RefreshCw size={13} className="network-spin"/>:<RefreshCw size={13}/>}Atualizar</button></div>
