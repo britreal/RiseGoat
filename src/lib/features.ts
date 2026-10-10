@@ -23,7 +23,7 @@ export const FEATURES = Object.freeze({
   waitlistSignup: flag('VITE_FEATURE_WAITLIST_SIGNUP', true),
 
   // Network modules.
-  tabuleiro: flag('VITE_FEATURE_TABULEIRO', false),
+  tabuleiro: flag('VITE_FEATURE_TABULEIRO', true),
   pngExport: flag('VITE_FEATURE_PNG_EXPORT', true),
   circles: flag('VITE_FEATURE_CIRCLES', true),
 
