@@ -52,3 +52,10 @@ npm run build
 As migrações do esquema de membros ficam em `supabase/migrations`. A implantação web é feita na Vercel e os dados/autenticação no Supabase.
 
 > O envio de magic links depende da configuração de e-mail transacional do projeto Supabase Auth. Se o SMTP/provider não estiver configurado corretamente, o fluxo deve apresentar o erro em vez de usar o aplicativo de e-mail do dispositivo.
+
+
+### E-mail transacional
+
+O envio de convites para notas, convites de entrada, boas-vindas, avisos de aceitação e e-mails de exclusão utiliza funções Edge do Supabase e o provedor Resend. Configure \`RESEND_API_KEY\` e \`RESEND_FROM_EMAIL\` como secrets das Edge Functions. Sem esses secrets, os fluxos expiram/revogam convites ou recusam o pedido de exclusão em vez de simular o envio.
+
+Eventos de e-mail guardam somente tipo, status, timestamps, código de erro e identificador de mensagem do provedor. Conteúdo de nota e endereço do destinatário não são escritos nesses logs.
