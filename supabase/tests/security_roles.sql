@@ -6,8 +6,8 @@
 begin;
 insert into public.magnates(nome,slug,setor,visivel_publico)
 values
-  ('RLS test public fixture','__rls_test_public__','test',true),
-  ('RLS test private fixture','__rls_test_private__','test',false)
+  ('RLS test public fixture','__rls_test_public__','outros',true),
+  ('RLS test private fixture','__rls_test_private__','outros',false)
 on conflict(slug) do update set visivel_publico=excluded.visivel_publico;
 set local role anon;
 select set_config('request.jwt.claims','{"role":"anon"}',true);
