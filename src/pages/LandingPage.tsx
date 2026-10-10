@@ -1,6 +1,7 @@
 import { Archive, ArrowRight, AudioLines, Check, Command, FileCheck2, Folder, Grid2X2, ImagePlus, Lock, Menu, MoreHorizontal, Palette, Search, Share2, Sparkles, Tag, Users, X, Plus } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect, useState } from 'react';
+import { FEATURES } from '@/lib/features';
 
 const benefits = [
   { icon: FileCheck2, title: 'Capture rápido', copy: 'Registre ideias, decisões e listas sem interromper o raciocínio.' },
@@ -23,7 +24,7 @@ export function LandingPage() {
   }, []);
 
   const action = session ? '/notes' : '/auth';
-  const requestInvite = session ? '/network' : '/auth?mode=waitlist';
+  const requestInvite = session ? '/network' : FEATURES.waitlistSignup ? '/auth?mode=waitlist' : '/auth';
 
   return (
     <div className="landing-shell">
@@ -53,7 +54,7 @@ export function LandingPage() {
             <h1>Pense com clareza.<br /><em>Construa relações com contexto.</em></h1>
             <p>Um espaço privado para notas, mapas de ideias e relações de confiança. Entre por convite, compartilhe apenas o que escolher e construa contexto ao longo do tempo.</p>
             <div className="landing-actions">
-              <a href={requestInvite} className="landing-primary">{session ? 'Abrir sua rede' : 'Solicitar convite'} <ArrowRight size={17} /></a>
+              <a href={requestInvite} className="landing-primary">{session ? 'Abrir sua rede' : FEATURES.waitlistSignup ? 'Solicitar convite' : 'Entrar'} <ArrowRight size={17} /></a>
               <a href="#recursos" className="landing-secondary">Ver recursos</a>
             </div>
             <div className="landing-meta"><span><Check size={14} /> Fácil de aprender</span><span><Check size={14} /> Sincroniza automaticamente</span><span><Check size={14} /> Privado por padrão</span></div>
