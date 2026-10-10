@@ -30,13 +30,14 @@ export function LandingPage() {
     <div className="landing-shell">
       <div className="landing-noise" />
       <header className="landing-nav">
-        <a href="/" className="landing-brand" aria-label="Notas | início">
-          <span className="landing-brand-mark">N</span>
-          <span>Notas</span>
+        <a href="/" className="landing-brand" aria-label="RiseGoat | início">
+          <span className="landing-brand-mark">R</span>
+          <span>RiseGoat</span>
         </a>
 
         <nav className={menuOpen ? 'landing-links open' : 'landing-links'}>
           <a href="#recursos" onClick={() => setMenuOpen(false)}>Recursos</a>
+          {FEATURES.tabuleiro&&<a href="/tabuleiro" onClick={() => setMenuOpen(false)}>Tabuleiro</a>}
           <a href="#filosofia" onClick={() => setMenuOpen(false)}>Filosofia</a>
           <a href={action} className="landing-nav-cta" onClick={() => setMenuOpen(false)}>
             {session ? 'Abrir Notas' : 'Entrar'}
