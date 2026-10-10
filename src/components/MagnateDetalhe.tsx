@@ -1,6 +1,7 @@
 import { ArrowUpRight, Building2, ExternalLink, Network, ShieldCheck } from 'lucide-react';
 import type { Magnate, MagnateCompany, MagnateConnection } from '@/types/tabuleiro';
 import { NotasCirculo } from '@/components/NotasCirculo';
+import { FEATURES } from '@/lib/features';
 import type { MemberCircle } from '@/types/tabuleiro';
 import '@/lib/tabuleiro.css';
 
@@ -61,7 +62,7 @@ export function MagnateDetalhe(props:Props){
           <small className="tabuleiro-updated">Última atualização: {new Date(magnate.atualizado_em).toLocaleDateString('pt-BR')}</small>
         </section>
       </div>
-      <aside className="tabuleiro-detail-aside"><NotasCirculo magnateId={magnate.id} userId={userId||''} circles={userId?circles:[]}/></aside>
+      <aside className="tabuleiro-detail-aside">{FEATURES.circles&&<NotasCirculo magnateId={magnate.id} userId={userId||''} circles={userId?circles:[]}/>}</aside>
     </div>
   </main>;
 }
