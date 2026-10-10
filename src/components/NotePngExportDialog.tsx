@@ -17,7 +17,7 @@ function roundedRect(ctx:CanvasRenderingContext2D,x:number,y:number,w:number,h:n
   ctx.beginPath();ctx.moveTo(x+radius,y);ctx.lineTo(x+w-radius,y);ctx.arcTo(x+w,y,x+w,y+radius,radius);
   ctx.lineTo(x+w,y+h-radius);ctx.arcTo(x+w,y+h,x+w-radius,y+h,radius);
   ctx.lineTo(x+radius,y+h);ctx.arcTo(x,y+h,x,y+h-radius,radius);
-  ctx.lineTo(x,y+radius);ctx.arcTo(x,y,x+radius,y);ctx.closePath();
+  ctx.lineTo(x,y+radius);ctx.arcTo(x,y,x+radius,y,radius);ctx.closePath();
 }
 
 function wrapText(ctx:CanvasRenderingContext2D,text:string,maxWidth:number):string[]{
