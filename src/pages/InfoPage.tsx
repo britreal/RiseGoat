@@ -2,7 +2,7 @@ import { ArrowLeft, ArrowRight, LockKeyhole, ShieldCheck, Users } from 'lucide-r
 import '@/lib/info-pages.css';
 
 export type InfoPageKind='terms'|'privacy'|'about';
-type Section={title:string;paragraphs:string[];items?:string[]};
+type Section={title:string;paragraphs?:string[];items?:string[]};
 type PageCopy={kicker:string;title:string;lead:string;icon:'lock'|'shield'|'people';sections:Section[]};
 
 const pages:Record<InfoPageKind,PageCopy>={
