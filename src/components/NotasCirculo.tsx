@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Check, FileText, Loader2, Plus } from 'lucide-react';
 import { addMagnateCircleNote, getMagnateCircleNotes } from '@/lib/tabuleiro';
 import type { MagnateCircleNote, MemberCircle } from '@/types/tabuleiro';
@@ -25,7 +25,7 @@ export function NotasCirculo({magnateId,userId,circles}:Props){
   useEffect(()=>{if(!circles.some(circle=>circle.id===circleId))setCircleId(circles[0]?.id||'')},[circleKey]);
   useEffect(()=>{void load()},[magnateId,circleKey]);
 
-  async function submit(e:React.FormEvent){
+  async function submit(e:FormEvent){
     e.preventDefault();if(!content.trim()||!circleId)return;
     setSaving(true);setError('');
     try{
