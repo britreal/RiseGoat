@@ -10,6 +10,7 @@ const AuthPage = lazy(() => import('@/pages/AuthPage').then((m) => ({ default: m
 const LandingPage = lazy(() => import('@/pages/LandingPage').then((m) => ({ default: m.LandingPage })));
 const NotesPage = lazy(() => import('@/pages/NotesPage').then((m) => ({ default: m.NotesPage })));
 const GraphPage = lazy(() => import('@/pages/GraphPage').then((m) => ({ default: m.GraphPage })));
+const NetworkPage = lazy(() => import('@/pages/NetworkPage').then((m) => ({ default: m.NetworkPage })));
 
 function AppContent() {
   const { route, navigate } = useRouter();
@@ -19,7 +20,7 @@ function AppContent() {
     if (loading) return;
     if (route.name === 'auth' && session) { navigate('/notes'); return; }
     if (route.name === 'landing' && session) { navigate('/notes'); return; }
-    if ((route.name === 'notes' || route.name === 'map' || route.name === 'settings') && !session) navigate('/auth');
+    if ((route.name === 'notes' || route.name === 'map' || route.name === 'network' || route.name === 'settings') && !session) navigate('/auth');
   }, [route.name, session, loading, navigate]);
 
   useEffect(() => {
@@ -28,7 +29,7 @@ function AppContent() {
   }, [route.name]);
 
   if (loading) return <Spinner />;
-  return <Suspense fallback={<Spinner />}>{route.name === 'landing' ? <LandingPage /> : route.name === 'auth' ? <AuthPage /> : route.name === 'map' ? <GraphPage /> : route.name === 'settings' ? <NotesPage initialSettingsOpen /> : <NotesPage />}</Suspense>;
+  return <Suspense fallback={<Spinner />}>{route.name === 'landing' ? <LandingPage /> : route.name === 'auth' ? <AuthPage /> : route.name === 'map' ? <GraphPage /> : route.name === 'network' ? <NetworkPage /> : route.name === 'settings' ? <NotesPage initialSettingsOpen /> : <NotesPage />}</Suspense>;
 }
 
 function App() { return <AuthProvider><AppContent /></AuthProvider>; }
