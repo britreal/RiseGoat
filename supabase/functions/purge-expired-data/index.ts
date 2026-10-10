@@ -60,6 +60,11 @@ async function purgeAccount(db:SupabaseClient,r:{id:string;user_id:string|null;e
   const {error:circleError}=await db.from('circle_notes').delete().eq('created_by',uid);if(circleError)throw circleError;
   const {error:roomError}=await db.from('network_room_notes').delete().eq('created_by',uid);if(roomError)throw roomError;
   for(const table of ['time_sessions','words']){const result=await db.from(table).delete().eq('user_id',uid);if(result.error&&!/does not exist|schema cache/i.test(result.error.message))throw result.error}
+  // Remove waitlist PII for this account; related invite delivery logs cascade with their invite.
+  if(claimed.email){
+    const {error:waitlistError}=await db.from('waitlist_signups').delete().eq('email',claimed.email);
+    if(waitlistError)throw waitlistError;
+  }
   const {error:deleteError}=await db.auth.admin.deleteUser(uid);if(deleteError)throw deleteError;
   const mailStatus=await emailCompleted(claimed.email,r.requested_at);
   const {error:completeError}=await db.from('account_deletion_requests').update({status:'completed',completed_at:new Date().toISOString(),user_id:null,email:null,completion_email_status:mailStatus,last_error_code:null}).eq('id',r.id);
