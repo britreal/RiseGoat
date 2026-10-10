@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Loader2, Network, Search } from 'lucide-react';
-import ReactFlow, { Background, Controls, MiniMap, type Edge, type Node } from '@xyflow/react';
+import { ReactFlow, Background, Controls, MiniMap, type Edge, type Node } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useRouter } from '@/lib/router';
 import { carregarGrafoTabuleiro } from '@/lib/tabuleiro';
