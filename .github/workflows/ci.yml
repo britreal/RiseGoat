@@ -30,6 +30,8 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+      - name: Check for privileged frontend secrets
+        run: npm run security:public-env
 
       - name: Typecheck
         run: npm run typecheck
