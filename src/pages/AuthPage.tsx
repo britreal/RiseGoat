@@ -13,6 +13,7 @@ export function AuthPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [referralCode, setReferralCode] = useState(new URLSearchParams(window.location.search).get('ref') || '');
+  const [activityContext, setActivityContext] = useState('');
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -49,6 +50,7 @@ export function AuthPage() {
         p_name: name.trim(),
         p_email: email.trim(),
         p_referral_code: referralCode.trim() || null,
+        p_activity_context: activityContext.trim(),
       });
       result = { error: requestError?.message ?? null };
       if (!result.error) setMessage('Solicitação recebida. A entrada é analisada manualmente; se aprovada, você receberá um link seguro por e-mail.');
@@ -98,6 +100,7 @@ export function AuthPage() {
             )}
             {mode === 'waitlist' && <label><span>Nome</span><input required maxLength={120} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Seu nome" /></label>}
             {mode === 'waitlist' && <label><span>Código de indicação (opcional)</span><input maxLength={32} autoCapitalize="characters" value={referralCode} onChange={(e) => setReferralCode(e.target.value.toUpperCase())} placeholder="RG-XXXXXXXXXX" /></label>}
+            {mode === 'waitlist' && <label><span>Atuação e foco atual</span><input maxLength={240} value={activityContext} onChange={(e) => setActivityContext(e.target.value)} placeholder="Em que você trabalha e no que está focado agora" /></label>}
 
             {(mode === 'signin' || mode === 'reset') && (
               <label><span>{mode === 'reset' ? 'Nova senha' : 'Senha'}</span><div className="auth-password"><input required type={showPassword ? 'text' : 'password'} autoComplete={mode === 'reset' ? 'new-password' : 'current-password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" /><button type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}>{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button></div></label>
