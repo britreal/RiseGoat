@@ -50,3 +50,17 @@ A auditoria do Supabase ainda reportou:
 - proteção contra senhas vazadas desativada.
 
 Não revogar em massa essas funções sem revisar seus chamadores: algumas são parte do fluxo público seguro, enquanto outras podem ser fechadas. Habilitar proteção contra senhas vazadas pelo painel/configuração Auth do Supabase quando o controle estiver disponível.
+
+
+## Convites por e-mail transacional
+
+- \`send-member-access-invite\` valida uma conta administradora, o convite pendente e o token de uso único; gera um link de autenticação via Supabase Auth e envia a mensagem com Resend.
+- \`send-note-share-invite\` valida que o dono da nota está enviando o convite, gera o link de autenticação e envia por Resend sem incluir o título ou o conteúdo da nota na mensagem.
+- \`send-member-invite-email\` envia boas-vindas e notifica quem convidou quando o convite de entrada é aceito.
+- As funções autenticadas usam JWT; os endpoints de evento disparados pelo banco verificam um token de alta entropia guardado no Vault. Segredos nunca são colocados no bundle do browser.
+- \`transactional_email_events\` e \`note_share_email_events\` guardam status, timestamps, código de erro e ID da mensagem do provedor, sem texto das mensagens nem endereços de destinatários.
+- O provedor de e-mail continua condicionado a \`RESEND_API_KEY\` e \`RESEND_FROM_EMAIL\` em secrets de Edge Functions. A entrega só pode ser considerada validada após configuração desses secrets e teste de ponta a ponta.
+
+## Exclusão e lixeira
+
+O agendamento \`risegoat-daily-purge\` chama diariamente \`purge-expired-data\` às 03:15 UTC. O job registra contagens, erros e horários em \`maintenance_job_logs\`. A remoção da lixeira é limitada aos anexos das notas vencidas; a exclusão de conta remove os anexos e as relações que impediriam a remoção do usuário. E-mail final que falhar fica na fila de retry até entrega confirmada; o endereço é removido do registro quando a mensagem for aceita pelo provedor.
