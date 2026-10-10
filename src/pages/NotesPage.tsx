@@ -585,15 +585,13 @@ function recordStop(){if(speech.current){speech.current.active=false;try{speech.
     const token=crypto.randomUUID().replace(/-/g,'');
     const {data,error:err}=await supabase.from('note_share_invites').insert({note_id:selected.id,inviter_id:user.id,email,role:inviteRole,token}).select().single();
     if(err){setShareMessage('Não foi possível criar o convite. '+err.message);return;}
-    const redirectTo=location.origin+'/notes?invite='+encodeURIComponent(data.token);
-    const {error:mailError}=await supabase.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:redirectTo}});
+    const {error:mailError}=await supabase.functions.invoke('send-note-share-invite',{body:{invite_id:data.id}});
     if(mailError){
-      await supabase.from('note_share_invites').update({expires_at:new Date(0).toISOString()}).eq('id',data.id).eq('inviter_id',user.id);
-      setShareMessage('O convite não foi enviado. Verifique a configuração de e-mail transacional do Supabase. '+mailError.message);
+      setShareMessage('O convite não foi enviado. Verifique RESEND_API_KEY e RESEND_FROM_EMAIL no Supabase. '+mailError.message);
       return;
     }
     setShareEmail('');
-    setShareMessage('Magic link enviado para '+email+'. O convite expira em 7 dias.');
+    setShareMessage('Convite transacional enviado para '+email+'. O convite fica válido por até 7 dias; o link de autenticação pode expirar antes.');
     await loadShareAccess(selected.id);
   }
   function exportOne(f:'json'|'md'|'txt'){if(!selected)return;const p=plain(selected.content),n=selected.title||'nota';if(f==='json')download(new Blob([JSON.stringify(selected,null,2)],{type:'application/json'}),n+'.json');if(f==='md')download(new Blob(['# '+n+'\n\n'+p],{type:'text/markdown'}),n+'.md');if(f==='txt')download(new Blob([p],{type:'text/plain'}),n+'.txt')}
