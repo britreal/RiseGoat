@@ -18,7 +18,7 @@ export function NotasCirculo({magnateId,userId,circles}:Props){
   async function load(){
     if(!circleKey){setNotes([]);return}
     setLoading(true);setError('');
-    try{setNotes(await getMagnateCircleNotes(magnateId,circleKey.split(','))}
+    try{setNotes(await getMagnateCircleNotes(magnateId,circleKey.split(',')))}
     catch(e){setError(e instanceof Error?e.message:'Não foi possível carregar as notas do círculo.')}
     finally{setLoading(false)}
   }
