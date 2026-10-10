@@ -7,7 +7,7 @@ const file=process.argv[2];
 if(!file){console.error('Uso: node scripts/tabuleiro/import-forbes-csv.mjs <csv-autorizado> [--publish-approved]');process.exit(2)}
 const allowPublish=process.argv.includes('--publish-approved');
 const sectorAliases={
-  technology:'tech',technology:'tech',tech:'tech',finance:'financas',financial:'financas',financas:'financas',financeiro:'financas',
+  technology:'tech',tech:'tech',finance:'financas',financial:'financas',financas:'financas',financeiro:'financas',
   realestate:'imobiliario',real_estate:'imobiliario',imobiliario:'imobiliario',energy:'energia',energia:'energia',
   industrial:'industria',industry:'industria',industria:'industria',media:'midia',midia:'midia',healthcare:'saude',saude:'saude',
   retail:'varejo',varejo:'varejo',logistics:'logistica',logistica:'logistica',agriculture:'agro',agro:'agro',education:'educacao',educacao:'educacao',
