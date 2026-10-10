@@ -77,7 +77,8 @@ export function TabuleiroGrafo() {
   }), [magnates, sector, query]);
   const candidateIds = useMemo(() => new Set(candidateNodes.map((item) => item.id)), [candidateNodes]);
   const candidateEdges = useMemo(() => relationFiltered.filter((edge) => candidateIds.has(edge.origem_id) && candidateIds.has(edge.destino_id)), [relationFiltered, candidateIds]);
-  const effectiveRootId = rootId && candidateIds.has(rootId) ? rootId : '';\n  const visibleIds = useMemo(() => withinDepth(candidateNodes, candidateEdges, effectiveRootId, depth), [candidateNodes, candidateEdges, effectiveRootId, depth]);
+  const effectiveRootId = rootId && candidateIds.has(rootId) ? rootId : '';
+  const visibleIds = useMemo(() => withinDepth(candidateNodes, candidateEdges, effectiveRootId, depth), [candidateNodes, candidateEdges, effectiveRootId, depth]);
   const visibleMagnates = useMemo(() => candidateNodes.filter((item) => visibleIds.has(item.id)), [candidateNodes, visibleIds]);
   const visibleEdges = useMemo(() => candidateEdges.filter((edge) => visibleIds.has(edge.origem_id) && visibleIds.has(edge.destino_id)), [candidateEdges, visibleIds]);
 
