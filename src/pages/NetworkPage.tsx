@@ -194,7 +194,7 @@ export function NetworkPage(){
       const {data:inviteData,error:issueError}=await supabase.rpc('issue_member_access_invite',{p_signup_id:row.id});
       const invite=Array.isArray(inviteData)?inviteData[0]:inviteData;
       if(issueError||!invite){setError('Solicitação aprovada, mas não foi possível emitir o convite. '+(issueError?.message||''));await load();setInviteBusy(null);return;}
-      const {error:mailError}=await supabase.auth.signInWithOtp({email:invite.invite_email,options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+'/auth?membership_invite='+encodeURIComponent(invite.invite_token)}});
+      const {error:mailError}=await supabase.auth.signInWithOtp({email:invite.invite_email,options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+'/notes?membership_invite='+encodeURIComponent(invite.invite_token)}});
       if(mailError){setError('Acesso aprovado, mas o e-mail mágico não foi enviado. Verifique o SMTP transacional do Supabase. '+mailError.message);}
       else feedback('Acesso aprovado e magic link enviado para '+invite.invite_email+'.');
     }else feedback('Solicitação recusada.');
@@ -205,7 +205,7 @@ export function NetworkPage(){
     const {data:inviteData,error:issueError}=await supabase.rpc('issue_member_access_invite',{p_signup_id:row.id});
     const invite=Array.isArray(inviteData)?inviteData[0]:inviteData;
     if(issueError||!invite){setError(issueError?.message||'Não foi possível emitir o convite.');setInviteBusy(null);return;}
-    const {error:mailError}=await supabase.auth.signInWithOtp({email:invite.invite_email,options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+'/auth?membership_invite='+encodeURIComponent(invite.invite_token)}});
+    const {error:mailError}=await supabase.auth.signInWithOtp({email:invite.invite_email,options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+'/notes?membership_invite='+encodeURIComponent(invite.invite_token)}});
     if(mailError)setError('Não foi possível enviar o magic link. Verifique o SMTP transacional do Supabase. '+mailError.message);
     else feedback('Magic link enviado para '+invite.invite_email+'.');
     await load();setInviteBusy(null);
@@ -257,6 +257,7 @@ export function NetworkPage(){
     </div>}
 
     {tab==='people'&&<section className="network-stack">
+      {notices.length>0&&<section className="network-panel network-notices"><div className="network-panel-heading"><div><span className="network-eyebrow">CENTRAL DE NOTIFICAÇÕES</span><h2>Atividade e convites</h2><p>Convites e atualizações administrativas. Conteúdo privado de notas não aparece nesta lista.</p></div><Bell size={19}/></div>{notices.map(notice=><div className="network-invite-row" key={notice.id}><div><strong>{notice.title}</strong><small>{notice.body||'Você recebeu uma atualização.'} · {new Date(notice.created_at).toLocaleString('pt-BR')}{notice.read_at?' · Lida':' · Não lida'}</small></div>{!notice.read_at&&<button className="network-secondary compact" onClick={()=>void markNoticeRead(notice.id)}>Marcar como lida</button>}</div>)}</section>}
       <div className="network-panel-heading network-directory-heading"><div><span className="network-eyebrow">DIRETÓRIO COM OPT-IN</span><h2>Membros disponíveis</h2><p>Somente quem ativou a visibilidade aparece aqui. Pedidos de introdução passam pela equipe.</p></div><Compass size={22}/></div>
       {shareInvites.length>0&&<section className="network-panel network-notices"><div className="network-panel-heading"><div><span className="network-eyebrow">CONVITES DE NOTA</span><h2>Você tem {shareInvites.length} convite(s) pendente(s)</h2></div><Bell size={19}/></div>{shareInvites.map(inv=><div className="network-invite-row" key={inv.id}><div><strong>Nota compartilhada com você</strong><small>Permissão: {inv.role==='editor'?'pode editar':'somente leitura'} · expira {new Date(inv.expires_at).toLocaleDateString('pt-BR')}</small></div><button className="network-primary compact" disabled={inviteBusy===inv.id} onClick={()=>void acceptShareInvite(inv)}>{inviteBusy===inv.id?<Loader2 size={14} className="network-spin"/>:<Check size={14}/>}Aceitar</button></div>)}</section>}
       {pendingCircleInvites.length>0&&<section className="network-panel network-notices"><div className="network-panel-heading"><div><span className="network-eyebrow">CÍRCULOS</span><h2>Convites de círculo</h2></div><Bell size={19}/></div>{pendingCircleInvites.map(inv=>{const circle=circles.find(c=>c.id===inv.circle_id);return <div className="network-invite-row" key={inv.circle_id+inv.user_id}><div><strong>{circle?.name||'Círculo privado'}</strong><small>{circle?.purpose||'Um membro convidou você para um grupo fechado.'}</small></div><button className="network-primary compact" disabled={inviteBusy===inv.circle_id} onClick={()=>void acceptCircleInvite(inv)}><Check size={14}/>Aceitar</button></div>})}</section>}
