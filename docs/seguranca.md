@@ -20,6 +20,15 @@ RLS forçado não substitui políticas corretas, controle de papéis ou teste co
 - **Não** colocar \`service_role\` em \`VITE_*\`, arquivos versionados, chats, imagens ou builds de navegador. Guardar a chave operacional em um gerenciador de segredos/arquivo criptografado fora do repositório, com acesso restrito. Se a chave já foi exposta em bundle, logs ou Git, rotacioná-la no Supabase e atualizar somente os serviços de servidor que realmente precisem dela.
 - O app normal deve usar a chave publishable e RLS. A chave administrativa só deve existir em automações/backend de servidor ou no cofre operacional offline.
 
+## Resultado dos testes executados
+
+- **RLS:** 102/102 tabelas de `public` com RLS habilitado e forçado; 0 tabelas sem política no momento da verificação.
+- **Anon:** o teste transacional mostrou apenas a fixture pública do Tabuleiro e confirmou ausência de privilégio `SELECT` sobre `public.notes`.
+- **JWT autenticado não-admin (simulado):** 0 notas pessoais, 0 notas de círculo, 0 perfis de membro e 0 eventos de auditoria visíveis.
+- **Admin:** `public.is_admin()` reconheceu a conta configurada, a tabela `admin_users` ficou acessível ao admin e `log_admin_access()` gerou um evento no log.
+- Os dados de teste foram executados em transações revertidas. O log atual contém apenas o evento administrativo criado durante a validação manual.
+- **Limite:** havia uma única conta em `auth.users`, que também é admin. Ainda falta repetir com uma sessão de membro real após a primeira conta de membro ser aprovada.
+
 ## Testes obrigatórios de papel
 
 Execute em projeto de staging com dados fictícios antes de cada release:
