@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import {
-  Bell, BookOpen, ChevronDown, ChevronRight, CircleHelp, Command,
-  Download, FileText, Folder, Map, Search, ShieldCheck,
+  BookOpen, ChevronDown, ChevronRight, CircleHelp, Command,
+  Download, FileText, Folder, Map, Network, Search, ShieldCheck,
   Sparkles, X, type LucideIcon,
 } from 'lucide-react';
 import '@/lib/help-center.css';
@@ -195,17 +195,6 @@ const helpCategories: HelpCategory[] = [
         keywords: 'anexo anexar arquivo PDF documento upload baixar segurança privado',
       },
       {
-        title: 'Salve um card como PNG',
-        summary: 'Exporte uma imagem da nota que você pode compartilhar nas redes sociais.',
-        steps: [
-          'Na grade de notas, abra Mais opções no card.',
-          'Escolha Salvar card como PNG.',
-          'A imagem é gerada em alta resolução, com o card centralizado e margem de 20 px em todos os lados.',
-          'Revise a imagem antes de publicar para confirmar que ela não contém informações privadas.',
-        ],
-        keywords: 'PNG imagem post redes sociais exportar cartão card salvar compartilhar',
-      },
-      {
         title: 'Entenda a Lixeira',
         summary: 'Excluir uma nota não é o mesmo que apagá-la permanentemente.',
         steps: [
@@ -294,45 +283,88 @@ const helpCategories: HelpCategory[] = [
     ],
   },
   {
-    id: 'reminders',
-    title: 'Lembretes e colaboração',
-    description: 'Dê um próximo passo às notas e compartilhe contexto quando necessário.',
-    icon: Bell,
+    id: 'collaboration',
+    title: 'Compartilhamento e rede',
+    description: 'Compartilhe somente o que escolher e construa relações por convite.',
+    icon: Network,
     articles: [
       {
-        title: 'Defina um lembrete',
-        summary: 'Lembretes ajudam a trazer uma nota de volta à sua atenção em um momento importante.',
+        title: 'Compartilhe uma nota com magic link',
+        summary: 'Convide alguém pelo e-mail e escolha entre edição e somente leitura.',
         steps: [
-          'Abra a nota e escolha o controle de lembrete, representado por um relógio.',
-          'Selecione a data e a hora.',
-          'Quando disponível, escolha uma repetição diária, semanal ou mensal.',
-          'Permita notificações no navegador ou dispositivo para receber os avisos.',
+          'Abra uma nota salva e escolha Compartilhar.',
+          'Informe o e-mail de quem deve receber acesso e selecione Pode editar ou Somente leitura.',
+          'Crie o convite. A pessoa recebe um magic link pelo serviço de autenticação; o link é destinado ao e-mail informado e expira em sete dias.',
+          'Convites existentes aparecem na área Rede. O proprietário pode conferir acessos, cancelar convites pendentes ou revogar participantes.',
         ],
-        note: 'O navegador pode suspender tarefas quando o app está fechado ou em segundo plano. Para itens críticos, mantenha também um lembrete no sistema do seu dispositivo.',
-        keywords: 'lembrete relógio data hora repetir diário semanal mensal notificação',
+        note: 'O envio depende da configuração de e-mail transacional do serviço. Nunca compartilhe uma nota com quem não deve conhecer seu conteúdo.',
+        keywords: 'compartilhar convidar colaborador magic link e-mail acesso editor somente leitura',
       },
       {
-        title: 'Lembretes por localização',
-        summary: 'Em dispositivos compatíveis, uma nota pode usar uma localização como gatilho.',
+        title: 'Configure seu perfil de membro',
+        summary: 'Defina o cartão de membro e escolha se deseja aparecer no diretório.',
         steps: [
-          'Abra os controles de lembrete e selecione a opção por localização, quando exibida.',
-          'Permita o acesso à localização no navegador e no dispositivo.',
-          'Escolha se o gatilho deve considerar chegada ou saída, quando disponível.',
+          'Abra Rede e entre em Meu perfil.',
+          'Preencha somente o que deseja compartilhar: nome, cidade, setor, foco atual e tema para conversar.',
+          'Ative Aceito pedidos de introdução apenas se estiver aberto a receber esses pedidos.',
+          'O perfil só aparece no diretório quando você ativa Aparecer no diretório de membros.',
         ],
-        note: 'A localização depende de permissão e suporte do navegador. O rastreamento pode não funcionar quando o navegador é suspenso ou o app está fechado.',
-        keywords: 'localização GPS chegar sair lugar geolocalização permissão',
+        note: 'A visibilidade do cartão não dá acesso às suas notas pessoais, pastas ou ao Mapa privado.',
+        keywords: 'perfil membro diretório opt in visibilidade privacidade cidade setor foco',
       },
       {
-        title: 'Compartilhe uma nota',
-        summary: 'Use o compartilhamento do dispositivo ou convide alguém para colaborar quando essa opção estiver disponível.',
+        title: 'Crie um círculo privado',
+        summary: 'Organize um grupo de três a doze membros e mantenha notas colaborativas separadas.',
         steps: [
-          'Abra a nota e escolha Compartilhar.',
-          'Para enviar o texto, use a opção de compartilhamento do sistema. Se ela não estiver disponível, o navegador pode oferecer uma alternativa por e-mail.',
-          'Para convidar alguém, informe o e-mail da pessoa e crie o convite.',
-          'A edição compartilhada pode sincronizar em tempo real para participantes autorizados.',
+          'Em Rede, abra Círculos e crie um nome e um propósito.',
+          'Convide membros que ativaram a visibilidade no diretório.',
+          'Os convidados precisam aceitar antes de ver as notas do círculo.',
+          'Publique contexto e decisões em Notas dos círculos. Suas notas pessoais não são copiadas para o grupo.',
         ],
-        note: 'Convites exigem uma nota já salva. Compartilhe apenas com pessoas que devem ter acesso ao conteúdo.',
-        keywords: 'compartilhar enviar convidar colaborador email edição conjunta sincronizar',
+        keywords: 'círculo grupo privado 3 12 membros convite nota colaborativa',
+      },
+      {
+        title: 'Entre em salas temáticas',
+        summary: 'Use salas para guardar conhecimento compartilhado por assunto.',
+        steps: [
+          'Em Rede, abra Salas e escolha um tema relevante.',
+          'Entre na sala para ler suas contribuições publicadas.',
+          'Envie uma nota para compartilhar contexto, pergunta ou proposta com os participantes.',
+          'Conteúdos que aguardam moderação só ficam visíveis quando forem publicados.',
+        ],
+        keywords: 'sala temática capital imóveis IA filantropia moderação contribuição',
+      },
+      {
+        title: 'Peça uma introdução',
+        summary: 'Solicite uma ponte com um membro que declarou aceitar apresentações.',
+        steps: [
+          'No diretório, procure alguém que ativou Aceito pedidos de introdução.',
+          'Informe o tema da conversa de forma breve e respeitosa.',
+          'A equipe faz a ponte e decide o melhor modo de apresentar as pessoas.',
+          'Seu texto privado não é enviado automaticamente; o pedido fica registrado para a equipe.',
+        ],
+        keywords: 'introdução apresentação contato networking ponte membro',
+      },
+      {
+        title: 'Solicite onboarding individual',
+        summary: 'Peça uma conversa de aproximadamente uma hora para orientar sua entrada na rede.',
+        steps: [
+          'Em Rede, abra Meu perfil e escolha Solicitar conversa.',
+          'Na conversa, alinhe objetivos, contexto, contribuição e temas de interesse.',
+          'A equipe pode sugerir até três apresentações relevantes.',
+          'O pedido fica pendente até que a equipe combine o horário.',
+        ],
+        keywords: 'onboarding conversa individual uma hora apresentação objetivos',
+      },
+      {
+        title: 'Entenda a central de notificações',
+        summary: 'Convites para notas e círculos aparecem dentro da área Rede.',
+        steps: [
+          'Abra Rede e depois Membros.',
+          'Revise a Central de notificações e os blocos de convites pendentes.',
+          'Aceite somente os convites que reconhece e marque atualizações como lidas quando terminar.',
+        ],
+        keywords: 'notificação in app convite pendente círculo nota ler',
       },
       {
         title: 'Gerencie quem tem acesso',
@@ -355,6 +387,17 @@ const helpCategories: HelpCategory[] = [
     icon: ShieldCheck,
     articles: [
       {
+        title: 'Solicite acesso à RiseGoat',
+        summary: 'A rede funciona por convite e a entrada é aprovada manualmente.',
+        steps: [
+          'Na tela de acesso, escolha Solicitar convite e informe seu nome e e-mail.',
+          'Se um membro compartilhou um código de indicação, você pode incluí-lo. O código registra a origem do convite, mas não aprova o acesso automaticamente.',
+          'A equipe analisa a solicitação. Se aprovada, você recebe um magic link por e-mail para entrar com segurança.',
+          'A equipe não publica seu perfil no diretório automaticamente. A visibilidade é uma escolha feita dentro da Rede.',
+        ],
+        keywords: 'acesso convite lista de espera código indicação aprovação manual magic link',
+      },
+      {
         title: 'Faça um backup completo',
         summary: 'Exporte suas notas e os dados relacionados em um arquivo JSON que também inclui os anexos.',
         steps: [
@@ -367,27 +410,15 @@ const helpCategories: HelpCategory[] = [
         keywords: 'exportar exportação download JSON Markdown txt backup cópia anexos checklist etiquetas pastas lembretes',
       },
       {
-        title: 'Importe arquivos do Google Takeout',
-        summary: 'A opção Importar Takeout aceita arquivos JSON e HTML. A importação depende do formato e dos campos presentes em cada arquivo.',
+        title: 'Entre com um magic link ou recupere a senha',
+        summary: 'O acesso à rede é aprovado por convite; membros também podem redefinir a senha por e-mail.',
         steps: [
-          'Exporte seus dados do Google Keep usando o Google Takeout.',
-          'Na área lateral do Notas, escolha Importar Takeout.',
-          'Selecione os arquivos JSON ou HTML que deseja importar.',
-          'Revise as notas importadas e ajuste pastas, etiquetas e títulos quando necessário.',
-        ],
-        note: 'O importador aceita title e content ou textContent. Notas do tipo lista em listContent são importadas como checklists, preservando itens marcados e subitens quando disponíveis. Mantenha o arquivo original até confirmar a migração.',
-        keywords: 'importar takeout Google Keep JSON HTML migração transferência',
-      },
-      {
-        title: 'Crie uma conta ou recupere a senha',
-        summary: 'A tela de acesso permite criar uma conta e solicitar a redefinição da senha por e-mail.',
-        steps: [
-          'Na tela de entrada, escolha Criar conta e informe seu e-mail e uma senha com pelo menos seis caracteres.',
-          'Se a confirmação de e-mail for solicitada, abra a mensagem recebida para concluir o cadastro.',
+          'Se você recebeu um convite aprovado, abra o magic link enviado ao e-mail exato da solicitação.',
+          'Se já possui acesso, entre na tela de login com sua conta.',
           'Se esquecer a senha, escolha Esqueci minha senha e solicite o link de redefinição.',
-          'Abra o link recebido e escolha uma nova senha.',
+          'O cadastro público direto está fechado. A entrada é feita por aprovação manual e convite.',
         ],
-        keywords: 'criar conta cadastro entrar login esquecer senha recuperar senha redefinir e-mail confirmação',
+        keywords: 'entrar login convite magic link recuperar senha redefinir e-mail cadastro aprovado',
       },
       {
         title: 'Exclua notas e entenda os limites da conta',
@@ -481,17 +512,6 @@ const helpCategories: HelpCategory[] = [
           'Não há um canal de suporte de contato exibido dentro do app. A Central de Ajuda não inventa um endereço de e-mail ou prazo de resposta.',
         ],
         keywords: 'internet offline sincronização dispositivos limite tamanho anexo planos preços contato suporte',
-      },
-      {
-        title: 'Uma notificação ou lembrete não chegou',
-        summary: 'O recebimento depende das permissões do navegador e de como o dispositivo mantém o app em execução.',
-        steps: [
-          'Confira se as notificações estão permitidas para o site.',
-          'Confira a data, a hora e o fuso do dispositivo.',
-          'Para lembretes de localização, confirme também a permissão de localização.',
-          'Se o navegador estava fechado ou suspenso, teste com o app aberto antes de confiar no comportamento.',
-        ],
-        keywords: 'notificação lembrete não chegou permissão horário fuso localização',
       },
       {
         title: 'Uma nota ou conexão não aparece',
