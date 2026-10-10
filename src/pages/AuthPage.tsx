@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 type Mode = 'signin' | 'waitlist' | 'forgot' | 'reset';
 
 export function AuthPage() {
-  const { signIn, signUp, resetPassword, updatePassword, recoveryMode } = useAuth();
+  const { signIn, resetPassword, updatePassword, recoveryMode } = useAuth();
   const initialMode: Mode = new URLSearchParams(window.location.search).get('mode') === 'waitlist' ? 'waitlist' : recoveryMode ? 'reset' : 'signin';
   const [mode, setMode] = useState<Mode>(initialMode);
   const [name, setName] = useState('');
