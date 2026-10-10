@@ -294,10 +294,10 @@ const helpCategories: HelpCategory[] = [
         steps: [
           'Abra uma nota salva e escolha Compartilhar.',
           'Informe o e-mail de quem deve receber acesso e selecione Pode editar ou Somente leitura.',
-          'Crie o convite. A pessoa recebe um magic link pelo serviço de autenticação; o link é destinado ao e-mail informado e expira em sete dias.',
+          'Crie o convite. A pessoa recebe um magic link por e-mail transacional. O convite fica válido por até sete dias, mas o link de autenticação pode expirar antes, conforme a configuração do serviço.',
           'Convites existentes aparecem na área Rede. O proprietário pode conferir acessos, cancelar convites pendentes ou revogar participantes.',
         ],
-        note: 'O envio depende da configuração de e-mail transacional do serviço. Nunca compartilhe uma nota com quem não deve conhecer seu conteúdo.',
+        note: 'A entrega usa Resend e depende de RESEND_API_KEY e RESEND_FROM_EMAIL configurados no Supabase. Se o envio falhar, o convite é expirado; compartilhe apenas com pessoas que devem ter acesso ao conteúdo.',
         keywords: 'compartilhar convidar colaborador magic link e-mail acesso editor somente leitura',
       },
       {
@@ -386,6 +386,19 @@ const helpCategories: HelpCategory[] = [
     description: 'Cuide dos seus registros e configure o app para seu jeito de trabalhar.',
     icon: ShieldCheck,
     articles: [
+      {
+        title: 'Exporte um card PNG para compartilhar',
+        summary: 'Crie uma imagem em formato social e escolha quanto do conteúdo pode aparecer.',
+        steps: [
+          'Abra uma nota sua, salva e editável, e escolha Exportar card PNG.',
+          'Selecione Story 9:16, Feed quadrado 1:1 ou Horizontal 16:9.',
+          'Card privado inclui o conteúdo completo. Card público oferece um resumo com título, uma linha e etiquetas, ou somente título e etiquetas.',
+          'A imagem é criada no navegador e salva no seu dispositivo. A RiseGoat não publica automaticamente por você.',
+          'Abra o PNG e revise o conteúdo antes de compartilhar. O domínio risegoat.com aparece discretamente no rodapé.',
+        ],
+        note: 'O membro controla se, quando e onde publica. Não use o modo privado para divulgar informações confidenciais.',
+        keywords: 'PNG exportar imagem Story 9:16 quadrado 1:1 horizontal 16:9 card privado card público resumo etiquetas branding',
+      },
       {
         title: 'Solicite acesso à RiseGoat',
         summary: 'A rede funciona por convite e a entrada é aprovada manualmente.',
