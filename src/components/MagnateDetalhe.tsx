@@ -1,4 +1,4 @@
-import { ArrowUpRight, Building2, ExternalLink, Network, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, Building2, ExternalLink, Network, ShieldCheck } from 'lucide-react';
 import type { Magnate, MagnateCompany, MagnateConnection } from '@/types/tabuleiro';
 import { NotasCirculo } from '@/components/NotasCirculo';
 import { FEATURES } from '@/lib/features';
