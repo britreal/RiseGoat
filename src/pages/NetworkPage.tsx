@@ -57,6 +57,7 @@ export function NetworkPage(){
   const [circleNoteCircle,setCircleNoteCircle]=useState('');
   const [circleNoteTitle,setCircleNoteTitle]=useState('');
   const [circleNoteContent,setCircleNoteContent]=useState('');
+  const [editingCircleNoteId,setEditingCircleNoteId]=useState<string|null>(null);
   const [circleInviteSelections,setCircleInviteSelections]=useState<Record<string,string>>({});
   const [activeRoom,setActiveRoom]=useState('');
   const [roomModeratorSelection,setRoomModeratorSelection]=useState<Record<string,string>>({});
@@ -123,7 +124,7 @@ export function NetworkPage(){
   useEffect(()=>{void load()},[user?.id]);
 
   const people=useMemo(()=>directory.filter(p=>p.discoverable&&p.user_id!==user?.id),[directory,user?.id]);
-  const myCircles=useMemo(()=>circles.filter(c=>c.owner_user_id===user?.id||circleMembers.some(m=>m.circle_id===c.id&&m.user_id===user?.id)),[circles,circleMembers,user?.id]);
+  const myCircles=useMemo(()=>circles.filter(c=>c.owner_user_id===user?.id||circleMembers.some(m=>m.circle_id===c.id&&m.user_id===user?.id&&m.status==='accepted')),[circles,circleMembers,user?.id]);
   const pendingCircleInvites=useMemo(()=>circleMembers.filter(m=>m.user_id===user?.id&&m.status==='pending'),[circleMembers,user?.id]);
   const joinedRooms=useMemo(()=>roomMembers.filter(m=>m.user_id===user?.id),[roomMembers,user?.id]);
   const pendingNotices=notices.filter(n=>!n.read_at).length+shareInvites.length+pendingCircleInvites.length;
@@ -200,9 +201,16 @@ export function NetworkPage(){
   }
   async function addCircleNote(e:FormEvent){
     e.preventDefault();if(!user||!circleNoteCircle||!circleNoteContent.trim())return;setInviteBusy('circle-note');
-    const {error:addError}=await supabase.from('circle_notes').insert({circle_id:circleNoteCircle,created_by:user.id,title:circleNoteTitle.trim(),content:circleNoteContent.trim()});
-    if(addError)setError('Não foi possível publicar no círculo. '+addError.message);else{setCircleNoteTitle('');setCircleNoteContent('');feedback('Nota publicada para os membros aceitos do círculo.');await load()}setInviteBusy(null);
+    const payload={title:circleNoteTitle.trim(),content:circleNoteContent.trim(),updated_at:new Date().toISOString()};
+    const result=editingCircleNoteId
+      ?await supabase.from('circle_notes').update(payload).eq('id',editingCircleNoteId).eq('circle_id',circleNoteCircle)
+      :await supabase.from('circle_notes').insert({circle_id:circleNoteCircle,created_by:user.id,...payload});
+    if(result.error)setError('Não foi possível salvar a nota do círculo. '+result.error.message);
+    else{setCircleNoteTitle('');setCircleNoteContent('');setEditingCircleNoteId(null);feedback(editingCircleNoteId?'Nota colaborativa atualizada.':'Nota publicada para os membros aceitos do círculo.');await load()}
+    setInviteBusy(null);
   }
+  function startEditingCircleNote(note:CircleNote){setCircleNoteCircle(note.circle_id);setCircleNoteTitle(note.title);setCircleNoteContent(note.content);setEditingCircleNoteId(note.id)}
+  async function toggleCircleNotePin(note:CircleNote){const {error:pinError}=await supabase.from('circle_notes').update({is_pinned:!note.is_pinned,updated_at:new Date().toISOString()}).eq('id',note.id);if(pinError)setError('Não foi possível atualizar a nota. '+pinError.message);else{feedback(note.is_pinned?'Nota desafixada.':'Nota fixada para o círculo.');await load()}}
   async function joinRoom(roomId:string){
     if(!user)return;setInviteBusy(roomId);const {error:joinError}=await supabase.from('network_room_members').insert({room_id:roomId,user_id:user.id,role:'member'});
     if(joinError&& !joinError.message.toLowerCase().includes('duplicate'))setError(joinError.message);else feedback('Você entrou na sala.');
