@@ -667,182 +667,6 @@ function recordStop(){if(speech.current){speech.current.active=false;try{speech.
   }
 
   async function copyDocs(note:Note|null=selected){if(!note)return;await navigator.clipboard?.writeText((note.title+'\n\n'+plain(note.content)).trim());window.open('https://docs.google.com/document/create','_blank');setQuickAction(null);setMore(false)}
-  function exportCardPNG(note:Note){
-    try{
-      const scale=2,padding=20,cardWidth=640,inner=26;
-      const canvas=document.createElement('canvas');
-      const ctx=canvas.getContext('2d');
-      if(!ctx)throw new Error('Este navegador não conseguiu preparar a imagem.');
-      const fontFamily='-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-      const titleFont='700 26px '+fontFamily;
-      const bodyFont='400 18px '+fontFamily;
-      const itemFont='400 16px '+fontFamily;
-      const availableWidth=cardWidth-inner*2;
-      const wrap=(value:string,maxWidth:number,font:string):string[]=>{
-        ctx.font=font;
-        const words=(value||'').split(/\s+/).filter(Boolean);
-        if(!words.length)return [''];
-        const lines:string[]=[];
-        let line='';
-        for(const word of words){
-          const candidate=line?line+' '+word:word;
-          if(line&&ctx.measureText(candidate).width>maxWidth){lines.push(line);line=word}else line=candidate;
-        }
-        if(line)lines.push(line);
-        return lines;
-      };
-      const limitLines=(lines:string[],max:number)=>{
-        if(lines.length<=max)return lines;
-        const kept=lines.slice(0,max);
-        kept[max-1]=(kept[max-1]||'').replace(/\s+\S*$/,'')+'…';
-        return kept;
-      };
-      const title=note.title?.trim()||'Sem título';
-      const titleLines=limitLines(wrap(title,availableWidth,titleFont),3);
-      const isChecklist=note.note_type==='checklist';
-      const allItems=(check[note.id]??[]).slice().sort((a,b)=>a.position-b.position).filter(item=>item.title.trim());
-      const visibleItems=allItems.slice(0,8);
-      const checkRows=visibleItems.map(item=>({item,lines:limitLines(wrap(item.title||'Item sem título',availableWidth-36,itemFont),2)}));
-      const bodyText=plain(note.content)||note.ocr_text||note.transcript||'Sem conteúdo ainda.';
-      const bodyLines=isChecklist?[]:limitLines(wrap(bodyText,availableWidth,bodyFont),12);
-      const checkRowHeight=(row:{item:Checklist;lines:string[]})=>Math.max(25,row.lines.length*22)+8;
-      const extraRows=allItems.length-visibleItems.length;
-      const bodyHeight=isChecklist
-        ?(checkRows.length?checkRows.reduce((total,row)=>total+checkRowHeight(row),0):27)+(extraRows?25:0)
-        :Math.max(27,bodyLines.length*26);
-      const labelsForNote=(links[note.id]??[]).map(id=>labels.find(label=>label.id===id)?.name).filter((name):name is string=>Boolean(name)).slice(0,3);
-      const bodyStartOffset=69+titleLines.length*34+10;
-      const cardHeight=Math.max(190,bodyStartOffset+bodyHeight+(labelsForNote.length?12+26+26:26));
-      canvas.width=(cardWidth+padding*2)*scale;
-      canvas.height=(cardHeight+padding*2)*scale;
-      ctx.scale(scale,scale);
-      ctx.fillStyle='#f5f5f3';
-      ctx.fillRect(0,0,cardWidth+padding*2,cardHeight+padding*2);
-      const cardX=padding,cardY=padding;
-      const rounded=(x:number,y:number,w:number,h:number,r:number)=>{
-        ctx.beginPath();
-        ctx.moveTo(x+r,y);
-        ctx.arcTo(x+w,y,x+w,y+h,r);
-        ctx.arcTo(x+w,y+h,x,y+h,r);
-        ctx.arcTo(x,y+h,x,y,r);
-        ctx.arcTo(x,y,x+w,y,r);
-        ctx.closePath();
-      };
-      const colors:Record<Color,string>={default:'#ffffff',warm:'#f7f1e5',yellow:'#fff4b8',orange:'#ffe1c7',red:'#f3d4cf',pink:'#f5dce7',purple:'#e8def7',indigo:'#dce2f8',blue:'#d9e9f7',teal:'#d7efe9',green:'#dcefdc',gray:'#e8e9e7'};
-      ctx.save();
-      ctx.shadowColor='rgba(30,30,30,.12)';
-      ctx.shadowBlur=14;
-      ctx.shadowOffsetY=5;
-      rounded(cardX,cardY,cardWidth,cardHeight,19);
-      ctx.fillStyle=colors[note.color]||'#ffffff';
-      ctx.fill();
-      ctx.restore();
-      rounded(cardX,cardY,cardWidth,cardHeight,19);
-      ctx.strokeStyle='rgba(40,40,40,.08)';
-      ctx.lineWidth=1;
-      ctx.stroke();
-      const updatedAt=new Date(note.updated_at||note.created_at);
-      const dateLabel=updatedAt.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}).replace('.','');
-      const timeLabel=updatedAt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-      ctx.fillStyle='#858585';
-      ctx.font='500 12px '+fontFamily;
-      ctx.textAlign='left';
-      ctx.fillText(dateLabel,cardX+inner,cardY+38);
-      ctx.textAlign='right';
-      ctx.fillText(timeLabel,cardX+cardWidth-inner,cardY+38);
-      ctx.textAlign='left';
-      let titleBaseline=cardY+69;
-      ctx.fillStyle='#222222';
-      ctx.font=titleFont;
-      for(const line of titleLines){ctx.fillText(line,cardX+inner,titleBaseline);titleBaseline+=34}
-      const bodyBaseline=cardY+bodyStartOffset;
-      let contentBottom=bodyBaseline+bodyHeight;
-      if(isChecklist){
-        if(!checkRows.length){
-          ctx.font=bodyFont;
-          ctx.fillStyle='#606060';
-          ctx.fillText('Sem itens ainda.',cardX+inner,bodyBaseline);
-          contentBottom=bodyBaseline+27;
-        }else{
-          let rowTop=bodyBaseline-17;
-          for(const row of checkRows){
-            const rowHeight=checkRowHeight(row);
-            rounded(cardX+inner,rowTop+3,16,16,4);
-            ctx.lineWidth=1.5;
-            ctx.strokeStyle=row.item.is_completed?'#53845e':'#858585';
-            ctx.stroke();
-            if(row.item.is_completed){
-              ctx.beginPath();
-              ctx.moveTo(cardX+inner+3,rowTop+11);
-              ctx.lineTo(cardX+inner+7,rowTop+15);
-              ctx.lineTo(cardX+inner+14,rowTop+6);
-              ctx.strokeStyle='#53845e';
-              ctx.lineWidth=1.8;
-              ctx.stroke();
-            }
-            ctx.font=itemFont;
-            ctx.fillStyle=row.item.is_completed?'#888888':'#343434';
-            row.lines.forEach((line,index)=>{
-              const baseline=rowTop+17+index*22;
-              ctx.fillText(line,cardX+inner+27,baseline);
-              if(row.item.is_completed){
-                const lineWidth=Math.min(ctx.measureText(line).width,availableWidth-36);
-                ctx.strokeStyle='rgba(100,100,100,.55)';
-                ctx.lineWidth=1;
-                ctx.beginPath();
-                ctx.moveTo(cardX+inner+27,baseline-5);
-                ctx.lineTo(cardX+inner+27+lineWidth,baseline-5);
-                ctx.stroke();
-              }
-            });
-            rowTop+=rowHeight;
-          }
-          if(extraRows){
-            ctx.font='500 13px '+fontFamily;
-            ctx.fillStyle='#777777';
-            ctx.fillText('+ '+extraRows+' itens',cardX+inner, rowTop+14);
-          }
-          contentBottom=rowTop+(extraRows?25:0);
-        }
-      }else{
-        ctx.font=bodyFont;
-        ctx.fillStyle='#555555';
-        bodyLines.forEach((line,index)=>ctx.fillText(line,cardX+inner,bodyBaseline+index*26));
-        contentBottom=bodyBaseline+Math.max(27,bodyLines.length*26);
-      }
-      if(labelsForNote.length){
-        let labelX=cardX+inner;
-        const labelY=contentBottom+12;
-        ctx.font='500 12px '+fontFamily;
-        for(const label of labelsForNote){
-          const pillWidth=ctx.measureText(label).width+18;
-          rounded(labelX,labelY,pillWidth,26,13);
-          ctx.fillStyle='rgba(30,30,30,.08)';
-          ctx.fill();
-          ctx.fillStyle='#555555';
-          ctx.fillText(label,labelX+9,labelY+17);
-          labelX+=pillWidth+8;
-        }
-      }
-      const slug=(note.title||'nota').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,48)||'nota';
-      canvas.toBlob(blob=>{
-        if(!blob){setError('Não foi possível gerar o PNG. Tente novamente.');return}
-        const url=URL.createObjectURL(blob);
-        const link=document.createElement('a');
-        link.href=url;
-        link.download='risegoat-card-'+slug+'.png';
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.setTimeout(()=>URL.revokeObjectURL(url),1200);
-        setQuickAction(null);
-        setError('Card exportado em PNG com margem de 20 px.');
-        window.setTimeout(()=>setError(''),2200);
-      },'image/png');
-    }catch(error){
-      setError(error instanceof Error?error.message:'Não foi possível exportar o card.');
-    }
-  }
   async function removeNoteById(id:string){const ok=await updateNoteById(id,{is_deleted:true,deleted_at:new Date().toISOString()});if(ok){if(selectedId===id)closeEditor();setQuickAction(null)}}
   async function restoreNoteById(id:string){const note=notes.find(x=>x.id===id);if(!note||note.user_id!==user?.id)return;const ok=await updateNoteById(id,{is_deleted:false,deleted_at:null});if(ok){setQuickAction(null);setPermanentDeleteId(null)}}
   async function permanentlyDeleteNoteById(id:string):Promise<boolean>{
@@ -889,7 +713,7 @@ function recordStop(){if(speech.current){speech.current.active=false;try{speech.
   return <div className={cn('notes-shell',dark&&'is-dark')}>
     <aside className="notes-sidebar"><div className="notes-brand"><div><strong>Notas</strong><span>Espaço pessoal</span></div></div>
       <div className="notes-new-wrap"><button className="notes-new" onClick={()=>void create('text')}><Plus size={17}/> Nova nota <kbd>⌘N</kbd></button><button className="notes-new-menu" onClick={()=>setNewMenu(v=>!v)}><ChevronDown size={15}/></button>{newMenu&&<div className="notes-popover new-menu">{types.map(t=><button key={t.key} onClick={()=>void create(t.key)}><t.icon size={15}/>{t.label}</button>)}</div>}</div>
-      <nav className="notes-nav"><button className={cn('notes-nav-item',filter==='all'&&!folderId&&'active')} onClick={()=>{setFilter('all');setFolderId(null);closeEditor()}}><Grid2X2 size={16}/><span>Todas</span></button><button className="notes-nav-item" onClick={()=>{window.history.pushState({},'', '/map');window.dispatchEvent(new PopStateEvent('popstate'))}}><Map size={16}/><span>Mapa</span></button>
+      <nav className="notes-nav"><button className={cn('notes-nav-item',filter==='all'&&!folderId&&'active')} onClick={()=>{setFilter('all');setFolderId(null);closeEditor()}}><Grid2X2 size={16}/><span>Todas</span></button><button className="notes-nav-item" onClick={()=>{window.history.pushState({},'', '/map');window.dispatchEvent(new PopStateEvent('popstate'))}}><Map size={16}/><span>Mapa</span></button><button className="notes-nav-item" onClick={()=>{window.history.pushState({},'', '/network');window.dispatchEvent(new PopStateEvent('popstate'))}}><Network size={16}/><span>Rede</span></button>
         <div className="notes-folder-section"><div className="notes-folder-heading"><span>Pastas</span><button title="Criar pasta" aria-label="Criar pasta ou usar modelo" onClick={()=>setTemplatesOpen(true)}><FolderPlus size={15}/></button></div>
           {folders.map(folder=><div className={cn('notes-folder-row',folderId===folder.id&&filter==='all'&&'active')} key={folder.id}><button className="notes-folder-main" onClick={()=>{setFilter('all');setFolderId(folder.id);closeEditor()}}>{folder.icon==='network'?<Network size={15} style={{color:folder.color}}/>:folder.icon==='key-round'?<KeyRound size={15} style={{color:folder.color}}/>:folder.icon==='book-open'?<BookOpen size={15} style={{color:folder.color}}/>:<Folder size={15} style={{color:folder.color||undefined}}/>}<span>{folder.name}</span><small>{notes.filter(n=>!n.is_deleted&&(folderLinks[n.id]??(n.folder_id?[n.folder_id]:[])).includes(folder.id)).length}</small></button><button className={cn('notes-folder-more',folderMenuId===folder.id&&'active')} title="Opções da pasta" onClick={e=>{e.stopPropagation();openFolderMenu(folder)}}><MoreHorizontal size={14}/></button>{folderMenuId===folder.id&&<div className="notes-popover folder-action-popover" onClick={e=>e.stopPropagation()}>{folderDeleteId===folder.id?<><strong>Excluir pasta?</strong><p>As notas serão mantidas em Todas as notas.</p><div className="folder-confirm-actions"><button onClick={()=>{setFolderDeleteId(null);setFolderMenuId(null)}}>Cancelar</button><button className="danger" onClick={()=>void deleteFolder(folder)}>Excluir</button></div></>:folderEditId===folder.id?<><input autoFocus value={folderDraft} onChange={e=>setFolderDraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')void saveFolderRename(folder);if(e.key==='Escape'){setFolderEditId(null);setFolderMenuId(null)}}}/><div className="folder-confirm-actions"><button onClick={()=>{setFolderEditId(null);setFolderMenuId(null)}}>Cancelar</button><button onClick={()=>void saveFolderRename(folder)}>Salvar</button></div></>:<><button onClick={()=>beginRenameFolder(folder)}><FileText size={14}/> Renomear</button><button className="danger" onClick={()=>askDeleteFolder(folder)}><Trash2 size={14}/> Excluir</button></>}</div>}</div>)}
           
@@ -904,7 +728,7 @@ function recordStop(){if(speech.current){speech.current.active=false;try{speech.
     <div className="notes-mobile-backdrop" onClick={()=>document.querySelector(".notes-sidebar")?.classList.remove("mobile-open")} />
     <main className="notes-main"><header className="notes-toolbar"><button className="notes-menu-button" onClick={()=>document.querySelector('.notes-sidebar')?.classList.toggle('mobile-open')}><Menu size={18}/></button><div className="notes-search"><Search size={17}/><input id="notes-search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar notas..." /><kbd><Command size={11}/>K</kbd></div><div className="notes-toolbar-actions"><button className={cn('notes-icon-button',view==='grid'&&'active')} onClick={()=>setView('grid')}><Grid2X2 size={17}/></button><button className={cn('notes-icon-button',view==='list'&&'active')} onClick={()=>setView('list')}><List size={17}/></button><button className="notes-primary" onClick={()=>void create('text')}><Plus size={16}/><span>Nova</span></button><button className="notes-icon-button notes-help-button" title="Ajuda" aria-label="Abrir ajuda" onClick={()=>setHelpOpen(true)}><CircleHelp size={17}/></button><button className="notes-icon-button" title={dark?'Modo claro':'Modo escuro'} onClick={()=>setTheme(theme==='system'?'dark':theme==='dark'?'light':'system')}>{dark?<Moon size={17}/>:<Sun size={17}/>}</button></div></header>
       {filters&&<div className="notes-filter-bar"><select value={typeFilter} onChange={e=>setTypeFilter(e.target.value as any)}><option value="all">Todos os tipos</option>{types.map(t=><option value={t.key} key={t.key}>{t.label}</option>)}</select><select value={colorFilter} onChange={e=>setColorFilter(e.target.value as any)}><option value="all">Todas as cores</option>{colorOptions.map(c=><option value={c.key} key={c.key}>{c.label}</option>)}</select><select value={labelFilter} onChange={e=>setLabelFilter(e.target.value)}><option value="all">Todos os marcadores</option>{labels.map(l=><option value={l.id} key={l.id}>{l.name}</option>)}</select></div>}
-      <section className={cn('notes-content',view==='list'&&'list-view',filter==='trash'&&'trash-view')}><div className="notes-heading"><div><p className="eyebrow">{filter==='trash'?'Excluídas · restaure ou exclua definitivamente':filter==='archive'?'Notas arquivadas':'Seu espaço'}</p><h1>{filter==='trash'?'Lixeira':filter==='pinned'?'Fixadas':filter==='archive'?'Arquivo':activeFolder?.name||'Todas as notas'}</h1></div><span>{visible.length}</span></div>{filter==='trash'&&visible.length>0&&<div className="trash-bulk-toolbar"><label className="trash-select-all"><input type="checkbox" checked={visible.length>0&&visible.every(note=>selectedTrashIds.includes(note.id))} onChange={event=>{setTrashDeleteConfirm(false);setSelectedTrashIds(event.target.checked?visible.map(note=>note.id):[])}}/><span>Selecionar todas as visíveis</span></label><span className="trash-selection-count">{selectedVisibleTrashIds.length} selecionada(s)</span>{trashDeleteConfirm?<><span className="trash-delete-warning">A exclusão é permanente.</span><button type="button" className="trash-cancel-button" disabled={trashBulkDeleting} onClick={()=>setTrashDeleteConfirm(false)}>Cancelar</button><button type="button" className="trash-delete-button" disabled={trashBulkDeleting||selectedVisibleTrashIds.length===0} onClick={()=>void permanentlyDeleteSelectedNotes()}><Trash2 size={14}/>{trashBulkDeleting?'Excluindo…':`Confirmar exclusão (${selectedVisibleTrashIds.length})`}</button></>:<button type="button" className="trash-delete-button" disabled={selectedVisibleTrashIds.length===0} onClick={()=>setTrashDeleteConfirm(true)}><Trash2 size={14}/> Excluir selecionadas</button>}</div>}{error&&<div className="notes-alert">{error}<button onClick={()=>setError('')}><X size={14}/></button></div>}{loading?<div className="notes-empty"><Loader2 className="spin" size={22}/><p>Carregando…</p></div>:visible.length===0?<div className="notes-empty"><div className="empty-orb">{filter==='trash'?<Trash2 size={20}/>:<Plus size={20}/>}</div><h2>{filter==='trash'?'Lixeira vazia':filter==='pinned'?'Nenhuma nota fixada':filter==='archive'?'Arquivo vazio':'Comece com uma nota'}</h2><p>{filter==='trash'?'Notas excluídas aparecem aqui antes da remoção definitiva.':'Texto, checklist, foto, desenho ou voz.'}</p>{filter!=='trash'&&<button className="notes-primary" onClick={()=>void create('text')}><Plus size={16}/> Criar nota</button>}</div>:<div className="notes-grid">{visible.map(n=>{const imageFiles=(files[n.id]??[]).filter(a=>a.attachment_type==='image'&&a.signed_url);const completedCount=(check[n.id]??[]).filter(item=>item.is_completed).length;const heatmapEnabled=n.metadata?.heatmap_enabled===true;return <article key={n.id} draggable={filter==='all'} onDragStart={e=>e.dataTransfer.setData('text/plain',n.id)} onDragOver={e=>e.preventDefault()} onDrop={async e=>{const d=e.dataTransfer.getData('text/plain');if(!d||d===n.id)return;const arr=[...notes].sort((a,b)=>a.sort_order-b.sort_order),from=arr.findIndex(x=>x.id===d),to=arr.findIndex(x=>x.id===n.id);if(from<0||to<0)return;const[m]=arr.splice(from,1);arr.splice(to,0,m);arr.forEach((x,i)=>x.sort_order=i);setNotes(arr);await Promise.all(arr.map(x=>supabase.from('notes').update({sort_order:x.sort_order}).eq('id',x.id)))}} className={cn('note-card','note-color-'+n.color)} onClick={()=>{setQuickAction(null);setEditorType('text');setSelectedId(n.id)}}>{filter==='trash'?<button type="button" className={cn('note-card-select-check',selectedTrashIds.includes(n.id)&&'selected')} aria-label={selectedTrashIds.includes(n.id)?'Desmarcar nota':'Marcar nota para exclusão'} aria-pressed={selectedTrashIds.includes(n.id)} onClick={event=>{event.stopPropagation();setTrashDeleteConfirm(false);setSelectedTrashIds(current=>current.includes(n.id)?current.filter(id=>id!==n.id):[...current,n.id])}}><Check size={14}/></button>:<span className={cn('note-card-select-check',selectedId===n.id&&'selected')} aria-hidden="true"><Check size={14}/></span>}{imageFiles.length>0&&<div className={cn('note-card-images',imageFiles.length===1?'single':'multi')}>{imageFiles.map(a=><div className="note-card-image-cell" key={a.id}><img src={a.signed_url} alt={a.file_name||'Imagem da nota'}/></div>)}</div>}{n.note_type==='image'&&imageFiles.length===0&&<div className="note-card-cover-placeholder"><ImagePlus size={20}/></div>}<div className="note-card-body"><h3>{n.title||'Sem título'}</h3>{n.note_type==='checklist'?(<div className="note-card-checklist" onClick={e=>e.stopPropagation()}>{(check[n.id]??[]).slice().sort((a,b)=>a.position-b.position).slice(0,6).map(item=><div className="note-card-check-row" key={item.id}><button type="button" className={cn('note-card-check-box',item.is_completed&&'done')} aria-label={item.is_completed?'Desmarcar item':'Concluir item'} onClick={()=>void saveChecklistItem(n.id,item,{is_completed:!item.is_completed})}>{item.is_completed&&<Check size={12}/>}</button><input value={item.title} placeholder="Item da lista" onClick={e=>e.stopPropagation()} onChange={e=>setCheck(v=>({...v,[n.id]:(v[n.id]??[]).map(x=>x.id===item.id?{...x,title:e.target.value}:x)}))} onBlur={e=>void saveChecklistItem(n.id,item,{title:e.target.value.trim()})}/></div>)}{(check[n.id]??[]).length>6&&<span className="note-card-check-more">+{(check[n.id]??[]).length-6} itens</span>}{(check[n.id]??[]).length===0&&<span className="note-card-check-empty">Sem itens ainda.</span>}</div>):<p>{plain(n.content)||n.ocr_text||n.transcript||'Sem conteúdo ainda.'}</p>}{heatmapEnabled&&completedCount>0&&<NoteHeatmap activity={n.metadata?.heatmap_activity} dailyItems={n.metadata?.heatmap_daily_items} checklistItems={check[n.id]??[]} noteTitle={n.title||'Sem título'} dark={dark}/>}{(links[n.id]??[]).length>0&&<div className="note-labels">{(links[n.id]??[]).map(id=>labels.find(l=>l.id===id)).filter(Boolean).slice(0,3).map(l=><span key={l!.id}>{l!.name}</span>)}</div>}</div><div className="note-quick-actions" onClick={e=>e.stopPropagation()}>{filter==='trash'?<button title="Ações da lixeira" className={cn(quickAction?.id===n.id&&quickAction.type==='more'&&'active')} onClick={()=>setQuickAction(v=>v?.id===n.id&&v.type==='more'?null:{id:n.id,type:'more'})}><MoreHorizontal size={18}/></button>:<><button title="Opções de fundo" className={cn(quickAction?.id===n.id&&quickAction.type==='palette'&&'active')} onClick={()=>setQuickAction(v=>v?.id===n.id&&v.type==='palette'?null:{id:n.id,type:'palette'})}><Palette size={18}/></button><button title="Colaborador" onClick={()=>void quickShare(n)}><Share2 size={18}/></button><label className="note-card-icon-button" title="Adicionar imagem" onClick={e=>e.stopPropagation()}><ImagePlus size={18}/><input hidden type="file" accept="image/*" onChange={e=>{const f=e.target.files?.[0];if(f)void uploadAttachment(n.id,f,'image');e.currentTarget.value=''}}/></label><button title={filter==='archive'?'Restaurar para notas':'Arquivar'} onClick={()=>{void updateNoteById(n.id,{is_archived:filter!=='archive'});setQuickAction(null)}}>{filter==='archive'?<RotateCcw size={18}/>:<Archive size={18}/>}</button><button title="Mais opções" className={cn(quickAction?.id===n.id&&quickAction.type==='more'&&'active')} onClick={()=>setQuickAction(v=>v?.id===n.id&&v.type==='more'?null:{id:n.id,type:'more'})}><MoreHorizontal size={18}/></button></>}</div>{quickAction?.id===n.id&&quickAction.type==='more'&&<div className="note-quick-popover note-more-quick" onClick={e=>e.stopPropagation()}>{filter==='trash'?permanentDeleteId===n.id?<><strong>Excluir permanentemente?</strong><p>Esta ação não pode ser desfeita.</p><div className="folder-confirm-actions"><button onClick={()=>setPermanentDeleteId(null)}>Cancelar</button><button className="danger" onClick={()=>void permanentlyDeleteNoteById(n.id)}>Excluir</button></div></>:<><button onClick={()=>void restoreNoteById(n.id)}><RotateCcw size={14}/> Restaurar{n.folder_id?' para a pasta original':''}</button><button className="danger" onClick={()=>setPermanentDeleteId(n.id)}><Trash2 size={14}/> Excluir definitivamente</button></>:<><button onClick={()=>exportCardPNG(n)}><Download size={14}/> Salvar card como PNG</button><button onClick={()=>void copyDocs(n)}><FileText size={14}/> Copiar para Google Docs</button><button className="danger" onClick={()=>void removeNoteById(n.id)}><Trash2 size={14}/> Excluir nota</button></>}</div>}{quickAction?.id===n.id&&quickAction.type==='palette'&&<div className="note-quick-popover note-color-popover" onClick={e=>e.stopPropagation()}>{colorOptions.map(col=><button key={col.key} title={col.label} className={cn('quick-color-dot',n.color===col.key&&'selected')} style={{background:col.hex}} onClick={()=>{void updateNoteById(n.id,{color:col.key});setQuickAction(null)}} />)}</div>}</article>})}</div>}</section></main>
+      <section className={cn('notes-content',view==='list'&&'list-view',filter==='trash'&&'trash-view')}><div className="notes-heading"><div><p className="eyebrow">{filter==='trash'?'Excluídas · restaure ou exclua definitivamente':filter==='archive'?'Notas arquivadas':'Seu espaço'}</p><h1>{filter==='trash'?'Lixeira':filter==='pinned'?'Fixadas':filter==='archive'?'Arquivo':activeFolder?.name||'Todas as notas'}</h1></div><span>{visible.length}</span></div>{filter==='trash'&&visible.length>0&&<div className="trash-bulk-toolbar"><label className="trash-select-all"><input type="checkbox" checked={visible.length>0&&visible.every(note=>selectedTrashIds.includes(note.id))} onChange={event=>{setTrashDeleteConfirm(false);setSelectedTrashIds(event.target.checked?visible.map(note=>note.id):[])}}/><span>Selecionar todas as visíveis</span></label><span className="trash-selection-count">{selectedVisibleTrashIds.length} selecionada(s)</span>{trashDeleteConfirm?<><span className="trash-delete-warning">A exclusão é permanente.</span><button type="button" className="trash-cancel-button" disabled={trashBulkDeleting} onClick={()=>setTrashDeleteConfirm(false)}>Cancelar</button><button type="button" className="trash-delete-button" disabled={trashBulkDeleting||selectedVisibleTrashIds.length===0} onClick={()=>void permanentlyDeleteSelectedNotes()}><Trash2 size={14}/>{trashBulkDeleting?'Excluindo…':`Confirmar exclusão (${selectedVisibleTrashIds.length})`}</button></>:<button type="button" className="trash-delete-button" disabled={selectedVisibleTrashIds.length===0} onClick={()=>setTrashDeleteConfirm(true)}><Trash2 size={14}/> Excluir selecionadas</button>}</div>}{error&&<div className="notes-alert">{error}<button onClick={()=>setError('')}><X size={14}/></button></div>}{loading?<div className="notes-empty"><Loader2 className="spin" size={22}/><p>Carregando…</p></div>:visible.length===0?<div className="notes-empty"><div className="empty-orb">{filter==='trash'?<Trash2 size={20}/>:<Plus size={20}/>}</div><h2>{filter==='trash'?'Lixeira vazia':filter==='pinned'?'Nenhuma nota fixada':filter==='archive'?'Arquivo vazio':'Comece com uma nota'}</h2><p>{filter==='trash'?'Notas excluídas aparecem aqui antes da remoção definitiva.':'Texto, checklist, foto, desenho ou voz.'}</p>{filter!=='trash'&&<button className="notes-primary" onClick={()=>void create('text')}><Plus size={16}/> Criar nota</button>}</div>:<div className="notes-grid">{visible.map(n=>{const imageFiles=(files[n.id]??[]).filter(a=>a.attachment_type==='image'&&a.signed_url);const completedCount=(check[n.id]??[]).filter(item=>item.is_completed).length;const heatmapEnabled=n.metadata?.heatmap_enabled===true;return <article key={n.id} draggable={filter==='all'} onDragStart={e=>e.dataTransfer.setData('text/plain',n.id)} onDragOver={e=>e.preventDefault()} onDrop={async e=>{const d=e.dataTransfer.getData('text/plain');if(!d||d===n.id)return;const arr=[...notes].sort((a,b)=>a.sort_order-b.sort_order),from=arr.findIndex(x=>x.id===d),to=arr.findIndex(x=>x.id===n.id);if(from<0||to<0)return;const[m]=arr.splice(from,1);arr.splice(to,0,m);arr.forEach((x,i)=>x.sort_order=i);setNotes(arr);await Promise.all(arr.map(x=>supabase.from('notes').update({sort_order:x.sort_order}).eq('id',x.id)))}} className={cn('note-card','note-color-'+n.color)} onClick={()=>{setQuickAction(null);setEditorType('text');setSelectedId(n.id)}}>{filter==='trash'?<button type="button" className={cn('note-card-select-check',selectedTrashIds.includes(n.id)&&'selected')} aria-label={selectedTrashIds.includes(n.id)?'Desmarcar nota':'Marcar nota para exclusão'} aria-pressed={selectedTrashIds.includes(n.id)} onClick={event=>{event.stopPropagation();setTrashDeleteConfirm(false);setSelectedTrashIds(current=>current.includes(n.id)?current.filter(id=>id!==n.id):[...current,n.id])}}><Check size={14}/></button>:<span className={cn('note-card-select-check',selectedId===n.id&&'selected')} aria-hidden="true"><Check size={14}/></span>}{imageFiles.length>0&&<div className={cn('note-card-images',imageFiles.length===1?'single':'multi')}>{imageFiles.map(a=><div className="note-card-image-cell" key={a.id}><img src={a.signed_url} alt={a.file_name||'Imagem da nota'}/></div>)}</div>}{n.note_type==='image'&&imageFiles.length===0&&<div className="note-card-cover-placeholder"><ImagePlus size={20}/></div>}<div className="note-card-body"><h3>{n.title||'Sem título'}</h3>{n.note_type==='checklist'?(<div className="note-card-checklist" onClick={e=>e.stopPropagation()}>{(check[n.id]??[]).slice().sort((a,b)=>a.position-b.position).slice(0,6).map(item=><div className="note-card-check-row" key={item.id}><button type="button" className={cn('note-card-check-box',item.is_completed&&'done')} aria-label={item.is_completed?'Desmarcar item':'Concluir item'} onClick={()=>void saveChecklistItem(n.id,item,{is_completed:!item.is_completed})}>{item.is_completed&&<Check size={12}/>}</button><input value={item.title} placeholder="Item da lista" onClick={e=>e.stopPropagation()} onChange={e=>setCheck(v=>({...v,[n.id]:(v[n.id]??[]).map(x=>x.id===item.id?{...x,title:e.target.value}:x)}))} onBlur={e=>void saveChecklistItem(n.id,item,{title:e.target.value.trim()})}/></div>)}{(check[n.id]??[]).length>6&&<span className="note-card-check-more">+{(check[n.id]??[]).length-6} itens</span>}{(check[n.id]??[]).length===0&&<span className="note-card-check-empty">Sem itens ainda.</span>}</div>):<p>{plain(n.content)||n.ocr_text||n.transcript||'Sem conteúdo ainda.'}</p>}{heatmapEnabled&&completedCount>0&&<NoteHeatmap activity={n.metadata?.heatmap_activity} dailyItems={n.metadata?.heatmap_daily_items} checklistItems={check[n.id]??[]} noteTitle={n.title||'Sem título'} dark={dark}/>}{(links[n.id]??[]).length>0&&<div className="note-labels">{(links[n.id]??[]).map(id=>labels.find(l=>l.id===id)).filter(Boolean).slice(0,3).map(l=><span key={l!.id}>{l!.name}</span>)}</div>}</div><div className="note-quick-actions" onClick={e=>e.stopPropagation()}>{filter==='trash'?<button title="Ações da lixeira" className={cn(quickAction?.id===n.id&&quickAction.type==='more'&&'active')} onClick={()=>setQuickAction(v=>v?.id===n.id&&v.type==='more'?null:{id:n.id,type:'more'})}><MoreHorizontal size={18}/></button>:<><button title="Opções de fundo" className={cn(quickAction?.id===n.id&&quickAction.type==='palette'&&'active')} onClick={()=>setQuickAction(v=>v?.id===n.id&&v.type==='palette'?null:{id:n.id,type:'palette'})}><Palette size={18}/></button><button title="Colaborador" onClick={()=>void quickShare(n)}><Share2 size={18}/></button><label className="note-card-icon-button" title="Adicionar imagem" onClick={e=>e.stopPropagation()}><ImagePlus size={18}/><input hidden type="file" accept="image/*" onChange={e=>{const f=e.target.files?.[0];if(f)void uploadAttachment(n.id,f,'image');e.currentTarget.value=''}}/></label><button title={filter==='archive'?'Restaurar para notas':'Arquivar'} onClick={()=>{void updateNoteById(n.id,{is_archived:filter!=='archive'});setQuickAction(null)}}>{filter==='archive'?<RotateCcw size={18}/>:<Archive size={18}/>}</button><button title="Mais opções" className={cn(quickAction?.id===n.id&&quickAction.type==='more'&&'active')} onClick={()=>setQuickAction(v=>v?.id===n.id&&v.type==='more'?null:{id:n.id,type:'more'})}><MoreHorizontal size={18}/></button></>}</div>{quickAction?.id===n.id&&quickAction.type==='more'&&<div className="note-quick-popover note-more-quick" onClick={e=>e.stopPropagation()}>{filter==='trash'?permanentDeleteId===n.id?<><strong>Excluir permanentemente?</strong><p>Esta ação não pode ser desfeita.</p><div className="folder-confirm-actions"><button onClick={()=>setPermanentDeleteId(null)}>Cancelar</button><button className="danger" onClick={()=>void permanentlyDeleteNoteById(n.id)}>Excluir</button></div></>:<><button onClick={()=>void restoreNoteById(n.id)}><RotateCcw size={14}/> Restaurar{n.folder_id?' para a pasta original':''}</button><button className="danger" onClick={()=>setPermanentDeleteId(n.id)}><Trash2 size={14}/> Excluir definitivamente</button></>:<><button onClick={()=>void copyDocs(n)}><FileText size={14}/> Copiar para Google Docs</button><button className="danger" onClick={()=>void removeNoteById(n.id)}><Trash2 size={14}/> Excluir nota</button></>}</div>}{quickAction?.id===n.id&&quickAction.type==='palette'&&<div className="note-quick-popover note-color-popover" onClick={e=>e.stopPropagation()}>{colorOptions.map(col=><button key={col.key} title={col.label} className={cn('quick-color-dot',n.color===col.key&&'selected')} style={{background:col.hex}} onClick={()=>{void updateNoteById(n.id,{color:col.key});setQuickAction(null)}} />)}</div>}</article>})}</div>}</section></main>
       <nav className="notes-mobile-tabbar" aria-label="Navegação principal">
         <button className={cn('notes-mobile-tab',filter==='all'&&!folderId&&'active')} onClick={()=>{setFilter('all');setFolderId(null);closeEditor()}}><Grid2X2 size={19}/><span>Notas</span></button>
         <button className={cn('notes-mobile-tab',filter==='pinned'&&'active')} onClick={()=>{setFilter('pinned');setFolderId(null);closeEditor()}}><Pin size={19}/><span>Fixadas</span></button>
