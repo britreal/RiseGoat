@@ -24,6 +24,8 @@ type Activity={id:number;user_id:string;event_type:string;entity_type:string;occ
 type Introduction={id:string;requester_id:string;target_user_id:string;topic:string;status:string;created_at:string};
 type Onboarding={id:string;user_id:string;status:string;note:string;created_at:string};
 type CircleStreak={opted_in_members:number;active_members_7d:number;group_active_days_7d:number};
+type MemberMapNode=MemberProfile&{x:number;y:number;label:string};
+type MemberMapEdge={source:string;target:string;circles:string[]};
 const blankProfile=(id:string):MemberProfile=>({user_id:id,display_name:'',city:'',industry:'',current_focus:'',contact_topic:'',accepts_introductions:false,discoverable:false,collective_streak_opt_in:false,onboarding_completed:false});
 
 export function NetworkPage(){
@@ -124,6 +126,31 @@ export function NetworkPage(){
   const joinedRooms=useMemo(()=>roomMembers.filter(m=>m.user_id===user?.id),[roomMembers,user?.id]);
   const pendingNotices=notices.filter(n=>!n.read_at).length+shareInvites.length+pendingCircleInvites.length;
   const profileById=useMemo(()=>new Map(directory.map(p=>[p.user_id,p])),[directory]);
+  const memberMap=useMemo(()=>{
+    const acceptedCircles=circles.filter(circle=>circle.owner_user_id===user?.id||circleMembers.some(member=>member.circle_id===circle.id&&member.user_id===user?.id&&member.status==='accepted'));
+    const circleIds=new Set(acceptedCircles.map(circle=>circle.id));
+    const visibleProfiles=directory.filter(person=>person.discoverable||person.user_id===user?.id);
+    const visibleIds=new Set(visibleProfiles.map(person=>person.user_id));
+    const includedIds=new Set(circleMembers.filter(member=>circleIds.has(member.circle_id)&&member.status==='accepted'&&visibleIds.has(member.user_id)).map(member=>member.user_id));
+    const sorted=visibleProfiles.filter(person=>includedIds.has(person.user_id)).sort((a,b)=>a.user_id===user?.id?-1:b.user_id===user?.id?1:(a.display_name||'').localeCompare(b.display_name||'')).slice(0,36);
+    const nodes:MemberMapNode[]=sorted.map((person,index)=>{
+      const angle=(-Math.PI/2)+(index/Math.max(1,sorted.length))*Math.PI*2;
+      return {...person,x:360+235*Math.cos(angle),y:160+112*Math.sin(angle),label:person.user_id===user?.id?'Você':person.display_name||'Membro'};
+    });
+    const nodeIds=new Set(nodes.map(node=>node.user_id));
+    const edgeMap=new Map<string,MemberMapEdge>();
+    for(const circle of acceptedCircles){
+      const members=circleMembers.filter(member=>member.circle_id===circle.id&&member.status==='accepted'&&nodeIds.has(member.user_id));
+      for(let i=0;i<members.length;i++)for(let j=i+1;j<members.length;j++){
+        const pair=[members[i].user_id,members[j].user_id].sort();
+        const key=pair.join(':');
+        const edge=edgeMap.get(key)||{source:pair[0],target:pair[1],circles:[]};
+        if(!edge.circles.includes(circle.name))edge.circles.push(circle.name);
+        edgeMap.set(key,edge);
+      }
+    }
+    return {nodes,edges:[...edgeMap.values()]};
+  },[circles,circleMembers,directory,user?.id]);
   const activeRoomNotes=roomNotes.filter(n=>n.room_id===activeRoom);
   const activeRoomMember=isAdmin||roomMembers.some(m=>m.room_id===activeRoom&&m.user_id===user?.id);
   const canModerateActiveRoom=isAdmin||roomMembers.some(m=>m.room_id===activeRoom&&m.user_id===user?.id&&m.role==='moderator');
@@ -284,6 +311,7 @@ export function NetworkPage(){
     {tab==='people'&&<section className="network-stack">
       {notices.length>0&&<section className="network-panel network-notices"><div className="network-panel-heading"><div><span className="network-eyebrow">CENTRAL DE NOTIFICAÇÕES</span><h2>Atividade e convites</h2><p>Convites e atualizações administrativas. Conteúdo privado de notas não aparece nesta lista.</p></div><Bell size={19}/></div>{notices.map(notice=><div className="network-invite-row" key={notice.id}><div><strong>{notice.title}</strong><small>{notice.body||'Você recebeu uma atualização.'} · {new Date(notice.created_at).toLocaleString('pt-BR')}{notice.read_at?' · Lida':' · Não lida'}</small></div>{!notice.read_at&&<button className="network-secondary compact" onClick={()=>void markNoticeRead(notice.id)}>Marcar como lida</button>}</div>)}</section>}
       <div className="network-panel-heading network-directory-heading"><div><span className="network-eyebrow">DIRETÓRIO COM OPT-IN</span><h2>Membros disponíveis</h2><p>Somente quem ativou a visibilidade aparece aqui. Pedidos de introdução passam pela equipe.</p></div><Compass size={22}/></div>
+      <section className="network-panel network-member-map-panel"><div className="network-panel-heading"><div><span className="network-eyebrow">MAPA DE RELAÇÕES</span><h2>Conexões explícitas</h2><p>As linhas representam participação no mesmo círculo aceito. Não inferimos relações por notas privadas ou atividade individual.</p></div><Network size={21}/></div>{memberMap.nodes.length===0?<div className="network-empty"><Network size={22}/><strong>O mapa começa com relações consentidas</strong><p>Entre em um círculo e ative a visibilidade de perfil para aparecer no mapa. Só conexões dos seus círculos aceitos são mostradas.</p></div>:<div className="network-member-map-scroll"><svg className="network-member-map-svg" viewBox="0 0 720 320" role="img" aria-label="Mapa de relações entre membros visíveis dos seus círculos"><g className="network-member-map-edges">{memberMap.edges.map(edge=>{const from=memberMap.nodes.find(node=>node.user_id===edge.source);const to=memberMap.nodes.find(node=>node.user_id===edge.target);if(!from||!to)return null;return <line key={edge.source+'-'+edge.target} x1={from.x} y1={from.y} x2={to.x} y2={to.y}><title>{edge.circles.join(', ')}</title></line>})}</g><g className="network-member-map-nodes">{memberMap.nodes.map(node=><g key={node.user_id} transform={'translate('+node.x+' '+node.y+')'}><circle r={node.user_id===user?.id?22:18} className={node.user_id===user?.id?'self':'member'}/><text y={34} textAnchor="middle">{node.label.length>19?node.label.slice(0,18)+'…':node.label}</text><title>{[node.display_name,node.industry,node.city].filter(Boolean).join(' · ')||node.label}</title></g>)}</g></svg><div className="network-map-legend"><span><i className="self"/>Você</span><span><i className="member"/>Membro visível</span><span>{memberMap.edges.length} conexões entre {memberMap.nodes.length} perfis</span></div></div>}</section>
       {shareInvites.length>0&&<section className="network-panel network-notices"><div className="network-panel-heading"><div><span className="network-eyebrow">CONVITES DE NOTA</span><h2>Você tem {shareInvites.length} convite(s) pendente(s)</h2></div><Bell size={19}/></div>{shareInvites.map(inv=><div className="network-invite-row" key={inv.id}><div><strong>Nota compartilhada com você</strong><small>Permissão: {inv.role==='editor'?'pode editar':'somente leitura'} · expira {new Date(inv.expires_at).toLocaleDateString('pt-BR')}</small></div><button className="network-primary compact" disabled={inviteBusy===inv.id} onClick={()=>void acceptShareInvite(inv)}>{inviteBusy===inv.id?<Loader2 size={14} className="network-spin"/>:<Check size={14}/>}Aceitar</button></div>)}</section>}
       {pendingCircleInvites.length>0&&<section className="network-panel network-notices"><div className="network-panel-heading"><div><span className="network-eyebrow">CÍRCULOS</span><h2>Convites de círculo</h2></div><Bell size={19}/></div>{pendingCircleInvites.map(inv=>{const circle=circles.find(c=>c.id===inv.circle_id);return <div className="network-invite-row" key={inv.circle_id+inv.user_id}><div><strong>{circle?.name||'Círculo privado'}</strong><small>{circle?.purpose||'Um membro convidou você para um grupo fechado.'}</small></div><button className="network-primary compact" disabled={inviteBusy===inv.circle_id} onClick={()=>void acceptCircleInvite(inv)}><Check size={14}/>Aceitar</button></div>})}</section>}
       {people.length===0?<div className="network-empty"><Users size={24}/><strong>A rede ainda está começando</strong><p>Quando os membros ativarem a visibilidade do perfil, você os encontrará aqui.</p></div>:<div className="network-people-grid">{people.map(person=><article className="network-person-card" key={person.user_id}><div className="network-person-top"><div className="network-avatar">{(person.display_name||'R').trim().slice(0,1).toUpperCase()}</div><div><h3>{person.display_name||'Membro'}</h3><p>{[person.industry,person.city].filter(Boolean).join(' · ')||'Membro RiseGoat'}</p></div><span className="network-optin-dot" title="Perfil visível"/></div>{person.current_focus&&<div className="network-person-focus"><span>No momento</span><p>{person.current_focus}</p></div>}{person.accepts_introductions&&<span className="network-person-badge"><CheckCircle2 size={13}/>Aceita introduções</span>}{person.accepts_introductions&&<div className="network-intro-form"><input maxLength={180} value={introTopic[person.user_id]||''} onChange={e=>setIntroTopic(v=>({...v,[person.user_id]:e.target.value}))} placeholder={person.contact_topic||'Tema para a introdução'}/><button className="network-secondary" onClick={()=>void requestIntroduction(person)}><ArrowUpRight size={14}/>Pedir introdução</button></div>}</article>)}</div>}
