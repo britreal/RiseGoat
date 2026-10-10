@@ -4,7 +4,7 @@ import ReactFlow, { Background, Controls, MiniMap, type Edge, type Node } from '
 import '@xyflow/react/dist/style.css';
 import { useRouter } from '@/lib/router';
 import { carregarGrafoTabuleiro } from '@/lib/tabuleiro';
-import type { ConexaoTipo, Magnate, MagnateConexao, MagnateSetor, TabuleiroFiltros } from '@/types/tabuleiro';
+import type { ConexaoTipo, Magnate, MagnateConexao, MagnateSetor } from '@/types/tabuleiro';
 import '@/lib/tabuleiro.css';
 
 const sectors: Array<{ value: MagnateSetor; label: string; color: string }> = [
