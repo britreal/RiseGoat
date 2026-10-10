@@ -871,7 +871,7 @@ function recordStop(){if(speech.current){speech.current.active=false;try{speech.
             ctx.fillStyle='#777777';
             ctx.fillText('+ '+extraRows+' itens',cardX+inner, rowTop+14);
           }
-          contentBottom=rowTop-17+(extraRows?25:0);
+          contentBottom=rowTop+(extraRows?25:0);
         }
       }else{
         ctx.font=bodyFont;
