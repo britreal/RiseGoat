@@ -58,7 +58,7 @@ const helpCategories: HelpCategory[] = [
         steps: [
           'Durante o dia, capture pensamentos e tarefas sem interromper o que está fazendo.',
           'No começo ou fim do dia, revise as notas recentes.',
-          'Transforme ações em checklists e coloque prazos importantes em lembretes.',
+          'Transforme ações em checklists e registre os próximos passos junto da nota.',
           'Uma vez por semana, organize o que merece uma pasta, etiqueta ou lugar no Mapa.',
         ],
         tip: 'Não tente categorizar cada pensamento no instante em que ele aparece. Capturar rápido costuma valer mais do que organizar demais.',
@@ -230,12 +230,12 @@ const helpCategories: HelpCategory[] = [
         summary: 'Os filtros reduzem a lista quando você sabe o tipo de informação que procura.',
         steps: [
           'Abra Filtros na área lateral.',
-          'Combine tipo da nota, cor, etiqueta e presença de lembrete.',
+          'Combine tipo da nota, cor e etiqueta para reduzir os resultados.',
           'Alterne entre cartões em grade e lista usando os controles no topo.',
           'Na visualização em grade, arraste os cartões para ajustar a ordem quando estiver na lista principal.',
         ],
         tip: 'Use filtros temporariamente para encontrar um grupo de notas. Depois limpe os filtros que não precisa mais.',
-        keywords: 'filtro filtros cor tipo lembrete grade lista ordenar arrastar',
+        keywords: 'filtro filtros cor tipo grade lista ordenar arrastar',
       },
       {
         title: 'Atalhos para ganhar tempo',
@@ -402,12 +402,12 @@ const helpCategories: HelpCategory[] = [
         summary: 'Exporte suas notas e os dados relacionados em um arquivo JSON que também inclui os anexos.',
         steps: [
           'Na barra lateral, escolha Exportar backup completo.',
-          'O arquivo reúne notas, checklists, etiquetas, pastas, lembretes, conexões, colaboradores, convites e anexos.',
+          'O arquivo reúne notas, checklists, etiquetas, pastas, conexões, colaboradores, convites e anexos. Campos históricos associados a notas podem continuar no backup para não perder dados antigos.',
           'Imagens e arquivos são embutidos no JSON em Base64. Por isso, o arquivo pode ficar grande se você tiver muitos anexos.',
           'Dentro de uma nota, Mais opções também permite exportar apenas aquela nota como JSON, Markdown ou texto.',
           'Guarde o backup em um local privado. Ele pode conter informações pessoais e conteúdo compartilhado.',
         ],
-        keywords: 'exportar exportação download JSON Markdown txt backup cópia anexos checklist etiquetas pastas lembretes',
+        keywords: 'exportar exportação download JSON Markdown txt backup cópia anexos checklist etiquetas pastas conexões',
       },
       {
         title: 'Entre com um magic link ou recupere a senha',
