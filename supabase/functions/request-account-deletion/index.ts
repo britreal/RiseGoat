@@ -24,12 +24,16 @@ Deno.serve(async req=>{
  if(existingError)return json(500,{error:'Não foi possível verificar solicitações anteriores.'});
  if(existing?.status==='pending')return json(200,{request_id:existing.id,scheduled_delete_at:existing.scheduled_delete_at,already_pending:true});
  if(existing?.status==='processing')return json(409,{error:'A exclusão já está sendo processada.'});
- const {data:adminRow,error:adminError}=await db.from('admin_users').select('user_id').eq('user_id',user.id).maybeSingle();
- if(adminError)return json(500,{error:'Não foi possível verificar as permissões administrativas.'});
- if(adminRow){
-   const {count,error:countError}=await db.from('admin_users').select('user_id',{count:'exact',head:true});
-   if(countError)return json(500,{error:'Não foi possível validar administradores.'});
-   if((count||0)<=1)return json(409,{error:'Esta é a última conta administrativa. Promova outro administrador antes de excluí-la.'});
+ const [{data:adminRow,error:adminError},{data:legacyAdmin,error:legacyError},{data:admins,error:adminsError},{data:legacyAdmins,error:legacyAdminsError}]=await Promise.all([
+   db.from('admin_users').select('user_id').eq('user_id',user.id).maybeSingle(),
+   db.from('app_admins').select('user_id').eq('user_id',user.id).maybeSingle(),
+   db.from('admin_users').select('user_id').limit(1000),
+   db.from('app_admins').select('user_id').limit(1000),
+ ]);
+ if(adminError||legacyError||adminsError||legacyAdminsError)return json(500,{error:'Não foi possível verificar as permissões administrativas.'});
+ if(adminRow||legacyAdmin){
+   const ids=new Set([...(admins||[]).map((x:{user_id:string})=>x.user_id),...(legacyAdmins||[]).map((x:{user_id:string})=>x.user_id)]);
+   if(ids.size<=1)return json(409,{error:'Esta é a última conta administrativa. Promova outro administrador antes de excluí-la.'});
  }
  const now=new Date(),due=new Date(now.getTime()+30*24*60*60*1000);
  const {data:request,error:insertError}=await db.from('account_deletion_requests').insert({user_id:user.id,email,status:'pending',requested_at:now.toISOString(),scheduled_delete_at:due.toISOString(),metadata:{source:'settings',confirmation:'two_step'}}).select('id,scheduled_delete_at').single();
